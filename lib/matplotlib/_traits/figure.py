@@ -57,5 +57,5 @@ docstring.interpd.update(projection_names=get_projection_names())
 
 from traitlets import HasTraits, Any, Instance, Unicode, Float, Bool, Int, validate, observe, default
 
-#for monkey patching
+# for monkey patching
 import matplotlib.figure as b_figure
