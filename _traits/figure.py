@@ -1,1708 +1,1492 @@
-
-
-
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-  <link rel="dns-prefetch" href="https://assets-cdn.github.com">
-  <link rel="dns-prefetch" href="https://avatars0.githubusercontent.com">
-  <link rel="dns-prefetch" href="https://avatars1.githubusercontent.com">
-  <link rel="dns-prefetch" href="https://avatars2.githubusercontent.com">
-  <link rel="dns-prefetch" href="https://avatars3.githubusercontent.com">
-  <link rel="dns-prefetch" href="https://github-cloud.s3.amazonaws.com">
-  <link rel="dns-prefetch" href="https://user-images.githubusercontent.com/">
-
-
-
-  <link crossorigin="anonymous" href="https://assets-cdn.github.com/assets/frameworks-bedfc518345498ab3204d330c1727cde7e733526a09cd7df6867f6a231565091.css" integrity="sha256-vt/FGDRUmKsyBNMwwXJ83n5zNSagnNffaGf2ojFWUJE=" media="all" rel="stylesheet" />
-  <link crossorigin="anonymous" href="https://assets-cdn.github.com/assets/github-3aa8238ecca60313b997b230834183c66288289cbb27d47eb5635a37e61c1793.css" integrity="sha256-OqgjjsymAxO5l7Iwg0GDxmKIKJy7J9R+tWNaN+YcF5M=" media="all" rel="stylesheet" />
-  
-  
-  
-  
-
-  <meta name="viewport" content="width=device-width">
-  
-  <title>matplotlib/figure.py at figure-traitlets-dev · katierose1029/matplotlib</title>
-  <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="GitHub">
-  <link rel="fluid-icon" href="https://github.com/fluidicon.png" title="GitHub">
-  <meta property="fb:app_id" content="1401488693436528">
-
-    
-    <meta content="https://avatars3.githubusercontent.com/u/12536035?v=4&amp;s=400" property="og:image" /><meta content="GitHub" property="og:site_name" /><meta content="object" property="og:type" /><meta content="katierose1029/matplotlib" property="og:title" /><meta content="https://github.com/katierose1029/matplotlib" property="og:url" /><meta content="matplotlib: plotting with Python" property="og:description" />
-
-  <link rel="assets" href="https://assets-cdn.github.com/">
-  <link rel="web-socket" href="wss://live.github.com/_sockets/VjI6MjAzNTY3OTkzOjJjZTRiN2NkMTRlMjRiMmM1NWRiY2E4ODVhYTIxNThhMDc0OTVmYmIzMDZhZTJlYjg1Njc1OGI1MjJiNWFiMTM=--ba598af8117a63c57f3f0181091c5ff64d502ded">
-  <meta name="pjax-timeout" content="1000">
-  <link rel="sudo-modal" href="/sessions/sudo_modal">
-  <meta name="request-id" content="EDD2:674E:91587C:107454A:59D5310C" data-pjax-transient>
-  
-
-  <meta name="selected-link" value="repo_source" data-pjax-transient>
-
-  <meta name="google-site-verification" content="KT5gs8h0wvaagLKAVWq8bbeNwnZZK1r1XQysX3xurLU">
-<meta name="google-site-verification" content="ZzhVyEFwb7w3e0-uOTltm8Jsck2F5StVihD0exw2fsA">
-    <meta name="google-analytics" content="UA-3769691-2">
-
-<meta content="collector.githubapp.com" name="octolytics-host" /><meta content="github" name="octolytics-app-id" /><meta content="https://collector.githubapp.com/github-external/browser_event" name="octolytics-event-url" /><meta content="EDD2:674E:91587C:107454A:59D5310C" name="octolytics-dimension-request_id" /><meta content="iad" name="octolytics-dimension-region_edge" /><meta content="iad" name="octolytics-dimension-region_render" /><meta content="11282858" name="octolytics-actor-id" /><meta content="Neminem1203" name="octolytics-actor-login" /><meta content="6ee50ace33914dc9341a25489b512022b67485d3f9fed32580c000a3d6e58b94" name="octolytics-actor-hash" />
-<meta content="/&lt;user-name&gt;/&lt;repo-name&gt;/blob/show" data-pjax-transient="true" name="analytics-location" />
-
-
-
-
-  <meta class="js-ga-set" name="dimension1" content="Logged In">
-
-
-  
-
-      <meta name="hostname" content="github.com">
-  <meta name="user-login" content="Neminem1203">
-
-      <meta name="expected-hostname" content="github.com">
-    <meta name="js-proxy-site-detection-payload" content="MDljMzNkMDYwOTljYWYyYmIwM2YzM2I0MjA3YTZiYWQyNDc5NGNhMGQxNTBmNTJkMDZiNDlkYzlmYTJmMjBmN3x7InJlbW90ZV9hZGRyZXNzIjoiNjcuODUuNy4xNzAiLCJyZXF1ZXN0X2lkIjoiRUREMjo2NzRFOjkxNTg3QzoxMDc0NTRBOjU5RDUzMTBDIiwidGltZXN0YW1wIjoxNTA3MTQzOTU0LCJob3N0IjoiZ2l0aHViLmNvbSJ9">
-
-    <meta name="enabled-features" content="UNIVERSE_BANNER">
-
-  <meta name="html-safe-nonce" content="115b261f4c05916bf1d2fc135a7e8ff39300380e">
-
-  <meta http-equiv="x-pjax-version" content="b8f935edc946056219480b83960b580a">
-  
-
-      <link href="https://github.com/katierose1029/matplotlib/commits/figure-traitlets-dev.atom" rel="alternate" title="Recent Commits to matplotlib:figure-traitlets-dev" type="application/atom+xml">
-
-  <meta name="description" content="matplotlib: plotting with Python">
-  <meta name="go-import" content="github.com/katierose1029/matplotlib git https://github.com/katierose1029/matplotlib.git">
-
-  <meta content="12536035" name="octolytics-dimension-user_id" /><meta content="katierose1029" name="octolytics-dimension-user_login" /><meta content="96583554" name="octolytics-dimension-repository_id" /><meta content="katierose1029/matplotlib" name="octolytics-dimension-repository_nwo" /><meta content="true" name="octolytics-dimension-repository_public" /><meta content="true" name="octolytics-dimension-repository_is_fork" /><meta content="1385122" name="octolytics-dimension-repository_parent_id" /><meta content="matplotlib/matplotlib" name="octolytics-dimension-repository_parent_nwo" /><meta content="1385122" name="octolytics-dimension-repository_network_root_id" /><meta content="matplotlib/matplotlib" name="octolytics-dimension-repository_network_root_nwo" /><meta content="false" name="octolytics-dimension-repository_explore_github_marketplace_ci_cta_shown" />
-
-
-    <link rel="canonical" href="https://github.com/katierose1029/matplotlib/blob/figure-traitlets-dev/lib/matplotlib/_traits/figure.py" data-pjax-transient>
-
-
-  <meta name="browser-stats-url" content="https://api.github.com/_private/browser/stats">
-
-  <meta name="browser-errors-url" content="https://api.github.com/_private/browser/errors">
-
-  <link rel="mask-icon" href="https://assets-cdn.github.com/pinned-octocat.svg" color="#000000">
-  <link rel="icon" type="image/x-icon" href="https://assets-cdn.github.com/favicon.ico">
-
-<meta name="theme-color" content="#1e2327">
-
-
-  <meta name="u2f-support" content="true">
-
-  </head>
-
-  <body class="logged-in env-production page-blob">
-    
-
-  <div class="position-relative js-header-wrapper ">
-    <a href="#start-of-content" tabindex="1" class="bg-black text-white p-3 show-on-focus js-skip-to-content">Skip to content</a>
-    <div id="js-pjax-loader-bar" class="pjax-loader-bar"><div class="progress"></div></div>
-
-    
-    
-    
-
-
-
-        
-<header class="Header  f5" role="banner">
-  <div class="d-flex px-3 flex-justify-between container-lg">
-    <div class="d-flex flex-justify-between">
-      <a class="header-logo-invertocat" href="https://github.com/" data-hotkey="g d" aria-label="Homepage" data-ga-click="Header, go to dashboard, icon:logo">
-  <svg aria-hidden="true" class="octicon octicon-mark-github" height="32" version="1.1" viewBox="0 0 16 16" width="32"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-</a>
-
-
-    </div>
-
-    <div class="HeaderMenu d-flex flex-justify-between flex-auto">
-      <div class="d-flex">
-            <div class="">
-              <div class="header-search scoped-search site-scoped-search js-site-search" role="search">
-  <!-- '"` --><!-- </textarea></xmp> --></option></form><form accept-charset="UTF-8" action="/katierose1029/matplotlib/search" class="js-site-search-form" data-scoped-search-url="/katierose1029/matplotlib/search" data-unscoped-search-url="/search" method="get"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /></div>
-    <label class="form-control header-search-wrapper js-chromeless-input-container">
-        <a href="/katierose1029/matplotlib/blob/figure-traitlets-dev/lib/matplotlib/_traits/figure.py" class="header-search-scope no-underline">This repository</a>
-      <input type="text"
-        class="form-control header-search-input js-site-search-focus js-site-search-field is-clearable"
-        data-hotkey="s"
-        name="q"
-        value=""
-        placeholder="Search"
-        aria-label="Search this repository"
-        data-unscoped-placeholder="Search GitHub"
-        data-scoped-placeholder="Search"
-        autocapitalize="off">
-        <input type="hidden" class="js-site-search-type-field" name="type" >
-    </label>
-</form></div>
-
-            </div>
-
-          <ul class="d-flex pl-2 flex-items-center text-bold list-style-none" role="navigation">
-            <li>
-              <a href="/pulls" aria-label="Pull requests you created" class="js-selected-navigation-item HeaderNavlink px-2" data-ga-click="Header, click, Nav menu - item:pulls context:user" data-hotkey="g p" data-selected-links="/pulls /pulls/assigned /pulls/mentioned /pulls">
-                Pull requests
-</a>            </li>
-            <li>
-              <a href="/issues" aria-label="Issues you created" class="js-selected-navigation-item HeaderNavlink px-2" data-ga-click="Header, click, Nav menu - item:issues context:user" data-hotkey="g i" data-selected-links="/issues /issues/assigned /issues/mentioned /issues">
-                Issues
-</a>            </li>
-                <li>
-                  <a href="/marketplace" class="js-selected-navigation-item HeaderNavlink px-2" data-ga-click="Header, click, Nav menu - item:marketplace context:user" data-selected-links=" /marketplace">
-                    Marketplace
-</a>                </li>
-            <li>
-              <a href="/explore" class="js-selected-navigation-item HeaderNavlink px-2" data-ga-click="Header, click, Nav menu - item:explore" data-selected-links="/explore /trending /trending/developers /integrations /integrations/feature/code /integrations/feature/collaborate /integrations/feature/ship showcases showcases_search showcases_landing /explore">
-                Explore
-</a>            </li>
-          </ul>
-      </div>
-
-      <div class="d-flex">
-        
-<ul class="user-nav d-flex flex-items-center list-style-none" id="user-links">
-  <li class="dropdown js-menu-container js-header-notifications">
-    <span class="d-inline-block  px-2">
-      
-      <a href="/notifications" aria-label="You have no unread notifications" class="notification-indicator tooltipped tooltipped-s  js-socket-channel js-notification-indicator" data-channel="notification-changed:11282858" data-ga-click="Header, go to notifications, icon:read" data-hotkey="g n">
-          <span class="mail-status "></span>
-          <svg aria-hidden="true" class="octicon octicon-bell" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path fill-rule="evenodd" d="M14 12v1H0v-1l.73-.58c.77-.77.81-2.55 1.19-4.42C2.69 3.23 6 2 6 2c0-.55.45-1 1-1s1 .45 1 1c0 0 3.39 1.23 4.16 5 .38 1.88.42 3.66 1.19 4.42l.66.58H14zm-7 4c1.11 0 2-.89 2-2H5c0 1.11.89 2 2 2z"/></svg>
-</a>
-    </span>
-  </li>
-
-  <li class="dropdown js-menu-container">
-    <details class="dropdown-details js-dropdown-details d-flex px-2 flex-items-center">
-      <summary class="HeaderNavlink"
-         aria-label="Create new…"
-         data-ga-click="Header, create new, icon:add">
-        <svg aria-hidden="true" class="octicon octicon-plus float-left mr-1 mt-1" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 9H7v5H5V9H0V7h5V2h2v5h5z"/></svg>
-        <span class="dropdown-caret mt-1"></span>
-      </summary>
-
-      <ul class="dropdown-menu dropdown-menu-sw">
-        
-<a class="dropdown-item" href="/new" data-ga-click="Header, create new repository">
-  New repository
-</a>
-
-  <a class="dropdown-item" href="/new/import" data-ga-click="Header, import a repository">
-    Import repository
-  </a>
-
-<a class="dropdown-item" href="https://gist.github.com/" data-ga-click="Header, create new gist">
-  New gist
-</a>
-
-  <a class="dropdown-item" href="/organizations/new" data-ga-click="Header, create new organization">
-    New organization
-  </a>
-
-
-
-
-      </ul>
-    </details>
-  </li>
-
-  <li class="dropdown js-menu-container">
-
-    <details class="dropdown-details js-dropdown-details d-flex pl-2 flex-items-center">
-      <summary class="HeaderNavlink name mt-1"
-        aria-label="View profile and more"
-        data-ga-click="Header, show menu, icon:avatar">
-        <img alt="@Neminem1203" class="avatar float-left mr-1" src="https://avatars0.githubusercontent.com/u/11282858?v=4&amp;s=40" height="20" width="20">
-        <span class="dropdown-caret"></span>
-      </summary>
-
-      <ul class="dropdown-menu dropdown-menu-sw">
-        <li class="dropdown-header header-nav-current-user css-truncate">
-          Signed in as <strong class="css-truncate-target">Neminem1203</strong>
-        </li>
-
-        <li class="dropdown-divider"></li>
-
-        <li><a class="dropdown-item" href="/Neminem1203" data-ga-click="Header, go to profile, text:your profile">
-          Your profile
-        </a></li>
-        <li><a class="dropdown-item" href="/Neminem1203?tab=stars" data-ga-click="Header, go to starred repos, text:your stars">
-          Your stars
-        </a></li>
-          <li><a class="dropdown-item" href="https://gist.github.com/" data-ga-click="Header, your gists, text:your gists">Your Gists</a></li>
-
-        <li class="dropdown-divider"></li>
-
-        <li><a class="dropdown-item" href="https://help.github.com" data-ga-click="Header, go to help, text:help">
-          Help
-        </a></li>
-
-        <li><a class="dropdown-item" href="/settings/profile" data-ga-click="Header, go to settings, icon:settings">
-          Settings
-        </a></li>
-
-        <li><!-- '"` --><!-- </textarea></xmp> --></option></form><form accept-charset="UTF-8" action="/logout" class="logout-form" method="post"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /><input name="authenticity_token" type="hidden" value="nUnC2igxFAdjEs/SsOyno1cA7daa4zJj2FFy2Uq9MOtAv+3HCHu0Djk+rfSwLhREallgiSHPDHa6JhCG31X+bA==" /></div>
-          <button type="submit" class="dropdown-item dropdown-signout" data-ga-click="Header, sign out, icon:logout">
-            Sign out
-          </button>
-        </form></li>
-      </ul>
-    </details>
-  </li>
-</ul>
-
-
-        <!-- '"` --><!-- </textarea></xmp> --></option></form><form accept-charset="UTF-8" action="/logout" class="sr-only right-0" method="post"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /><input name="authenticity_token" type="hidden" value="desVzTh081eMiApr3S/uAOo2zScEpa+ASZgFYIEol4SoHTrQGD5TXtakaE3d7V3n129AeL+JkZUr72c/FMBZAw==" /></div>
-          <button type="submit" class="dropdown-item dropdown-signout" data-ga-click="Header, sign out, icon:logout">
-            Sign out
-          </button>
-</form>      </div>
-    </div>
-  </div>
-</header>
-
-
-      
-
-  </div>
-
-  <div id="start-of-content" class="show-on-focus"></div>
-
-    <div id="js-flash-container">
-</div>
-
-
-
-  <div role="main">
-        <div itemscope itemtype="http://schema.org/SoftwareSourceCode">
-    <div id="js-repo-pjax-container" data-pjax-container>
-      
-
-
-
-
-
-    <div class="pagehead repohead instapaper_ignore readability-menu experiment-repo-nav ">
-      <div class="repohead-details-container clearfix container ">
-
-        <ul class="pagehead-actions">
-  <li>
-        <!-- '"` --><!-- </textarea></xmp> --></option></form><form accept-charset="UTF-8" action="/notifications/subscribe" class="js-social-container" data-autosubmit="true" data-remote="true" method="post"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /><input name="authenticity_token" type="hidden" value="GgvzxT6aua1JvJThfHZsFBtVNQ0edaRA8nmNZ05DBTmK8cI0efGozZchTC+PdLFk0f4jB4exA5S+NPsfAQjq9w==" /></div>      <input class="form-control" id="repository_id" name="repository_id" type="hidden" value="96583554" />
-
-        <div class="select-menu js-menu-container js-select-menu">
-          <a href="/katierose1029/matplotlib/subscription"
-            class="btn btn-sm btn-with-count select-menu-button js-menu-target"
-            role="button"
-            aria-haspopup="true"
-            aria-expanded="false"
-            aria-label="Toggle repository notifications menu"
-            data-ga-click="Repository, click Watch settings, action:blob#show">
-            <span class="js-select-button">
-                <svg aria-hidden="true" class="octicon octicon-eye" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M8.06 2C3 2 0 8 0 8s3 6 8.06 6C13 14 16 8 16 8s-3-6-7.94-6zM8 12c-2.2 0-4-1.78-4-4 0-2.2 1.8-4 4-4 2.22 0 4 1.8 4 4 0 2.22-1.78 4-4 4zm2-4c0 1.11-.89 2-2 2-1.11 0-2-.89-2-2 0-1.11.89-2 2-2 1.11 0 2 .89 2 2z"/></svg>
-                Watch
-            </span>
-          </a>
-            <a class="social-count js-social-count"
-              href="/katierose1029/matplotlib/watchers"
-              aria-label="2 users are watching this repository">
-              2
-            </a>
-
-        <div class="select-menu-modal-holder">
-          <div class="select-menu-modal subscription-menu-modal js-menu-content">
-            <div class="select-menu-header js-navigation-enable" tabindex="-1">
-              <svg aria-label="Close" class="octicon octicon-x js-menu-close" height="16" role="img" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48z"/></svg>
-              <span class="select-menu-title">Notifications</span>
-            </div>
-
-              <div class="select-menu-list js-navigation-container" role="menu">
-
-                <div class="select-menu-item js-navigation-item selected" role="menuitem" tabindex="0">
-                  <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-                  <div class="select-menu-item-text">
-                    <input checked="checked" id="do_included" name="do" type="radio" value="included" />
-                    <span class="select-menu-item-heading">Not watching</span>
-                    <span class="description">Be notified when participating or @mentioned.</span>
-                    <span class="js-select-button-text hidden-select-button-text">
-                      <svg aria-hidden="true" class="octicon octicon-eye" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M8.06 2C3 2 0 8 0 8s3 6 8.06 6C13 14 16 8 16 8s-3-6-7.94-6zM8 12c-2.2 0-4-1.78-4-4 0-2.2 1.8-4 4-4 2.22 0 4 1.8 4 4 0 2.22-1.78 4-4 4zm2-4c0 1.11-.89 2-2 2-1.11 0-2-.89-2-2 0-1.11.89-2 2-2 1.11 0 2 .89 2 2z"/></svg>
-                      Watch
-                    </span>
-                  </div>
-                </div>
-
-                <div class="select-menu-item js-navigation-item " role="menuitem" tabindex="0">
-                  <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-                  <div class="select-menu-item-text">
-                    <input id="do_subscribed" name="do" type="radio" value="subscribed" />
-                    <span class="select-menu-item-heading">Watching</span>
-                    <span class="description">Be notified of all conversations.</span>
-                    <span class="js-select-button-text hidden-select-button-text">
-                      <svg aria-hidden="true" class="octicon octicon-eye" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M8.06 2C3 2 0 8 0 8s3 6 8.06 6C13 14 16 8 16 8s-3-6-7.94-6zM8 12c-2.2 0-4-1.78-4-4 0-2.2 1.8-4 4-4 2.22 0 4 1.8 4 4 0 2.22-1.78 4-4 4zm2-4c0 1.11-.89 2-2 2-1.11 0-2-.89-2-2 0-1.11.89-2 2-2 1.11 0 2 .89 2 2z"/></svg>
-                        Unwatch
-                    </span>
-                  </div>
-                </div>
-
-                <div class="select-menu-item js-navigation-item " role="menuitem" tabindex="0">
-                  <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-                  <div class="select-menu-item-text">
-                    <input id="do_ignore" name="do" type="radio" value="ignore" />
-                    <span class="select-menu-item-heading">Ignoring</span>
-                    <span class="description">Never be notified.</span>
-                    <span class="js-select-button-text hidden-select-button-text">
-                      <svg aria-hidden="true" class="octicon octicon-mute" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M8 2.81v10.38c0 .67-.81 1-1.28.53L3 10H1c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h2l3.72-3.72C7.19 1.81 8 2.14 8 2.81zm7.53 3.22l-1.06-1.06-1.97 1.97-1.97-1.97-1.06 1.06L11.44 8 9.47 9.97l1.06 1.06 1.97-1.97 1.97 1.97 1.06-1.06L13.56 8l1.97-1.97z"/></svg>
-                        Stop ignoring
-                    </span>
-                  </div>
-                </div>
-
-              </div>
-
-            </div>
-          </div>
-        </div>
-</form>
-  </li>
-
-  <li>
-    
-  <div class="js-toggler-container js-social-container starring-container ">
-    <!-- '"` --><!-- </textarea></xmp> --></option></form><form accept-charset="UTF-8" action="/katierose1029/matplotlib/unstar" class="starred" data-remote="true" method="post"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /><input name="authenticity_token" type="hidden" value="F4/IupvvWQMdcWcrRpkZ8y/kNqyopqnG5GFq2A1auFwd8/9UCPt1UJUstxNbqWxXQe4KX0v8LN3xU5l5LA5baA==" /></div>
-      <button
-        type="submit"
-        class="btn btn-sm btn-with-count js-toggler-target"
-        aria-label="Unstar this repository" title="Unstar katierose1029/matplotlib"
-        data-ga-click="Repository, click unstar button, action:blob#show; text:Unstar">
-        <svg aria-hidden="true" class="octicon octicon-star" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path fill-rule="evenodd" d="M14 6l-4.9-.64L7 1 4.9 5.36 0 6l3.6 3.26L2.67 14 7 11.67 11.33 14l-.93-4.74z"/></svg>
-        Unstar
-      </button>
-        <a class="social-count js-social-count" href="/katierose1029/matplotlib/stargazers"
-           aria-label="0 users starred this repository">
-          0
-        </a>
-</form>
-    <!-- '"` --><!-- </textarea></xmp> --></option></form><form accept-charset="UTF-8" action="/katierose1029/matplotlib/star" class="unstarred" data-remote="true" method="post"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /><input name="authenticity_token" type="hidden" value="w63q3P1tpXmxMJvnT/MVhWq5Zz4baWGwsqzywjKLDmUkIHHqOxkXQMVVIk4MDwEtHtGqYv5NzG65BGqyJiL9iQ==" /></div>
-      <button
-        type="submit"
-        class="btn btn-sm btn-with-count js-toggler-target"
-        aria-label="Star this repository" title="Star katierose1029/matplotlib"
-        data-ga-click="Repository, click star button, action:blob#show; text:Star">
-        <svg aria-hidden="true" class="octicon octicon-star" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path fill-rule="evenodd" d="M14 6l-4.9-.64L7 1 4.9 5.36 0 6l3.6 3.26L2.67 14 7 11.67 11.33 14l-.93-4.74z"/></svg>
-        Star
-      </button>
-        <a class="social-count js-social-count" href="/katierose1029/matplotlib/stargazers"
-           aria-label="0 users starred this repository">
-          0
-        </a>
-</form>  </div>
-
-  </li>
-
-  <li>
-          <a href="#fork-destination-box" class="btn btn-sm btn-with-count"
-              title="Fork your own copy of katierose1029/matplotlib to your account"
-              aria-label="Fork your own copy of katierose1029/matplotlib to your account"
-              rel="facebox"
-              data-ga-click="Repository, show fork modal, action:blob#show; text:Fork">
-              <svg aria-hidden="true" class="octicon octicon-repo-forked" height="16" version="1.1" viewBox="0 0 10 16" width="10"><path fill-rule="evenodd" d="M8 1a1.993 1.993 0 0 0-1 3.72V6L5 8 3 6V4.72A1.993 1.993 0 0 0 2 1a1.993 1.993 0 0 0-1 3.72V6.5l3 3v1.78A1.993 1.993 0 0 0 5 15a1.993 1.993 0 0 0 1-3.72V9.5l3-3V4.72A1.993 1.993 0 0 0 8 1zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm3 10c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm3-10c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"/></svg>
-            Fork
-          </a>
-
-          <div id="fork-destination-box" style="display: none;">
-            <h2 class="facebox-header" data-facebox-id="facebox-header">Where should we fork this repository?</h2>
-            <include-fragment src=""
-                class="js-fork-select-fragment fork-select-fragment"
-                data-url="/katierose1029/matplotlib/fork?fragment=1">
-              <img alt="Loading" height="64" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-128.gif" width="64" />
-            </include-fragment>
-          </div>
-
-    <a href="/katierose1029/matplotlib/network" class="social-count"
-       aria-label="2839 users forked this repository">
-      2,839
-    </a>
-  </li>
-</ul>
-
-        <h1 class="public ">
-  <svg aria-hidden="true" class="octicon octicon-repo-forked" height="16" version="1.1" viewBox="0 0 10 16" width="10"><path fill-rule="evenodd" d="M8 1a1.993 1.993 0 0 0-1 3.72V6L5 8 3 6V4.72A1.993 1.993 0 0 0 2 1a1.993 1.993 0 0 0-1 3.72V6.5l3 3v1.78A1.993 1.993 0 0 0 5 15a1.993 1.993 0 0 0 1-3.72V9.5l3-3V4.72A1.993 1.993 0 0 0 8 1zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm3 10c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm3-10c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"/></svg>
-  <span class="author" itemprop="author"><a href="/katierose1029" class="url fn" rel="author">katierose1029</a></span><!--
---><span class="path-divider">/</span><!--
---><strong itemprop="name"><a href="/katierose1029/matplotlib" data-pjax="#js-repo-pjax-container">matplotlib</a></strong>
-
-    <span class="fork-flag">
-      <span class="text">forked from <a href="/matplotlib/matplotlib">matplotlib/matplotlib</a></span>
-    </span>
-</h1>
-
-      </div>
-      
-<nav class="reponav js-repo-nav js-sidenav-container-pjax container"
-     itemscope
-     itemtype="http://schema.org/BreadcrumbList"
-     role="navigation"
-     data-pjax="#js-repo-pjax-container">
-
-  <span itemscope itemtype="http://schema.org/ListItem" itemprop="itemListElement">
-    <a href="/katierose1029/matplotlib/tree/figure-traitlets-dev" class="js-selected-navigation-item selected reponav-item" data-hotkey="g c" data-selected-links="repo_source repo_downloads repo_commits repo_releases repo_tags repo_branches /katierose1029/matplotlib/tree/figure-traitlets-dev" itemprop="url">
-      <svg aria-hidden="true" class="octicon octicon-code" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path fill-rule="evenodd" d="M9.5 3L8 4.5 11.5 8 8 11.5 9.5 13 14 8 9.5 3zm-5 0L0 8l4.5 5L6 11.5 2.5 8 6 4.5 4.5 3z"/></svg>
-      <span itemprop="name">Code</span>
-      <meta itemprop="position" content="1">
-</a>  </span>
-
-
-  <span itemscope itemtype="http://schema.org/ListItem" itemprop="itemListElement">
-    <a href="/katierose1029/matplotlib/pulls" class="js-selected-navigation-item reponav-item" data-hotkey="g p" data-selected-links="repo_pulls /katierose1029/matplotlib/pulls" itemprop="url">
-      <svg aria-hidden="true" class="octicon octicon-git-pull-request" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0 0 10 15a1.993 1.993 0 0 0 1-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v6.56A1.993 1.993 0 0 0 2 15a1.993 1.993 0 0 0 1-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"/></svg>
-      <span itemprop="name">Pull requests</span>
-      <span class="Counter">0</span>
-      <meta itemprop="position" content="3">
-</a>  </span>
-
-    <a href="/katierose1029/matplotlib/projects" class="js-selected-navigation-item reponav-item" data-hotkey="g b" data-selected-links="repo_projects new_repo_project repo_project /katierose1029/matplotlib/projects">
-      <svg aria-hidden="true" class="octicon octicon-project" height="16" version="1.1" viewBox="0 0 15 16" width="15"><path fill-rule="evenodd" d="M10 12h3V2h-3v10zm-4-2h3V2H6v8zm-4 4h3V2H2v12zm-1 1h13V1H1v14zM14 0H1a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1z"/></svg>
-      Projects
-      <span class="Counter" >0</span>
-</a>
-    <a href="/katierose1029/matplotlib/wiki" class="js-selected-navigation-item reponav-item" data-hotkey="g w" data-selected-links="repo_wiki /katierose1029/matplotlib/wiki">
-      <svg aria-hidden="true" class="octicon octicon-book" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M3 5h4v1H3V5zm0 3h4V7H3v1zm0 2h4V9H3v1zm11-5h-4v1h4V5zm0 2h-4v1h4V7zm0 2h-4v1h4V9zm2-6v9c0 .55-.45 1-1 1H9.5l-1 1-1-1H2c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h5.5l1 1 1-1H15c.55 0 1 .45 1 1zm-8 .5L7.5 3H2v9h6V3.5zm7-.5H9.5l-.5.5V12h6V3z"/></svg>
-      Wiki
-</a>
-
-    <div class="reponav-dropdown js-menu-container">
-      <button type="button" class="btn-link reponav-item reponav-dropdown js-menu-target " data-no-toggle aria-expanded="false" aria-haspopup="true">
-        Insights
-        <svg aria-hidden="true" class="octicon octicon-triangle-down v-align-middle text-gray" height="11" version="1.1" viewBox="0 0 12 16" width="8"><path fill-rule="evenodd" d="M0 5l6 6 6-6z"/></svg>
-      </button>
-      <div class="dropdown-menu-content js-menu-content">
-        <div class="dropdown-menu dropdown-menu-sw">
-          <a class="dropdown-item" href="/katierose1029/matplotlib/pulse" data-skip-pjax>
-            <svg aria-hidden="true" class="octicon octicon-pulse" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path fill-rule="evenodd" d="M11.5 8L8.8 5.4 6.6 8.5 5.5 1.6 2.38 8H0v2h3.6l.9-1.8.9 5.4L9 8.5l1.6 1.5H14V8z"/></svg>
-            Pulse
-          </a>
-          <a class="dropdown-item" href="/katierose1029/matplotlib/graphs" data-skip-pjax>
-            <svg aria-hidden="true" class="octicon octicon-graph" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M16 14v1H0V0h1v14h15zM5 13H3V8h2v5zm4 0H7V3h2v10zm4 0h-2V6h2v7z"/></svg>
-            Graphs
-          </a>
-        </div>
-      </div>
-    </div>
-</nav>
-
-
-    </div>
-
-<div class="container new-discussion-timeline experiment-repo-nav">
-  <div class="repository-content">
-
-    
-  <a href="/katierose1029/matplotlib/blob/cb288059b1fd6237591a630a84a841c7b6bdecd0/lib/matplotlib/_traits/figure.py" class="d-none js-permalink-shortcut" data-hotkey="y">Permalink</a>
-
-  <!-- blob contrib key: blob_contributors:v21:7f2b35fb97e8168e8461821612376143 -->
-
-  <div class="file-navigation js-zeroclipboard-container">
-    
-<div class="select-menu branch-select-menu js-menu-container js-select-menu float-left">
-  <button class=" btn btn-sm select-menu-button js-menu-target css-truncate" data-hotkey="w"
-    title="figure-traitlets-dev"
-    type="button" aria-label="Switch branches or tags" aria-expanded="false" aria-haspopup="true">
-      <i>Branch:</i>
-      <span class="js-select-button css-truncate-target">figure-traitle…</span>
-  </button>
-
-  <div class="select-menu-modal-holder js-menu-content js-navigation-container" data-pjax>
-
-    <div class="select-menu-modal">
-      <div class="select-menu-header">
-        <svg aria-label="Close" class="octicon octicon-x js-menu-close" height="16" role="img" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48z"/></svg>
-        <span class="select-menu-title">Switch branches/tags</span>
-      </div>
-
-      <div class="select-menu-filters">
-        <div class="select-menu-text-filter">
-          <input type="text" aria-label="Filter branches/tags" id="context-commitish-filter-field" class="form-control js-filterable-field js-navigation-enable" placeholder="Filter branches/tags">
-        </div>
-        <div class="select-menu-tabs">
-          <ul>
-            <li class="select-menu-tab">
-              <a href="#" data-tab-filter="branches" data-filter-placeholder="Filter branches/tags" class="js-select-menu-tab" role="tab">Branches</a>
-            </li>
-            <li class="select-menu-tab">
-              <a href="#" data-tab-filter="tags" data-filter-placeholder="Find a tag…" class="js-select-menu-tab" role="tab">Tags</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="select-menu-list select-menu-tab-bucket js-select-menu-tab-bucket" data-tab-filter="branches" role="menu">
-
-        <div data-filterable-for="context-commitish-filter-field" data-filterable-type="substring">
-
-
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/katierose1029/matplotlib/blob/artist-traitlets-dev/lib/matplotlib/_traits/figure.py"
-               data-name="artist-traitlets-dev"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                artist-traitlets-dev
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open selected"
-               href="/katierose1029/matplotlib/blob/figure-traitlets-dev/lib/matplotlib/_traits/figure.py"
-               data-name="figure-traitlets-dev"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                figure-traitlets-dev
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/katierose1029/matplotlib/blob/line2D-traitlets-dev/lib/matplotlib/_traits/figure.py"
-               data-name="line2D-traitlets-dev"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                line2D-traitlets-dev
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/katierose1029/matplotlib/blob/line2d-traitlets-dev/lib/matplotlib/_traits/figure.py"
-               data-name="line2d-traitlets-dev"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                line2d-traitlets-dev
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/katierose1029/matplotlib/blob/master/lib/matplotlib/_traits/figure.py"
-               data-name="master"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                master
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/katierose1029/matplotlib/blob/v2.0.x/lib/matplotlib/_traits/figure.py"
-               data-name="v2.0.x"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                v2.0.x
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/katierose1029/matplotlib/blob/v2.0.2-doc/lib/matplotlib/_traits/figure.py"
-               data-name="v2.0.2-doc"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                v2.0.2-doc
-              </span>
-            </a>
-        </div>
-
-          <div class="select-menu-no-results">Nothing to show</div>
-      </div>
-
-      <div class="select-menu-list select-menu-tab-bucket js-select-menu-tab-bucket" data-tab-filter="tags">
-        <div data-filterable-for="context-commitish-filter-field" data-filterable-type="substring">
-
-
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v2.0.2/lib/matplotlib/_traits/figure.py"
-              data-name="v2.0.2"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v2.0.2">
-                v2.0.2
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v2.0.1/lib/matplotlib/_traits/figure.py"
-              data-name="v2.0.1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v2.0.1">
-                v2.0.1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v2.0.0/lib/matplotlib/_traits/figure.py"
-              data-name="v2.0.0"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v2.0.0">
-                v2.0.0
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v2.0.0rc2/lib/matplotlib/_traits/figure.py"
-              data-name="v2.0.0rc2"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v2.0.0rc2">
-                v2.0.0rc2
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v2.0.0rc1/lib/matplotlib/_traits/figure.py"
-              data-name="v2.0.0rc1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v2.0.0rc1">
-                v2.0.0rc1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v2.0.0b4/lib/matplotlib/_traits/figure.py"
-              data-name="v2.0.0b4"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v2.0.0b4">
-                v2.0.0b4
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v2.0.0b3/lib/matplotlib/_traits/figure.py"
-              data-name="v2.0.0b3"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v2.0.0b3">
-                v2.0.0b3
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v2.0.0b2/lib/matplotlib/_traits/figure.py"
-              data-name="v2.0.0b2"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v2.0.0b2">
-                v2.0.0b2
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v2.0.0b1/lib/matplotlib/_traits/figure.py"
-              data-name="v2.0.0b1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v2.0.0b1">
-                v2.0.0b1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.5.3/lib/matplotlib/_traits/figure.py"
-              data-name="v1.5.3"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.5.3">
-                v1.5.3
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.5.2/lib/matplotlib/_traits/figure.py"
-              data-name="v1.5.2"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.5.2">
-                v1.5.2
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.5.2rc2/lib/matplotlib/_traits/figure.py"
-              data-name="v1.5.2rc2"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.5.2rc2">
-                v1.5.2rc2
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.5.2rc1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.5.2rc1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.5.2rc1">
-                v1.5.2rc1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.5.1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.5.1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.5.1">
-                v1.5.1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.5.1rc1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.5.1rc1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.5.1rc1">
-                v1.5.1rc1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.5.0/lib/matplotlib/_traits/figure.py"
-              data-name="v1.5.0"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.5.0">
-                v1.5.0
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.5.0rc3/lib/matplotlib/_traits/figure.py"
-              data-name="v1.5.0rc3"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.5.0rc3">
-                v1.5.0rc3
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.5.0rc2/lib/matplotlib/_traits/figure.py"
-              data-name="v1.5.0rc2"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.5.0rc2">
-                v1.5.0rc2
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.5.0rc1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.5.0rc1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.5.0rc1">
-                v1.5.0rc1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.4.3/lib/matplotlib/_traits/figure.py"
-              data-name="v1.4.3"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.4.3">
-                v1.4.3
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.4.3rc1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.4.3rc1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.4.3rc1">
-                v1.4.3rc1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.4.2/lib/matplotlib/_traits/figure.py"
-              data-name="v1.4.2"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.4.2">
-                v1.4.2
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.4.1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.4.1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.4.1">
-                v1.4.1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.4.1rc1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.4.1rc1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.4.1rc1">
-                v1.4.1rc1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.4.0/lib/matplotlib/_traits/figure.py"
-              data-name="v1.4.0"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.4.0">
-                v1.4.0
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.4.0rc4/lib/matplotlib/_traits/figure.py"
-              data-name="v1.4.0rc4"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.4.0rc4">
-                v1.4.0rc4
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.4.0rc3/lib/matplotlib/_traits/figure.py"
-              data-name="v1.4.0rc3"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.4.0rc3">
-                v1.4.0rc3
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.4.0rc2/lib/matplotlib/_traits/figure.py"
-              data-name="v1.4.0rc2"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.4.0rc2">
-                v1.4.0rc2
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.4.0rc1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.4.0rc1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.4.0rc1">
-                v1.4.0rc1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.3.1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.3.1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.3.1">
-                v1.3.1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.3.1rc2/lib/matplotlib/_traits/figure.py"
-              data-name="v1.3.1rc2"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.3.1rc2">
-                v1.3.1rc2
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.3.1rc1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.3.1rc1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.3.1rc1">
-                v1.3.1rc1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.3.0/lib/matplotlib/_traits/figure.py"
-              data-name="v1.3.0"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.3.0">
-                v1.3.0
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.3.0rc5/lib/matplotlib/_traits/figure.py"
-              data-name="v1.3.0rc5"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.3.0rc5">
-                v1.3.0rc5
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.3.0rc4/lib/matplotlib/_traits/figure.py"
-              data-name="v1.3.0rc4"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.3.0rc4">
-                v1.3.0rc4
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.3.0rc3/lib/matplotlib/_traits/figure.py"
-              data-name="v1.3.0rc3"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.3.0rc3">
-                v1.3.0rc3
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.3.0rc2/lib/matplotlib/_traits/figure.py"
-              data-name="v1.3.0rc2"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.3.0rc2">
-                v1.3.0rc2
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.3.0rc1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.3.0rc1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.3.0rc1">
-                v1.3.0rc1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.2.1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.2.1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.2.1">
-                v1.2.1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.2.1rc1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.2.1rc1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.2.1rc1">
-                v1.2.1rc1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.2.0/lib/matplotlib/_traits/figure.py"
-              data-name="v1.2.0"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.2.0">
-                v1.2.0
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.2.0rc3/lib/matplotlib/_traits/figure.py"
-              data-name="v1.2.0rc3"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.2.0rc3">
-                v1.2.0rc3
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.2.0rc2/lib/matplotlib/_traits/figure.py"
-              data-name="v1.2.0rc2"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.2.0rc2">
-                v1.2.0rc2
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.2.0rc1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.2.0rc1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.2.0rc1">
-                v1.2.0rc1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.1.1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.1.1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.1.1">
-                v1.1.1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.1.1-rc2/lib/matplotlib/_traits/figure.py"
-              data-name="v1.1.1-rc2"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.1.1-rc2">
-                v1.1.1-rc2
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.1.0/lib/matplotlib/_traits/figure.py"
-              data-name="v1.1.0"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.1.0">
-                v1.1.0
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.1.0-rc1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.1.0-rc1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.1.0-rc1">
-                v1.1.0-rc1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.0.1/lib/matplotlib/_traits/figure.py"
-              data-name="v1.0.1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.0.1">
-                v1.0.1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v1.0.0/lib/matplotlib/_traits/figure.py"
-              data-name="v1.0.0"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v1.0.0">
-                v1.0.0
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v0.99.0/lib/matplotlib/_traits/figure.py"
-              data-name="v0.99.0"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v0.99.0">
-                v0.99.0
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v0.99.0.rc1/lib/matplotlib/_traits/figure.py"
-              data-name="v0.99.0.rc1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v0.99.0.rc1">
-                v0.99.0.rc1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v0.98.5/lib/matplotlib/_traits/figure.py"
-              data-name="v0.98.5"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v0.98.5">
-                v0.98.5
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v0.98.4/lib/matplotlib/_traits/figure.py"
-              data-name="v0.98.4"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v0.98.4">
-                v0.98.4
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v0.98.3/lib/matplotlib/_traits/figure.py"
-              data-name="v0.98.3"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v0.98.3">
-                v0.98.3
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v0.98.2/lib/matplotlib/_traits/figure.py"
-              data-name="v0.98.2"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v0.98.2">
-                v0.98.2
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v0.98.1/lib/matplotlib/_traits/figure.py"
-              data-name="v0.98.1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v0.98.1">
-                v0.98.1
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v0.98.0/lib/matplotlib/_traits/figure.py"
-              data-name="v0.98.0"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v0.98.0">
-                v0.98.0
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v0.91.4/lib/matplotlib/_traits/figure.py"
-              data-name="v0.91.4"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v0.91.4">
-                v0.91.4
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v0.91.3/lib/matplotlib/_traits/figure.py"
-              data-name="v0.91.3"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v0.91.3">
-                v0.91.3
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/v0.91.2/lib/matplotlib/_traits/figure.py"
-              data-name="v0.91.2"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="v0.91.2">
-                v0.91.2
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/katierose1029/matplotlib/tree/1.3.1/lib/matplotlib/_traits/figure.py"
-              data-name="1.3.1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"/></svg>
-              <span class="select-menu-item-text css-truncate-target" title="1.3.1">
-                1.3.1
-              </span>
-            </a>
-        </div>
-
-        <div class="select-menu-no-results">Nothing to show</div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-    <div class="BtnGroup float-right">
-      <a href="/katierose1029/matplotlib/find/figure-traitlets-dev"
-            class="js-pjax-capture-input btn btn-sm BtnGroup-item"
-            data-pjax
-            data-hotkey="t">
-        Find file
-      </a>
-      <button aria-label="Copy file path to clipboard" class="js-zeroclipboard btn btn-sm BtnGroup-item tooltipped tooltipped-s" data-copied-hint="Copied!" type="button">Copy path</button>
-    </div>
-    <div class="breadcrumb js-zeroclipboard-target">
-      <span class="repo-root js-repo-root"><span class="js-path-segment"><a href="/katierose1029/matplotlib/tree/figure-traitlets-dev"><span>matplotlib</span></a></span></span><span class="separator">/</span><span class="js-path-segment"><a href="/katierose1029/matplotlib/tree/figure-traitlets-dev/lib"><span>lib</span></a></span><span class="separator">/</span><span class="js-path-segment"><a href="/katierose1029/matplotlib/tree/figure-traitlets-dev/lib/matplotlib"><span>matplotlib</span></a></span><span class="separator">/</span><span class="js-path-segment"><a href="/katierose1029/matplotlib/tree/figure-traitlets-dev/lib/matplotlib/_traits"><span>_traits</span></a></span><span class="separator">/</span><strong class="final-path">figure.py</strong>
-    </div>
-  </div>
-
-
-  
-  <div class="commit-tease">
-      <span class="float-right">
-        <a class="commit-tease-sha" href="/katierose1029/matplotlib/commit/cb288059b1fd6237591a630a84a841c7b6bdecd0" data-pjax>
-          cb28805
-        </a>
-        <relative-time datetime="2017-10-03T17:39:36Z">Oct 3, 2017</relative-time>
-      </span>
-      <div>
-        <img alt="@katierose1029" class="avatar" height="20" src="https://avatars2.githubusercontent.com/u/12536035?v=4&amp;s=40" width="20" />
-        <a href="/katierose1029" class="user-mention" rel="author">katierose1029</a>
-          <a href="/katierose1029/matplotlib/commit/cb288059b1fd6237591a630a84a841c7b6bdecd0" class="message" data-pjax="true" title="added comment of base figure class">added comment of base figure class</a>
-      </div>
-
-    <div class="commit-tease-contributors">
-      <button type="button" class="btn-link muted-link contributors-toggle" data-facebox="#blob_contributors_box">
-        <strong>1</strong>
-         contributor
-      </button>
-      
-    </div>
-
-    <div id="blob_contributors_box" style="display:none">
-      <h2 class="facebox-header" data-facebox-id="facebox-header">Users who have contributed to this file</h2>
-      <ul class="facebox-user-list" data-facebox-id="facebox-description">
-          <li class="facebox-user-list-item">
-            <img alt="@katierose1029" height="24" src="https://avatars0.githubusercontent.com/u/12536035?v=4&amp;s=48" width="24" />
-            <a href="/katierose1029">katierose1029</a>
-          </li>
-      </ul>
-    </div>
-  </div>
-
-
-  <div class="file">
-    <div class="file-header">
-  <div class="file-actions">
-
-    <div class="BtnGroup">
-      <a href="/katierose1029/matplotlib/raw/figure-traitlets-dev/lib/matplotlib/_traits/figure.py" class="btn btn-sm BtnGroup-item" id="raw-url">Raw</a>
-        <a href="/katierose1029/matplotlib/blame/figure-traitlets-dev/lib/matplotlib/_traits/figure.py" class="btn btn-sm js-update-url-with-hash BtnGroup-item" data-hotkey="b">Blame</a>
-      <a href="/katierose1029/matplotlib/commits/figure-traitlets-dev/lib/matplotlib/_traits/figure.py" class="btn btn-sm BtnGroup-item" rel="nofollow">History</a>
-    </div>
-
-        <a class="btn-octicon tooltipped tooltipped-nw"
-           href="github-windows://openRepo/https://github.com/katierose1029/matplotlib?branch=figure-traitlets-dev&amp;filepath=lib%2Fmatplotlib%2F_traits%2Ffigure.py"
-           aria-label="Open this file in GitHub Desktop"
-           data-ga-click="Repository, open with desktop, type:windows">
-            <svg aria-hidden="true" class="octicon octicon-device-desktop" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M15 2H1c-.55 0-1 .45-1 1v9c0 .55.45 1 1 1h5.34c-.25.61-.86 1.39-2.34 2h8c-1.48-.61-2.09-1.39-2.34-2H15c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1zm0 9H1V3h14v8z"/></svg>
-        </a>
-
-        <!-- '"` --><!-- </textarea></xmp> --></option></form><form accept-charset="UTF-8" action="/katierose1029/matplotlib/edit/figure-traitlets-dev/lib/matplotlib/_traits/figure.py" class="inline-form js-update-url-with-hash" method="post"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /><input name="authenticity_token" type="hidden" value="HojrzB2PFh2pKwjwqzADIAsNToe7oTzbExmxs53Ceu5v39KOreani21m4xMvYKwhnqnGvY53UdiWnphNfzJjeg==" /></div>
-          <button class="btn-octicon tooltipped tooltipped-nw" type="submit"
-            aria-label="Edit the file in your fork of this project" data-hotkey="e" data-disable-with>
-            <svg aria-hidden="true" class="octicon octicon-pencil" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path fill-rule="evenodd" d="M0 12v3h3l8-8-3-3-8 8zm3 2H1v-2h1v1h1v1zm10.3-9.3L12 6 9 3l1.3-1.3a.996.996 0 0 1 1.41 0l1.59 1.59c.39.39.39 1.02 0 1.41z"/></svg>
-          </button>
-</form>        <!-- '"` --><!-- </textarea></xmp> --></option></form><form accept-charset="UTF-8" action="/katierose1029/matplotlib/delete/figure-traitlets-dev/lib/matplotlib/_traits/figure.py" class="inline-form" method="post"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /><input name="authenticity_token" type="hidden" value="Glsof31hw3hHbAo8axxKcE/UZZyaxndHKQ77k7yipJhzlXy47ttobBMDTvm0QBy8gBNwVJqCaHNsXKEHXlbEhQ==" /></div>
-          <button class="btn-octicon btn-octicon-danger tooltipped tooltipped-nw" type="submit"
-            aria-label="Delete the file in your fork of this project" data-disable-with>
-            <svg aria-hidden="true" class="octicon octicon-trashcan" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M11 2H9c0-.55-.45-1-1-1H5c-.55 0-1 .45-1 1H2c-.55 0-1 .45-1 1v1c0 .55.45 1 1 1v9c0 .55.45 1 1 1h7c.55 0 1-.45 1-1V5c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1zm-1 12H3V5h1v8h1V5h1v8h1V5h1v8h1V5h1v9zm1-10H2V3h9v1z"/></svg>
-          </button>
-</form>  </div>
-
-  <div class="file-info">
-      62 lines (43 sloc)
-      <span class="file-info-divider"></span>
-    1.87 KB
-  </div>
-</div>
-
-    
-
-  <div itemprop="text" class="blob-wrapper data type-python">
-      <table class="highlight tab-size js-file-line-container" data-tab-size="8">
-      <tr>
-        <td id="L1" class="blob-num js-line-number" data-line-number="1"></td>
-        <td id="LC1" class="blob-code blob-code-inner js-file-line"><span class="pl-s"><span class="pl-pds">&quot;&quot;&quot;</span></span></td>
-      </tr>
-      <tr>
-        <td id="L2" class="blob-num js-line-number" data-line-number="2"></td>
-        <td id="LC2" class="blob-code blob-code-inner js-file-line"><span class="pl-s">matplotlib._traits.figure.Figure</span></td>
-      </tr>
-      <tr>
-        <td id="L3" class="blob-num js-line-number" data-line-number="3"></td>
-        <td id="LC3" class="blob-code blob-code-inner js-file-line"><span class="pl-s"></span></td>
-      </tr>
-      <tr>
-        <td id="L4" class="blob-num js-line-number" data-line-number="4"></td>
-        <td id="LC4" class="blob-code blob-code-inner js-file-line"><span class="pl-s">Note: from base Figure class</span></td>
-      </tr>
-      <tr>
-        <td id="L5" class="blob-num js-line-number" data-line-number="5"></td>
-        <td id="LC5" class="blob-code blob-code-inner js-file-line"><span class="pl-s">The figure module provides the top-level</span></td>
-      </tr>
-      <tr>
-        <td id="L6" class="blob-num js-line-number" data-line-number="6"></td>
-        <td id="LC6" class="blob-code blob-code-inner js-file-line"><span class="pl-s">:class:`~matplotlib.artist.Artist`, the :class:`Figure`, which</span></td>
-      </tr>
-      <tr>
-        <td id="L7" class="blob-num js-line-number" data-line-number="7"></td>
-        <td id="LC7" class="blob-code blob-code-inner js-file-line"><span class="pl-s">contains all the plot elements.  The following classes are defined</span></td>
-      </tr>
-      <tr>
-        <td id="L8" class="blob-num js-line-number" data-line-number="8"></td>
-        <td id="LC8" class="blob-code blob-code-inner js-file-line"><span class="pl-s"></span></td>
-      </tr>
-      <tr>
-        <td id="L9" class="blob-num js-line-number" data-line-number="9"></td>
-        <td id="LC9" class="blob-code blob-code-inner js-file-line"><span class="pl-s">:class:`SubplotParams`</span></td>
-      </tr>
-      <tr>
-        <td id="L10" class="blob-num js-line-number" data-line-number="10"></td>
-        <td id="LC10" class="blob-code blob-code-inner js-file-line"><span class="pl-s">    control the default spacing of the subplots</span></td>
-      </tr>
-      <tr>
-        <td id="L11" class="blob-num js-line-number" data-line-number="11"></td>
-        <td id="LC11" class="blob-code blob-code-inner js-file-line"><span class="pl-s"></span></td>
-      </tr>
-      <tr>
-        <td id="L12" class="blob-num js-line-number" data-line-number="12"></td>
-        <td id="LC12" class="blob-code blob-code-inner js-file-line"><span class="pl-s">:class:`Figure`</span></td>
-      </tr>
-      <tr>
-        <td id="L13" class="blob-num js-line-number" data-line-number="13"></td>
-        <td id="LC13" class="blob-code blob-code-inner js-file-line"><span class="pl-s">    top level container for all plot elements</span></td>
-      </tr>
-      <tr>
-        <td id="L14" class="blob-num js-line-number" data-line-number="14"></td>
-        <td id="LC14" class="blob-code blob-code-inner js-file-line"><span class="pl-s"><span class="pl-pds">&quot;&quot;&quot;</span></span></td>
-      </tr>
-      <tr>
-        <td id="L15" class="blob-num js-line-number" data-line-number="15"></td>
-        <td id="LC15" class="blob-code blob-code-inner js-file-line">
-</td>
-      </tr>
-      <tr>
-        <td id="L16" class="blob-num js-line-number" data-line-number="16"></td>
-        <td id="LC16" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> <span class="pl-c1">__future__</span> <span class="pl-k">import</span> (absolute_import, division, print_function,</td>
-      </tr>
-      <tr>
-        <td id="L17" class="blob-num js-line-number" data-line-number="17"></td>
-        <td id="LC17" class="blob-code blob-code-inner js-file-line">                        unicode_literals)</td>
-      </tr>
-      <tr>
-        <td id="L18" class="blob-num js-line-number" data-line-number="18"></td>
-        <td id="LC18" class="blob-code blob-code-inner js-file-line">
-</td>
-      </tr>
-      <tr>
-        <td id="L19" class="blob-num js-line-number" data-line-number="19"></td>
-        <td id="LC19" class="blob-code blob-code-inner js-file-line"><span class="pl-k">import</span> six</td>
-      </tr>
-      <tr>
-        <td id="L20" class="blob-num js-line-number" data-line-number="20"></td>
-        <td id="LC20" class="blob-code blob-code-inner js-file-line">
-</td>
-      </tr>
-      <tr>
-        <td id="L21" class="blob-num js-line-number" data-line-number="21"></td>
-        <td id="LC21" class="blob-code blob-code-inner js-file-line"><span class="pl-k">import</span> warnings</td>
-      </tr>
-      <tr>
-        <td id="L22" class="blob-num js-line-number" data-line-number="22"></td>
-        <td id="LC22" class="blob-code blob-code-inner js-file-line">
-</td>
-      </tr>
-      <tr>
-        <td id="L23" class="blob-num js-line-number" data-line-number="23"></td>
-        <td id="LC23" class="blob-code blob-code-inner js-file-line"><span class="pl-k">import</span> numpy <span class="pl-k">as</span> np</td>
-      </tr>
-      <tr>
-        <td id="L24" class="blob-num js-line-number" data-line-number="24"></td>
-        <td id="LC24" class="blob-code blob-code-inner js-file-line">
-</td>
-      </tr>
-      <tr>
-        <td id="L25" class="blob-num js-line-number" data-line-number="25"></td>
-        <td id="LC25" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib <span class="pl-k">import</span> rcParams</td>
-      </tr>
-      <tr>
-        <td id="L26" class="blob-num js-line-number" data-line-number="26"></td>
-        <td id="LC26" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib <span class="pl-k">import</span> docstring</td>
-      </tr>
-      <tr>
-        <td id="L27" class="blob-num js-line-number" data-line-number="27"></td>
-        <td id="LC27" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib <span class="pl-k">import</span> <span class="pl-c1">__version__</span> <span class="pl-k">as</span> _mpl_version</td>
-      </tr>
-      <tr>
-        <td id="L28" class="blob-num js-line-number" data-line-number="28"></td>
-        <td id="LC28" class="blob-code blob-code-inner js-file-line">
-</td>
-      </tr>
-      <tr>
-        <td id="L29" class="blob-num js-line-number" data-line-number="29"></td>
-        <td id="LC29" class="blob-code blob-code-inner js-file-line"><span class="pl-k">import</span> matplotlib.artist <span class="pl-k">as</span> martist</td>
-      </tr>
-      <tr>
-        <td id="L30" class="blob-num js-line-number" data-line-number="30"></td>
-        <td id="LC30" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib.artist <span class="pl-k">import</span> Artist, allow_rasterization</td>
-      </tr>
-      <tr>
-        <td id="L31" class="blob-num js-line-number" data-line-number="31"></td>
-        <td id="LC31" class="blob-code blob-code-inner js-file-line"><span class="pl-c"><span class="pl-c">#</span> import matplotlib._traits.artist as martist</span></td>
-      </tr>
-      <tr>
-        <td id="L32" class="blob-num js-line-number" data-line-number="32"></td>
-        <td id="LC32" class="blob-code blob-code-inner js-file-line"><span class="pl-c"><span class="pl-c">#</span> from matplotlib._traits.artist import Artist, allow_rasterization</span></td>
-      </tr>
-      <tr>
-        <td id="L33" class="blob-num js-line-number" data-line-number="33"></td>
-        <td id="LC33" class="blob-code blob-code-inner js-file-line">
-</td>
-      </tr>
-      <tr>
-        <td id="L34" class="blob-num js-line-number" data-line-number="34"></td>
-        <td id="LC34" class="blob-code blob-code-inner js-file-line"><span class="pl-k">import</span> matplotlib.cbook <span class="pl-k">as</span> cbook</td>
-      </tr>
-      <tr>
-        <td id="L35" class="blob-num js-line-number" data-line-number="35"></td>
-        <td id="LC35" class="blob-code blob-code-inner js-file-line">
-</td>
-      </tr>
-      <tr>
-        <td id="L36" class="blob-num js-line-number" data-line-number="36"></td>
-        <td id="LC36" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib.cbook <span class="pl-k">import</span> Stack, iterable</td>
-      </tr>
-      <tr>
-        <td id="L37" class="blob-num js-line-number" data-line-number="37"></td>
-        <td id="LC37" class="blob-code blob-code-inner js-file-line">
-</td>
-      </tr>
-      <tr>
-        <td id="L38" class="blob-num js-line-number" data-line-number="38"></td>
-        <td id="LC38" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib <span class="pl-k">import</span> image <span class="pl-k">as</span> mimage</td>
-      </tr>
-      <tr>
-        <td id="L39" class="blob-num js-line-number" data-line-number="39"></td>
-        <td id="LC39" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib.image <span class="pl-k">import</span> FigureImage</td>
-      </tr>
-      <tr>
-        <td id="L40" class="blob-num js-line-number" data-line-number="40"></td>
-        <td id="LC40" class="blob-code blob-code-inner js-file-line">
-</td>
-      </tr>
-      <tr>
-        <td id="L41" class="blob-num js-line-number" data-line-number="41"></td>
-        <td id="LC41" class="blob-code blob-code-inner js-file-line"><span class="pl-k">import</span> matplotlib.colorbar <span class="pl-k">as</span> cbar</td>
-      </tr>
-      <tr>
-        <td id="L42" class="blob-num js-line-number" data-line-number="42"></td>
-        <td id="LC42" class="blob-code blob-code-inner js-file-line">
-</td>
-      </tr>
-      <tr>
-        <td id="L43" class="blob-num js-line-number" data-line-number="43"></td>
-        <td id="LC43" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib.axes <span class="pl-k">import</span> Axes, SubplotBase, subplot_class_factory</td>
-      </tr>
-      <tr>
-        <td id="L44" class="blob-num js-line-number" data-line-number="44"></td>
-        <td id="LC44" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib.blocking_input <span class="pl-k">import</span> BlockingMouseInput, BlockingKeyMouseInput</td>
-      </tr>
-      <tr>
-        <td id="L45" class="blob-num js-line-number" data-line-number="45"></td>
-        <td id="LC45" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib.gridspec <span class="pl-k">import</span> GridSpec</td>
-      </tr>
-      <tr>
-        <td id="L46" class="blob-num js-line-number" data-line-number="46"></td>
-        <td id="LC46" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib.legend <span class="pl-k">import</span> Legend</td>
-      </tr>
-      <tr>
-        <td id="L47" class="blob-num js-line-number" data-line-number="47"></td>
-        <td id="LC47" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib.patches <span class="pl-k">import</span> Rectangle</td>
-      </tr>
-      <tr>
-        <td id="L48" class="blob-num js-line-number" data-line-number="48"></td>
-        <td id="LC48" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib.projections <span class="pl-k">import</span> (get_projection_names,</td>
-      </tr>
-      <tr>
-        <td id="L49" class="blob-num js-line-number" data-line-number="49"></td>
-        <td id="LC49" class="blob-code blob-code-inner js-file-line">                                    process_projection_requirements)</td>
-      </tr>
-      <tr>
-        <td id="L50" class="blob-num js-line-number" data-line-number="50"></td>
-        <td id="LC50" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib.text <span class="pl-k">import</span> Text, _process_text_args</td>
-      </tr>
-      <tr>
-        <td id="L51" class="blob-num js-line-number" data-line-number="51"></td>
-        <td id="LC51" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib.transforms <span class="pl-k">import</span> (Affine2D, Bbox, BboxTransformTo,</td>
-      </tr>
-      <tr>
-        <td id="L52" class="blob-num js-line-number" data-line-number="52"></td>
-        <td id="LC52" class="blob-code blob-code-inner js-file-line">                                   TransformedBbox)</td>
-      </tr>
-      <tr>
-        <td id="L53" class="blob-num js-line-number" data-line-number="53"></td>
-        <td id="LC53" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> matplotlib.backend_bases <span class="pl-k">import</span> NonGuiException</td>
-      </tr>
-      <tr>
-        <td id="L54" class="blob-num js-line-number" data-line-number="54"></td>
-        <td id="LC54" class="blob-code blob-code-inner js-file-line">
-</td>
-      </tr>
-      <tr>
-        <td id="L55" class="blob-num js-line-number" data-line-number="55"></td>
-        <td id="LC55" class="blob-code blob-code-inner js-file-line">docstring.interpd.update(<span class="pl-v">projection_names</span><span class="pl-k">=</span>get_projection_names())</td>
-      </tr>
-      <tr>
-        <td id="L56" class="blob-num js-line-number" data-line-number="56"></td>
-        <td id="LC56" class="blob-code blob-code-inner js-file-line">
-</td>
-      </tr>
-      <tr>
-        <td id="L57" class="blob-num js-line-number" data-line-number="57"></td>
-        <td id="LC57" class="blob-code blob-code-inner js-file-line">
-</td>
-      </tr>
-      <tr>
-        <td id="L58" class="blob-num js-line-number" data-line-number="58"></td>
-        <td id="LC58" class="blob-code blob-code-inner js-file-line"><span class="pl-k">from</span> traitlets <span class="pl-k">import</span> HasTraits, Any, Instance, Unicode, Float, Bool, Int, validate, observe, default</td>
-      </tr>
-      <tr>
-        <td id="L59" class="blob-num js-line-number" data-line-number="59"></td>
-        <td id="LC59" class="blob-code blob-code-inner js-file-line">
-</td>
-      </tr>
-      <tr>
-        <td id="L60" class="blob-num js-line-number" data-line-number="60"></td>
-        <td id="LC60" class="blob-code blob-code-inner js-file-line"><span class="pl-c"><span class="pl-c">#</span> for monkey patching</span></td>
-      </tr>
-      <tr>
-        <td id="L61" class="blob-num js-line-number" data-line-number="61"></td>
-        <td id="LC61" class="blob-code blob-code-inner js-file-line"><span class="pl-k">import</span> matplotlib.figure <span class="pl-k">as</span> b_figure</td>
-      </tr>
-</table>
-
-  <div class="BlobToolbar position-absolute js-file-line-actions dropdown js-menu-container js-select-menu d-none" aria-hidden="true">
-    <button class="btn-octicon ml-0 px-2 p-0 bg-white border border-gray-dark rounded-1 dropdown-toggle js-menu-target" id="js-file-line-action-button" type="button" aria-expanded="false" aria-haspopup="true" aria-label="Inline file action toolbar" aria-controls="inline-file-actions">
-      <svg aria-hidden="true" class="octicon" height="16" version="1.1" viewBox="0 0 13 4" width="14">
-        <g stroke="none" stroke-width="1" fill-rule="evenodd">
-            <g transform="translate(-1.000000, -6.000000)">
-                <path d="M2.5,9.5 C1.67157288,9.5 1,8.82842712 1,8 C1,7.17157288 1.67157288,6.5 2.5,6.5 C3.32842712,6.5 4,7.17157288 4,8 C4,8.82842712 3.32842712,9.5 2.5,9.5 Z M7.5,9.5 C6.67157288,9.5 6,8.82842712 6,8 C6,7.17157288 6.67157288,6.5 7.5,6.5 C8.32842712,6.5 9,7.17157288 9,8 C9,8.82842712 8.32842712,9.5 7.5,9.5 Z M12.5,9.5 C11.6715729,9.5 11,8.82842712 11,8 C11,7.17157288 11.6715729,6.5 12.5,6.5 C13.3284271,6.5 14,7.17157288 14,8 C14,8.82842712 13.3284271,9.5 12.5,9.5 Z"></path>
-            </g>
-        </g>
-      </svg>
-    </button>
-    <div class="dropdown-menu-content js-menu-content" id="inline-file-actions">
-      <ul class="BlobToolbar-dropdown dropdown-menu dropdown-menu-se mt-2">
-        <li><a class="js-zeroclipboard dropdown-item" style="cursor:pointer;" id="js-copy-lines" data-original-text="Copy lines">Copy lines</a></li>
-        <li><a class="js-zeroclipboard dropdown-item" id= "js-copy-permalink" style="cursor:pointer;" data-original-text="Copy permalink">Copy permalink</a></li>
-        <li><a href="/katierose1029/matplotlib/blame/cb288059b1fd6237591a630a84a841c7b6bdecd0/lib/matplotlib/_traits/figure.py" class="dropdown-item js-update-url-with-hash" id="js-view-git-blame">View git blame</a></li>
-      </ul>
-    </div>
-  </div>
-
-  </div>
-
-  </div>
-
-  <button type="button" data-facebox="#jump-to-line" data-facebox-class="linejump" data-hotkey="l" class="d-none">Jump to Line</button>
-  <div id="jump-to-line" style="display:none">
-    <!-- '"` --><!-- </textarea></xmp> --></option></form><form accept-charset="UTF-8" action="" class="js-jump-to-line-form" method="get"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /></div>
-      <input class="form-control linejump-input js-jump-to-line-field" type="text" placeholder="Jump to line&hellip;" aria-label="Jump to line" autofocus>
-      <button type="submit" class="btn">Go</button>
-</form>  </div>
-
-  </div>
-  <div class="modal-backdrop js-touch-events"></div>
-</div>
-
-    </div>
-  </div>
-
-  </div>
-
-      
-<div class="footer container-lg px-3" role="contentinfo">
-  <div class="position-relative d-flex flex-justify-between py-6 mt-6 f6 text-gray border-top border-gray-light ">
-    <ul class="list-style-none d-flex flex-wrap ">
-      <li class="mr-3">&copy; 2017 <span title="0.20418s from unicorn-4100006713-gb1lp">GitHub</span>, Inc.</li>
-        <li class="mr-3"><a href="https://github.com/site/terms" data-ga-click="Footer, go to terms, text:terms">Terms</a></li>
-        <li class="mr-3"><a href="https://github.com/site/privacy" data-ga-click="Footer, go to privacy, text:privacy">Privacy</a></li>
-        <li class="mr-3"><a href="https://github.com/security" data-ga-click="Footer, go to security, text:security">Security</a></li>
-        <li class="mr-3"><a href="https://status.github.com/" data-ga-click="Footer, go to status, text:status">Status</a></li>
-        <li><a href="https://help.github.com" data-ga-click="Footer, go to help, text:help">Help</a></li>
-    </ul>
-
-    <a href="https://github.com" aria-label="Homepage" class="footer-octicon" title="GitHub">
-      <svg aria-hidden="true" class="octicon octicon-mark-github" height="24" version="1.1" viewBox="0 0 16 16" width="24"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-</a>
-    <ul class="list-style-none d-flex flex-wrap ">
-        <li class="mr-3"><a href="https://github.com/contact" data-ga-click="Footer, go to contact, text:contact">Contact GitHub</a></li>
-      <li class="mr-3"><a href="https://developer.github.com" data-ga-click="Footer, go to api, text:api">API</a></li>
-      <li class="mr-3"><a href="https://training.github.com" data-ga-click="Footer, go to training, text:training">Training</a></li>
-      <li class="mr-3"><a href="https://shop.github.com" data-ga-click="Footer, go to shop, text:shop">Shop</a></li>
-        <li class="mr-3"><a href="https://github.com/blog" data-ga-click="Footer, go to blog, text:blog">Blog</a></li>
-        <li><a href="https://github.com/about" data-ga-click="Footer, go to about, text:about">About</a></li>
-
-    </ul>
-  </div>
-</div>
-
-
-
-  <div id="ajax-error-message" class="ajax-error-message flash flash-error">
-    <svg aria-hidden="true" class="octicon octicon-alert" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M8.865 1.52c-.18-.31-.51-.5-.87-.5s-.69.19-.87.5L.275 13.5c-.18.31-.18.69 0 1 .19.31.52.5.87.5h13.7c.36 0 .69-.19.86-.5.17-.31.18-.69.01-1L8.865 1.52zM8.995 13h-2v-2h2v2zm0-3h-2V6h2v4z"/></svg>
-    <button type="button" class="flash-close js-flash-close js-ajax-error-dismiss" aria-label="Dismiss error">
-      <svg aria-hidden="true" class="octicon octicon-x" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48z"/></svg>
-    </button>
-    You can't perform that action at this time.
-  </div>
-
-
-    
-    <script crossorigin="anonymous" integrity="sha256-2wbV5cxQi1mj1tFsIrtSMAXKn8DFE8uwObMqJSBLa+c=" src="https://assets-cdn.github.com/assets/frameworks-db06d5e5cc508b59a3d6d16c22bb523005ca9fc0c513cbb039b32a25204b6be7.js"></script>
-    
-    <script async="async" crossorigin="anonymous" integrity="sha256-kNcGC7xY4G1zWrNt2ncsn+DT1sjOb3kAP/FKTUppbVs=" src="https://assets-cdn.github.com/assets/github-90d7060bbc58e06d735ab36dda772c9fe0d3d6c8ce6f79003ff14a4d4a696d5b.js"></script>
-    
-    
-    
-    
-  <div class="js-stale-session-flash stale-session-flash flash flash-warn flash-banner d-none">
-    <svg aria-hidden="true" class="octicon octicon-alert" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M8.865 1.52c-.18-.31-.51-.5-.87-.5s-.69.19-.87.5L.275 13.5c-.18.31-.18.69 0 1 .19.31.52.5.87.5h13.7c.36 0 .69-.19.86-.5.17-.31.18-.69.01-1L8.865 1.52zM8.995 13h-2v-2h2v2zm0-3h-2V6h2v4z"/></svg>
-    <span class="signed-in-tab-flash">You signed in with another tab or window. <a href="">Reload</a> to refresh your session.</span>
-    <span class="signed-out-tab-flash">You signed out in another tab or window. <a href="">Reload</a> to refresh your session.</span>
-  </div>
-  <div class="facebox" id="facebox" style="display:none;">
-  <div class="facebox-popup">
-    <div class="facebox-content" role="dialog" aria-labelledby="facebox-header" aria-describedby="facebox-description">
-    </div>
-    <button type="button" class="facebox-close js-facebox-close" aria-label="Close modal">
-      <svg aria-hidden="true" class="octicon octicon-x" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48z"/></svg>
-    </button>
-  </div>
-</div>
-
-
-  </body>
-</html>
-
+"""
+matplotlib.lines.Line2D refactored in traitlets
+"""
+
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
+import six
+import warnings
+import numpy as np
+
+from matplotlib import artist, colors as mcolors, docstring, rcParams
+from .artist import Artist, allow_rasterization
+import matplotlib.artist as b_artist
+
+from matplotlib._traits.artist import Artist, allow_rasterization
+from matplotlib.cbook import (
+    iterable, is_numlike, ls_mapper, ls_mapper_r, STEP_LOOKUP_MAP)
+from matplotlib.markers import MarkerStyle
+from matplotlib.path import Path
+from matplotlib.transforms import Bbox, TransformedPath, IdentityTransform
+# Imported here for backward compatibility, even though they don't
+# really belong.
+from numpy import ma
+from matplotlib import _path
+from matplotlib.markers import (
+    CARETLEFT, CARETRIGHT, CARETUP, CARETDOWN,
+    CARETLEFTBASE, CARETRIGHTBASE, CARETUPBASE, CARETDOWNBASE,
+    TICKLEFT, TICKRIGHT, TICKUP, TICKDOWN)
+
+from traitlets import HasTraits, Any, Instance, Unicode, Float, Bool, Int, validate, observe, default
+
+#for monkey patching into base lines
+import matplotlib.lines as b_Line2D
+
+
+
+
+def _get_dash_pattern(style):
+    """Convert linestyle -> dash pattern
+    """
+    # go from short hand -> full strings
+    if isinstance(style, six.string_types):
+        style = ls_mapper.get(style, style)
+    # un-dashed styles
+    if style in ['solid', 'None']:
+        offset, dashes = None, None
+    # dashed styles
+    elif style in ['dashed', 'dashdot', 'dotted']:
+        offset = 0
+        dashes = tuple(rcParams['lines.{}_pattern'.format(style)])
+    #
+    elif isinstance(style, tuple):
+        offset, dashes = style
+    else:
+        raise ValueError('Unrecognized linestyle: %s' % str(style))
+
+    # normalize offset to be positive and shorter than the dash cycle
+    if dashes is not None and offset is not None:
+        dsum = sum(dashes)
+        if dsum:
+            offset %= dsum
+
+    return offset, dashes
+
+def _scale_dashes(offset, dashes, lw):
+    if not rcParams['lines.scale_dashes']:
+        return offset, dashes
+
+    scaled_offset = scaled_dashes = None
+    if offset is not None:
+        scaled_offset = offset * lw
+    if dashes is not None:
+        scaled_dashes = [x * lw if x is not None else None
+                         for x in dashes]
+
+    return scaled_offset, scaled_dashes
+
+def segment_hits(cx, cy, x, y, radius):
+    """
+    Determine if any line segments are within radius of a
+    point. Returns the list of line segments that are within that
+    radius.
+    """
+    # Process single points specially
+    if len(x) < 2:
+        res, = np.nonzero((cx - x) ** 2 + (cy - y) ** 2 <= radius ** 2)
+        return res
+
+    # We need to lop the last element off a lot.
+    xr, yr = x[:-1], y[:-1]
+
+    # Only look at line segments whose nearest point to C on the line
+    # lies within the segment.
+    dx, dy = x[1:] - xr, y[1:] - yr
+    Lnorm_sq = dx ** 2 + dy ** 2  # Possibly want to eliminate Lnorm==0
+    u = ((cx - xr) * dx + (cy - yr) * dy) / Lnorm_sq
+    candidates = (u >= 0) & (u <= 1)
+    #if any(candidates): print "candidates",xr[candidates]
+
+    # Note that there is a little area near one side of each point
+    # which will be near neither segment, and another which will
+    # be near both, depending on the angle of the lines.  The
+    # following radius test eliminates these ambiguities.
+    point_hits = (cx - x) ** 2 + (cy - y) ** 2 <= radius ** 2
+    #if any(point_hits): print "points",xr[candidates]
+    candidates = candidates & ~(point_hits[:-1] | point_hits[1:])
+
+    # For those candidates which remain, determine how far they lie away
+    # from the line.
+    px, py = xr + u * dx, yr + u * dy
+    line_hits = (cx - px) ** 2 + (cy - py) ** 2 <= radius ** 2
+    #if any(line_hits): print "lines",xr[candidates]
+    line_hits = line_hits & candidates
+    points, = point_hits.ravel().nonzero()
+    lines, = line_hits.ravel().nonzero()
+    #print points,lines
+    return np.concatenate((points, lines))
+
+def _mark_every_path(markevery, tpath, affine, ax_transform):
+    """
+    Helper function that sorts out how to deal the input
+    `markevery` and returns the points where markers should be drawn.
+
+    Takes in the `markevery` value and the line path and returns the
+    sub-sampled path.
+    """
+    # pull out the two bits of data we want from the path
+    codes, verts = tpath.codes, tpath.vertices
+
+    def _slice_or_none(in_v, slc):
+        '''
+        Helper function to cope with `codes` being an
+        ndarray or `None`
+        '''
+        if in_v is None:
+            return None
+        return in_v[slc]
+
+    # if just a float, assume starting at 0.0 and make a tuple
+    if isinstance(markevery, float):
+        markevery = (0.0, markevery)
+    # if just an int, assume starting at 0 and make a tuple
+    elif isinstance(markevery, int):
+        markevery = (0, markevery)
+    # if just an numpy int, assume starting at 0 and make a tuple
+    elif isinstance(markevery, np.integer):
+        markevery = (0, markevery.item())
+
+    if isinstance(markevery, tuple):
+        if len(markevery) != 2:
+            raise ValueError('`markevery` is a tuple but its '
+                'len is not 2; '
+                'markevery=%s' % (markevery,))
+        start, step = markevery
+        # if step is an int, old behavior
+        if isinstance(step, int):
+            #tuple of 2 int is for backwards compatibility,
+            if not(isinstance(start, int)):
+                raise ValueError('`markevery` is a tuple with '
+                    'len 2 and second element is an int, but '
+                    'the first element is not an int; '
+                    'markevery=%s' % (markevery,))
+            # just return, we are done here
+
+            return Path(verts[slice(start, None, step)],
+                        _slice_or_none(codes, slice(start, None, step)))
+
+        elif isinstance(step, float):
+            if not (isinstance(start, int) or
+                    isinstance(start, float)):
+                raise ValueError('`markevery` is a tuple with '
+                    'len 2 and second element is a float, but '
+                    'the first element is not a float or an '
+                    'int; '
+                    'markevery=%s' % (markevery,))
+            #calc cumulative distance along path (in display
+            # coords):
+            disp_coords = affine.transform(tpath.vertices)
+            delta = np.empty((len(disp_coords), 2),
+                             dtype=float)
+            delta[0, :] = 0.0
+            delta[1:, :] = (disp_coords[1:, :] -
+                                disp_coords[:-1, :])
+            delta = np.sum(delta**2, axis=1)
+            delta = np.sqrt(delta)
+            delta = np.cumsum(delta)
+            #calc distance between markers along path based on
+            # the axes bounding box diagonal being a distance
+            # of unity:
+            scale = ax_transform.transform(
+                np.array([[0, 0], [1, 1]]))
+            scale = np.diff(scale, axis=0)
+            scale = np.sum(scale**2)
+            scale = np.sqrt(scale)
+            marker_delta = np.arange(start * scale,
+                                     delta[-1],
+                                     step * scale)
+            #find closest actual data point that is closest to
+            # the theoretical distance along the path:
+            inds = np.abs(delta[np.newaxis, :] -
+                            marker_delta[:, np.newaxis])
+            inds = inds.argmin(axis=1)
+            inds = np.unique(inds)
+            # return, we are done here
+            return Path(verts[inds],
+                        _slice_or_none(codes, inds))
+        else:
+            raise ValueError('`markevery` is a tuple with '
+                'len 2, but its second element is not an int '
+                'or a float; '
+                'markevery=%s' % (markevery,))
+
+    elif isinstance(markevery, slice):
+        # mazol tov, it's already a slice, just return
+        return Path(verts[markevery],
+                    _slice_or_none(codes, markevery))
+
+    elif iterable(markevery):
+        #fancy indexing
+        try:
+            return Path(verts[markevery],
+                    _slice_or_none(codes, markevery))
+
+        except (ValueError, IndexError):
+            raise ValueError('`markevery` is iterable but '
+                'not a valid form of numpy fancy indexing; '
+                'markevery=%s' % (markevery,))
+    else:
+        raise ValueError('Value of `markevery` is not '
+            'recognized; '
+            'markevery=%s' % (markevery,))
+
+class Line2D(b_artist.Artist, HasTraits):
+    """
+    A line - the line can have both a solid linestyle connecting all
+    the vertices, and a marker at each vertex.  Additionally, the
+    drawing of the solid line is influenced by the drawstyle, e.g., one
+    can create "stepped" lines in various styles.
+    """
+
+    #lineStyles
+    lineStyles = _lineStyles = {  # hidden names deprecated
+        '-':    '_draw_solid',
+        '--':   '_draw_dashed',
+        '-.':   '_draw_dash_dot',
+        ':':    '_draw_dotted',
+        'None': '_draw_nothing',
+        ' ':    '_draw_nothing',
+        '':     '_draw_nothing',
+    }
+
+    #drawStyles_l
+    _drawStyles_l = {
+        'default':    '_draw_lines',
+        'steps-mid':  '_draw_steps_mid',
+        'steps-pre':  '_draw_steps_pre',
+        'steps-post': '_draw_steps_post',
+    }
+
+    #drawStyles_s
+    _drawStyles_s = {
+        'steps': '_draw_steps_pre',
+    }
+
+    # drawStyles should now be deprecated.
+    drawStyles = {}
+    drawStyles.update(_drawStyles_l)
+    drawStyles.update(_drawStyles_s)
+    # Need a list ordered with long names first:
+    drawStyleKeys = list(_drawStyles_l) + list(_drawStyles_s)
+
+    # Referenced here to maintain API.  These are defined in
+    # MarkerStyle
+    markers = MarkerStyle.markers
+    filled_markers = MarkerStyle.filled_markers
+    fillStyles = MarkerStyle.fillstyles
+
+    zorder = 2
+    validCap = ('butt', 'round', 'projecting')
+    validJoin = ('miter', 'round', 'bevel')
+
+    def __init__(self, xdata, ydata,
+                 linewidth=None,  # all Nones default to rc
+                 linestyle=None,
+                 color=None,
+                 marker=None,
+                 markersize=None,
+                 markeredgewidth=None,
+                 markeredgecolor=None,
+                 markerfacecolor=None,
+                 markerfacecoloralt='none',
+                 fillstyle=None,
+                 antialiased=None,
+                 dash_capstyle=None,
+                 solid_capstyle=None,
+                 dash_joinstyle=None,
+                 solid_joinstyle=None,
+                 pickradius=5,
+                 drawstyle=None,
+                 markevery=None,
+                 **kwargs
+                 ):
+
+        Artist.__init__(self)
+        print("Artist", Artist)
+
+        if not iterable(xdata):
+            raise RuntimeError('xdata must be a sequence')
+        if not iterable(ydata):
+            raise RuntimeError('ydata must be a sequence')
+
+    # xdata=Instance('numpy.array', allow_none=True,default_value=None) #not sure about this line
+    # xdata=Instance('numpy.array', allow_none=True) #not sure about this line
+
+
+    # ydata=Instance('numpy.array', allow_none=True,default_value=None) #not sure about this line
+    # ydata=Instance('numpy.array', allow_none=True) #not sure about this line
+
+
+    xorig = np.asarray([])
+    # xorig = Instance('numpy.asarray', allow_none=True,default_value=[]) #not sure on this line ay have to declare default value in default decorator
+
+    yorig = np.asarray([])
+    # yorig = Instance('numpy.asarray', allow_none=True,default_value=[]) #not sure on this line ay have to declare default value in default decorator
+
+    # for x, y, & xy I am not sure if these following lines of code are correct, I may just leave them alone come testing time
+    x = None
+    # x=Instance('numpy.asarray', allow_none=True,default_value=None) # not sure on this line
+
+    y = None
+    # y=Instance('numpy.asarray', allow_none=True,default_value=None) # not sure on this line
+
+    xy = None
+
+    linewidth=Float(allow_none=True, default_value=None)
+
+    linestyle=Instance('matplotlib.text.Text', allow_none=True, default_value=None)
+
+    # TODO: not sure if this is correct?
+    color=Unicode(allow_none=True, default_value=None)
+    #color=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+
+    marker=Instance('matplotlib.markers',allow_none=True, default_value=None)
+
+    markersize=Float(allow_none=True,default_value=True)
+
+    markeredgewidth=Float(allow_none=True,default_value=None)
+
+    # TODO: not sure if this is correct?
+    markerfacecolor=Unicode(allow_none=True, default_value=None)
+    #markerfacecolor=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+
+    # same applies for the alternative face color
+    markerfacecoloralt=Unicode(allow_none=True, default_value=None)
+    #markerfacecoloralt=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+
+    # this gets passed into marker so I want to assume same for color however only accepts the following strings: ['full' | 'left' | 'right' | 'bottom' | 'top' | 'none']
+    fillstyle=Unicode(allow_none=True, default_value=None)
+    # fillstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+
+    antialiased=Bool(default_value=False)
+
+    # accepts: ['butt' | 'round' | 'projecting']
+    dash_capstyle=Unicode(allow_none=True, default_value=None)
+    # dash_capstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+
+    # accepts: ['butt' | 'round' | 'projecting']
+    solid_capstyle=Unicode(allow_none=True, default_value=None)
+    # solid_capstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+
+    # accepts: ['miter' | 'round' | 'bevel']
+    dash_joinstyle=Unicode(allow_none=True, default_value=None)
+    # dash_joinstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+
+    # accepts: ['miter' | 'round' | 'bevel']
+    solid_joinstyle=Unicode(allow_none=True, default_value=None)
+    # solid_joinstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+
+    pickradius=Int(allow_none=True, default_value=5)
+
+    # accepts: ['default' | 'steps' | 'steps-pre' | 'steps-mid' | 'steps-post']
+    # drawstyle=Unicode(allow_none=True, default_value=None)
+    # drawstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+    drawstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+
+    # for this one I want to attempt at using the ANY trait
+    markevery=Any(allow_none=True, default_value=None)
+
+    #only found once in the original lines code so not sure what to do with this
+    verticalOffset = None
+
+    ind_offset = Int(allow_none=True,default_value=0)
+
+    # invalidx = True
+    invalidx=Bool(default_value=True)
+    # invalidy = True
+    invalidy=Bool(default_value=True)
+
+    #TODO: create a PathTrait in traits.py but I am not sure if this how to
+    #really go about it because there is no setting the Path in this class,
+    #this class just gets the Path
+    path = None
+    # path=Instance('matplotlib.path.Path', allow_none=True, default_value=None)
+    # path=Instance('matplotlib.path.Path', allow_none=True)
+
+
+    transformed_path=Instance('matplotlib.transforms.TransformedPath', allow_none=True, default_value=None)
+
+    subslice=Bool(default_value=False)
+
+    # used in subslicing; only x is needed
+    x_filled=Instance('numpy.array', allow_none=True, default_value=None)
+
+    dashSeq = None
+    # dashSeq = Instance('') #TODO: figure this out
+    dashOffset=Int(allow_none=True, default_value=None)
+
+    # unscaled dash + offset
+    # this is needed scaling the dash pattern by linewidth
+    us_dashSeq = None #TODO: figure this out
+    us_dashOffset=Int(allow_none=True, default_value=None)
+
+    # set_data(xdata, ydata) #TODO: determine if this is needed
+
+    # not sure how much this will have to be refactored
+    def __str__(self):
+        if self._label != "":
+            return "Line2D(%s)" % (self._label)
+        elif self.x is None:
+            return "Line2D()"
+        elif len(self.x) > 3:
+            return "Line2D((%g,%g),(%g,%g),...,(%g,%g))"\
+                % (self.x[0], self.y[0], self.x[0],
+                   self.y[0], self.x[-1], self_y[-1])
+        else:
+            return "Line2D(%s)"\
+                % (",".join(["(%g,%g)" % (x, y) for x, y
+                             in zip(self.x, self.y)]))
+
+    #this will have to be edited according to the traits
+    def __init__(self, **kwargs):
+        """
+        Create a :class:`~matplotlib.lines.Line2D` instance with *x*
+        and *y* data in sequences *xdata*, *ydata*.
+
+        The kwargs are :class:`~matplotlib.lines.Line2D` properties:
+
+        %(Line2D)s
+        """
+
+        #initialize Artist in Line2D
+        Artist.__init__(self)
+        # print("Artist: ", Artist)
+
+    # NOTE: NOT SURE IF xdata & ydata are needed
+    #xdata default
+    # @default("xdata")
+    # def _xdata_default(self):
+    #     # from numpy import array
+    #     # print("xdata: generating default value")
+    #     return None
+    #xdata validate
+    # @validate("xdata")
+    # def _xdata_validate(self, proposal):
+    #     # print("xdata: cross validating %r" % proposal.value)
+    #     #convert sequences to numpy arrays
+    #     if not iterable(proposal.value):
+    #         raise RuntimeError('xdata must be a sequence')
+    #     return proposal.value
+    #xdata observer
+    # @observe("xdata", type="change")
+    # def _xdata_observe(self, change):
+    #     # print("xdata: observed a change from %r to %r" % (change.old, change.new))
+    #     self.stale = True
+    #     # print("set stale: %r" % self.stale)
+
+    #ydata default
+    # @default("ydata")
+    # def _ydata_default(self):
+    #     print("ydata: generating default value")
+    #     return None
+    #ydata validate
+    # @validate("ydata")
+    # def _ydata_validate(self, proposal):
+    #     # print("ydata: cross validating %r" % proposal.value)
+    #     #convert sequences to numpy arrays
+    #     if not iterable(proposal.value):
+    #         raise RuntimeError('ydata must be a sequence')
+    #     return proposal.value
+    # #ydata observer
+    # @observe("ydata", type="change")
+    # def _ydata_observe(self, change):
+    #     # print("ydata: observed a change from %r to %r" % (change.old, change.new))
+    #     self.stale = True
+    #     # print("set stale: %r" % self.stale)
+    #linewidth default
+    # @default("linewidth")
+    # def _linewidth_default(self):
+    #     print("linewidth: generating default value")
+    #     return None
+
+    #linewidth validate
+    @validate("linewidth")
+    def _linewidth_validate(self, proposal):
+        # print("linewidth: cross validating %r" % proposal.value)
+        if proposal.value is None:
+            return rcParams['lines.linewidth']
+        #to assure we are dealing with a FLOAT
+        proposal.value=float(proposal.value) #watch out for recursion on this line
+        return proposal.value
+    #linewidth observer
+    @observe("linewidth", type="change")
+    def _linewidth_observe(self, change):
+        # print("linewidth: observed a change from %r to %r" % (change.old, change.new))
+        self.stale = True
+        # print("set stale: %r" % self.stale)
+        #NOTE: this line may cause recursion error
+        self.dashOffset, self.dashSeq = _scale_dashes(self.us_dashOffset, self.us_dashSeq, self.linewidth)
+        # print("set self.dashOffset: ", self.dashOffset)
+        # print("set self.dashSeq: ", self.dashSeq)
+
+    #linestyle default
+    # @default("linestyle")
+    # def _linestyle_default(self):
+    #     print("linestyle: generating default value")
+    #     return None
+    #linestyle validate
+    @validate("linestyle")
+    def _linestyle_validate(self, proposal):
+        # print("linestyle: cross validating %r" % proposal.value)
+        if proposal.value is None:
+            return rcParams['lines.linestyle']
+
+        if isinstance(proposal.value, six.string_types):
+            # ds, ls = self._split_drawstyle_linestyle(linestyle)
+            # if ds is not None and drawstyle is not None and ds != drawstyle:
+            #     raise ValueError("Inconsistent drawstyle ({0!r}) and "
+            #                      "linestyle ({1!r})".format(drawstyle,
+            #                                                 linestyle)
+            #                      )
+            ds, ls = self._split_drawstyle_linestyle(proposal.value)
+            if ds is not None and self.drawstyle is not None and ds != drawstyle:
+                raise ValueError("Inconsistent drawstyle ({0!r}) and "
+                                 "linestyle ({1!r})".format(self.drawstyle,
+                                                            proposal.value)
+                                 )
+            # linestyle = ls
+
+            #NOTE: this line may cause error
+            if ds is not None:
+                # drawstyle = ds
+                self.drawstyle = ds
+                return proposal.value
+        # return proposal.value
+    #linestyle observer
+    # @observe("linestyle", type="change")
+    # def _linestyle_observe(self, change):
+        # print("linestyle: observed a change from %r to %r" % (change.old, change.new))
+
+    #color default
+    # @default("color")
+    # def _color_default(self):
+    #     print("color: generating default value")
+    #     return None
+    #color validate
+    @validate("color")
+    def _color_validate(self, proposal):
+        # print("color: cross validating %r" % proposal.value)
+        if proposal.value is None:
+            return rcParams['lines.color']
+        return proposal.value
+    #color observer
+    @observe("color", type="change")
+    def _color_observe(self, change):
+        # print("color: observed a change from %r to %r" % (change.old, change.new))
+        self.stale = True
+        # print("set stale: %r" % self.stale)
+
+    """
+    NOTE: I may have to create a marker trait but I think
+    an instance of the module will suffice
+    """
+    #marker default
+    # @default("marker")
+    # def _marker_default(self):
+    #     print("marker : generating default value")
+    #     return None
+    #marker validate
+    #@docstring.dedent_interpd
+    @validate("marker")
+    def _marker_validate(self, proposal):
+        # print("marker: cross validating %r" % proposal.value)
+        if proposal.value is None:
+            return rcParams['lines.marker']
+        # TODO: find a method to make the line below work
+        # self._marker.set_marker(marker)
+        return proposal.value
+    #marker observer
+    @observe("marker", type="change")
+    def _marker_observe(self, change):
+        # print("marker: observed a change from %r to %r" % (change.old, change.new))
+        self.stale = True
+        # print("set stale: %r" % self.stale)
+
+    #markersize default
+    # @default("markersize")
+    # def _markersize_default(self):
+    #     print("markersize : generating default value")
+    #     return None
+    #markersize validate
+    @validate("markersize")
+    def _markersize_validate(self, proposal):
+        # print("markersize: cross validating %r" % proposal.value)
+        if proposal.value is None:
+            return rcParams['lines.markersize']
+        return proposal.value
+    #markersize observer
+    @observe("markersize", type="change")
+    def _markersize_observe(self, change):
+        # print("markersize: observed a change from %r to %r" % (change.old, change.new))
+        self.stale = True
+        # print("set stale: %r" % self.stale)
+
+    #markeredgewidth default
+    # @default("markeredgewidth")
+    # def _markeredgewidth_default(self):
+        # print("markeredgewidth : generating default value")
+        # return None
+    #markeredgewidth validate
+    @validate("markeredgewidth")
+    def _markeredgewidth_validate(self, proposal):
+        # print("markeredgewidth: cross validating %r" % proposal.value)
+        if proposal.value is None:
+            return rcParams['lines.markeredgewidth']
+        return proposal.value
+    #markeredgewidth observer
+    @observe("markeredgewidth", type="change")
+    def _markeredgewidth_observe(self, change):
+        # print("markeredgewidth: observed a change from %r to %r" % (change.old, change.new))
+        self.stale = True
+        # print("set stale: %r" % self.stale)
+
+    #markerfacecolor default
+    # @default("markerfacecolor")
+    # def _markerfacecolor_default(self):
+        # print("markerfacecolor: generating default value")
+        # return None
+    #markerfacecolor validate
+    @validate("markerfacecolor")
+    def _markerfacecolor_validate(self, proposal):
+        # print("markerfacecolor: cross validating %r" % proposal.value)
+        return proposal.value
+    #markerfacecolor observer
+    # @observe("markerfacecolor", type="change")
+    # def _markerfacecolor_observe(self, change):
+        # print("markerfacecolor: observed a change from %r to %r" % (change.old, change.new))
+
+    #markerfacecoloralt default
+    # @default("markerfacecoloralt")
+    # def _markerfacecoloralt_default(self):
+        # print("markerfacecoloralt: generating default value")
+        # return None
+    #markerfacecoloralt validate
+    @validate("markerfacecoloralt")
+    def _markerfacecoloralt_validate(self, proposal):
+        # print("markerfacecoloralt: cross validating %r" % proposal.value)
+        return proposal.value
+    #markerfacecoloralt observer
+    # @observe("markerfacecoloralt", type="change")
+    # def _markerfacecoloralt_observe(self, change):
+        # print("markerfacecoloralt: observed a change from %r to %r" % (change.old, change.new))
+
+    #fillstyle default
+    # @default("fillstyle")
+    # def _fillstyle_default(self):
+        # print("fillstyle : generating default value")
+        # return None
+    #fillstyle validate
+    @validate("fillstyle")
+    def _fillstyle_validate(self, proposal):
+        # print("fillstyle: cross validating %r" % proposal.value)
+        # return self._marker.set_fillstyle(proposal.value)
+        return proposal.value
+    #fillstyle observer
+    @observe("fillstyle", type="change")
+    def _fillstyle_observe(self, change):
+        # print("fillstyle: observed a change from %r to %r" % (change.old, change.new))
+        self.stale = True
+        # print("set stale: %r" % self.stale)
+
+    #antialiased default
+    # @default("antialiased")
+    # def _antialiased_default(self):
+        # print("antialiased : generating default value")
+        # return False
+    #antialiased validate
+    @validate("antialiased")
+    def _antialiased_validate(self, proposal):
+        # print("antialiased: cross validating %r" % proposal.value)
+        if proposal.value is None:
+            return rcParams['lines.antialiased']
+        return proposal.value
+    #antialiased observer
+    @observe("antialiased", type="change")
+    def _antialiased_observe(self, change):
+        # print("antialiased: observed a change from %r to %r" % (change.old, change.new))
+        self.stale = True
+        # print("set stale: %r" % self.stale)
+
+    #dash_capstyle default
+    # @default("dash_capstyle")
+    # def _dash_capstyle_default(self):
+        # print("dash_capstyle : generating default value")
+        # return None
+    #dash_capstyle validate
+    @validate("dash_capstyle")
+    def _dash_capstyle_validate(self, proposal):
+        # print("dash_capstyle: cross validating %r" % proposal.value)
+        if proposal.value is None:
+            return rcParams['lines.dash_capstyle']
+        return proposal.value
+    #dash_capstyle observer
+    # @observe("dash_capstyle", type="change")
+    # def _dash_capstyle_observe(self, change):
+        # print("dash_capstyle: observed a change from %r to %r" % (change.old, change.new))
+
+    #solid_capstyle default
+    # @default("solid_capstyle")
+    # def _solid_capstyle_default(self):
+        # print("solid_capstyle : generating default value")
+        # return None
+    #solid_capstyle validate
+    @validate("solid_capstyle")
+    def _solid_capstyle_validate(self, proposal):
+        # print("solid_capstyle: cross validating %r" % proposal.value)
+        if proposal.value is None:
+            return rcParams['lines.solid_capstyle']
+        return proposal.value
+    #solid_capstyle observer
+    # @observe("solid_capstyle", type="change")
+    # def _solid_capstyle_observe(self, change):
+        # print("solid_capstyle: observed a change from %r to %r" % (change.old, change.new))
+
+    #dash_joinstyle default
+    # @default("dash_joinstyle")
+    # def _dash_joinstyle_default(self):
+        # print("dash_joinstyle : generating default value")
+        # return None
+    #dash_joinstyle validate
+    @validate("dash_joinstyle")
+    def _dash_joinstyle_validate(self, proposal):
+        # print("dash_joinstyle: cross validating %r" % proposal.value)
+        if proposal.value is None:
+            return rcParams['lines.dash_joinstyle']
+        proposal.value = proposal.value.lower() #not sure on this line
+        #NOTE: validJoin = ('miter', 'round', 'bevel')
+        if proposal.value not in self.validJoin:
+            raise ValueError('dash_joinstyle validate passed "%s";\n' % (proposal.value,)
+                             + 'valid joinstyles are %s' % (self.validJoin,))
+        return proposal.value
+    # observer
+    @observe("dash_joinstyle", type="change")
+    def __dash_joinstyleobserve(self, change):
+        # print(": observed a change from %r to %r" % (change.old, change.new))
+        self.stale = True
+        # print("set stale: %r" % self.stale)
+
+    #solid_joinstyle default
+    # @default("solid_joinstyle")
+    # def _solid_joinstyle_default(self):
+        # print("solid_joinstyle : generating default value")
+        # return None
+    #solid_joinstyle validate
+    @validate("solid_joinstyle")
+    def _solid_joinstyle_validate(self, proposal):
+        # print("solid_joinstyle: cross validating %r" % proposal.value)
+        if proposal.value is None:
+            return rcParams['lines.solid_joinstyle']
+        proposal.value = proposal.value.lower() #not sure on this line
+        #NOTE: validJoin = ('miter', 'round', 'bevel')
+        if proposal.value not in self.validJoin:
+            raise ValueError('solid_joinstyle validate passed "%s";\n' % (proposal.value,)
+                     + 'valid joinstyles are %s' % (self.validJoin,))
+        return proposal.value
+    #solid_joinstyle observer
+    @observe("solid_joinstyle", type="change")
+    def _solid_joinstyle_observe(self, change):
+        # print("solid_joinstyle: observed a change from %r to %r" % (change.old, change.new))
+        self.stale = True
+        # print("set stale: %r" % self.stale)
+
+    #pickradius default
+    # @default("pickradius")
+    # def _pickradius_default(self):
+        # print("pickradius : generating default value")
+        # return 5
+    #pickradius validate
+    @validate("pickradius")
+    def _pickradius_validate(self, proposal):
+        # print("pickradius: cross validating %r" % proposal.value)
+        return proposal.value
+    #pickradius observer
+    # @observe("pickradius", type="change")
+    # def _pickradius_observe(self, change):
+        # print("pickradius: observed a change from %r to %r" % (change.old, change.new))
+
+    #drawstyle default
+    # @default("drawstyle")
+    # def _drawstyle_default(self):
+        # print("drawstyle : generating default value")
+        # return None
+    #drawstyle validate
+    @validate("drawstyle")
+    def _drawstyle_validate(self, proposal):
+        # print("drawstyle: cross validating %r" % proposal.value)
+        if proposal.value is None:
+            return 'default'
+        if proposal.value not in self.drawStyles:
+            raise ValueError('Unrecognized drawstyle {!r}'.format(proposal.value))
+        return proposal.value
+    #drawstyle observer
+    @observe("drawstyle", type="change")
+    def _drawstyle_observe(self, change):
+        # print("drawstyle: observed a change from %r to %r" % (change.old, change.new))
+        self.stale = True
+        # print("set stale: %r" % self.stale)
+
+    #markevery default
+    # @default("markevery")
+    # def _markevery_default(self):
+        # print("markevery : generating default value")
+        # return None
+        """Set the markevery property to subsample the plot when using markers.
+
+        e.g., if `every=5`, every 5-th marker will be plotted.
+
+        ACCEPTS: [None | int | length-2 tuple of int | slice |
+        list/array of int | float | length-2 tuple of float]
+
+        Parameters
+        ----------
+        every: None | int | length-2 tuple of int | slice | list/array of int |
+        float | length-2 tuple of float
+            Which markers to plot.
+
+            - every=None, every point will be plotted.
+            - every=N, every N-th marker will be plotted starting with
+              marker 0.
+            - every=(start, N), every N-th marker, starting at point
+              start, will be plotted.
+            - every=slice(start, end, N), every N-th marker, starting at
+              point start, upto but not including point end, will be plotted.
+            - every=[i, j, m, n], only markers at points i, j, m, and n
+              will be plotted.
+            - every=0.1, (i.e. a float) then markers will be spaced at
+              approximately equal distances along the line; the distance
+              along the line between markers is determined by multiplying the
+              display-coordinate distance of the axes bounding-box diagonal
+              by the value of every.
+            - every=(0.5, 0.1) (i.e. a length-2 tuple of float), the
+              same functionality as every=0.1 is exhibited but the first
+              marker will be 0.5 multiplied by the
+              display-cordinate-diagonal-distance along the line.
+
+        Notes
+        -----
+        Setting the markevery property will only show markers at actual data
+        points.  When using float arguments to set the markevery property
+        on irregularly spaced data, the markers will likely not appear evenly
+        spaced because the actual data points do not coincide with the
+        theoretical spacing between markers.
+
+        When using a start offset to specify the first marker, the offset will
+        be from the first data point which may be different from the first
+        the visible data point if the plot is zoomed in.
+
+        If zooming in on a plot when using float arguments then the actual
+        data points that have markers will change because the distance between
+        markers is always determined from the display-coordinates
+        axes-bounding-box-diagonal regardless of the actual axes data limits.
+        """
+    #markevery validate
+    @validate("markevery")
+    def _markevery_validate(self, proposal):
+        # print("markevery: cross validating %r" % proposal.value)
+        # if self._markevery != every:
+            # self.stale = True
+        # self._markevery = every
+        return proposal.value
+    #markevery observer
+    @observe("markevery", type="change")
+    def _markevery_observe(self, change):
+        # print("markevery: observed a change from %r to %r" % (change.old, change.new))
+        self.stale = True
+        # print("set stale: %r" % self.stale)
+
+    # TODO: figure out what to do with this!!!!!
+    #verticalOffset default
+    # @default("verticalOffset")
+    # def _verticalOffset_default(self):
+        # print("verticalOffset: generating default value")
+        # return False
+    #verticalOffset validate
+    # @validate("verticalOffset")
+    # def _verticalOffset_validate(self, proposal):
+        # print("verticalOffset: cross validating %r" % proposal.value)
+        # return proposal.value
+    #verticalOffset observer
+    # @observe("verticalOffset", type="change")
+    # def _verticalOffset_observe(self, change):
+        # print("verticalOffset: observed a change from %r to %r" % (change.old, change.new))
+
+    #ind_offset default
+    # @default("ind_offset")
+    # def _ind_offset_default(self):
+        # print("ind_offset: generating default value")
+        # return 0
+    #ind_offset validate
+    @validate("ind_offset")
+    def _ind_offset_validate(self, proposal):
+        # print("ind_offset: cross validating %r" % proposal.value)
+        return proposal.value
+    #ind_offset observer
+    # @observe("ind_offset", type="change")
+    # def _ind_offset_observe(self, change):
+        # print("ind_offset: observed a change from %r to %r" % (change.old, change.new))
+
+    #xorig default
+    # @default("xorig")
+    # def _xorig_default(self):
+        # print("xorig: generating default value")
+        # return None
+    #xorig validate
+    # @validate("xorig")
+    # def _xorig_validate(self, proposal):
+        # print("xorig: cross validating %r" % proposal.value)
+        # return proposal.value
+    #xorig observer
+    # @observe("xorig", type="change")
+    # def _xorig_observe(self, change):
+        # print("xorig: observed a change from %r to %r" % (change.old, change.new))
+
+    #yorig default
+    # @default("yorig")
+    # def _yorig_default(self):
+        # print("yorig: generating default value")
+        # return None
+    #yorig validate
+    # @validate("yorig")
+    # def _yorig_validate(self, proposal):
+        # print("yorig: cross validating %r" % proposal.value)
+        # return proposal.value
+    #yorig observer
+    # @observe("yorig", type="change")
+    # def _yorig_observe(self, change):
+        # print("yorig: observed a change from %r to %r" % (change.old, change.new))
+
+    #invalidx default
+    # @default("invalidx")
+    # def _invalidx_default(self):
+    #     print("invalidx: generating default value")
+    #     return True
+    #invalidx validate
+    @validate("invalidx")
+    def _invalidx_validate(self, proposal):
+        # print("invalidx: cross validating %r" % proposal.value)
+        return proposal.value
+    #invalidx observer
+    # @observe("invalidx", type="change")
+    # def _invalidx_observe(self, change):
+        # print(": observed a change from %r to %r" % (change.old, change.new))
+
+    #invalidy default
+    # @default("invalidy")
+    # def _invalidy_default(self):
+        # print("invalidy: generating default value")
+        # return True
+    #invalidy validate
+    @validate("invalidy")
+    def _invalidy_validate(self, proposal):
+        # print("invalidy: cross validating %r" % proposal.value)
+        return proposal.value
+    #invalidy observer
+    # @observe("invalidy", type="change")
+    # def _invalidy_observe(self, change):
+        # print("invalidy: observed a change from %r to %r" % (change.old, change.new))
+
+    #x default
+    # @default("x")
+    # def _x_default(self):
+        # print("x: generating default value")
+        # return None
+    #x validate
+    # @validate("x")
+    # def _x_validate(self, proposal):
+        # print("x: cross validating %r" % proposal.value)
+        # return proposal.value
+    #x observer
+    # @observe("x", type="change")
+    # def _x_observe(self, change):
+        # print("x: observed a change from %r to %r" % (change.old, change.new))
+
+    #y default
+    # @default("y")
+    # def _y_default(self):
+        # print("y: generating default value")
+        # return None
+    #y validate
+    # @validate("y")
+    # def _y_validate(self, proposal):
+        # print("y: cross validating %r" % proposal.value)
+        # return proposal.value
+    # y observer
+    # @observe("y", type="change")
+    # def _y_observe(self, change):
+        # print("y: observed a change from %r to %r" % (change.old, change.new))
+
+    # path default
+    # @default("path")
+    # def _path_default(self):
+    #     from matplotlib.path import Path
+    #     # print("path: generating default value")
+    #     return None
+    # #path validate
+    # @validate("path")
+    # def _path_validate(self, proposal):
+    #     # print("path: cross validating %r" % proposal.value)
+    #     return proposal.value
+    #path observer
+    # @observe("path", type="change")
+    # def _path_observe(self, change):
+        # print("path: observed a change from %r to %r" % (change.old, change.new))
+
+    #transformed_path default
+    # @default("transformed_path")
+    # def _transformed_path_default(self):
+        # print("transformed_path: generating default value")
+        # return None
+    #transformed_path validate
+    @validate("transformed_path")
+    def _transformed_path_validate(self, proposal):
+        # print("transformed_path: cross validating %r" % proposal.value)
+        return proposal.value
+    #transformed_path observer
+    # @observe("transformed_path", type="change")
+    # def _transformed_path_observe(self, change):
+        # print("transformed_path: observed a change from %r to %r" % (change.old, change.new))
+
+    #subslice default
+    # @default("subslice")
+    # def _subslice_default(self):
+        # print("subslice: generating default value")
+        # return None
+    #subslice validate
+    @validate("subslice")
+    def _subslice_validate(self, proposal):
+        # print("subslice: cross validating %r" % proposal.value)
+        return proposal.value
+    #subslice observer
+    # @observe("subslice", type="change")
+    # def _subslice_observe(self, change):
+        # print("subslice: observed a change from %r to %r" % (change.old, change.new))
+
+    #x_filled default
+    # @default("x_filled")
+    # def _x_filled_default(self):
+        # print("x_filled: generating default value")
+        # return None
+    #x_filled validate
+    @validate("x_filled")
+    def _x_filled_validate(self, proposal):
+        # print("x_filled: cross validating %r" % proposal.value)
+        return proposal.value
+    #x_filled observer
+    # @observe("x_filled", type="change")
+    # def _x_filled_observe(self, change):
+        # print("x_filled: observed a change from %r to %r" % (change.old, change.new))
+
+    def contains(self, mouseevent):
+        """
+        Test whether the mouse event occurred on the line.  The pick
+        radius determines the precision of the location test (usually
+        within five points of the value).  Use
+        :meth:`~matplotlib.lines.Line2D.get_pickradius` or
+        :meth:`~matplotlib.lines.Line2D.set_pickradius` to view or
+        modify it.
+
+        Returns *True* if any values are within the radius along with
+        ``{'ind': pointlist}``, where *pointlist* is the set of points
+        within the radius.
+
+        TODO: sort returned indices by distance
+        """
+        if callable(self._contains):
+            return self._contains(self, mouseevent)
+
+        if not is_numlike(self.pickradius):
+            raise ValueError("pick radius should be a distance")
+
+        # Make sure we have data to plot
+        if self._invalidy or self._invalidx:
+            self.recache()
+        if len(self._xy) == 0:
+            return False, {}
+
+        # Convert points to pixels
+        transformed_path = self._get_transformed_path()
+        path, affine = transformed_path.get_transformed_path_and_affine()
+        path = affine.transform_path(path)
+        xy = path.vertices
+        xt = xy[:, 0]
+        yt = xy[:, 1]
+
+        # Convert pick radius from points to pixels
+        if self.figure is None:
+            warnings.warn('no figure set when check if mouse is on line')
+            pixels = self.pickradius
+        else:
+            pixels = self.figure.dpi / 72. * self.pickradius
+
+        # the math involved in checking for containment (here and inside of
+        # segment_hits) assumes that it is OK to overflow.  In case the
+        # application has set the error flags such that an exception is raised
+        # on overflow, we temporarily set the appropriate error flags here and
+        # set them back when we are finished.
+        with np.errstate(all='ignore'):
+            # Check for collision
+            if self._linestyle in ['None', None]:
+                # If no line, return the nearby point(s)
+                d = (xt - mouseevent.x) ** 2 + (yt - mouseevent.y) ** 2
+                ind, = np.nonzero(np.less_equal(d, pixels ** 2))
+            else:
+                # If line, return the nearby segment(s)
+                ind = segment_hits(mouseevent.x, mouseevent.y, xt, yt, pixels)
+                if self.drawstyle.startswith("steps"):
+                    ind //= 2
+
+        ind += self.ind_offset
+
+        # Return the point(s) within radius
+        return len(ind) > 0, dict(ind=ind)
+
+    def get_window_extent(self, renderer):
+        bbox = Bbox([[0, 0], [0, 0]])
+        trans_data_to_xy = self.get_transform().transform
+        bbox.update_from_data_xy(trans_data_to_xy(self.get_xydata()),
+                                 ignore=True)
+        # correct for marker size, if any
+        if self._marker:
+            ms = (self._markersize / 72.0 * self.figure.dpi) * 0.5
+            bbox = bbox.padded(ms)
+        return bbox
+
+    # @Artist.axes.setter
+    def axes(self, ax):
+        # call the set method from the base-class property
+        # Artist.axes.fset(self, ax)
+        Artist.axes = ax # in reference to Artist with traitlets
+        if ax is not None:
+            # connect unit-related callbacks
+            if ax.xaxis is not None:
+                self._xcid = ax.xaxis.callbacks.connect('units', self.recache_always)
+            if ax.yaxis is not None:
+                self._ycid = ax.yaxis.callbacks.connect('units', self.recache_always)
+
+    def set_data(self, *args):
+        """
+        Set the x and y data
+
+        ACCEPTS: 2D array (rows are x, y) or two 1D arrays
+        """
+        if len(args) == 1:
+            x, y = args[0]
+        else:
+            x, y = args
+
+        self.set_xdata(x)
+        self.set_ydata(y)
+
+    def recache_always(self):
+        self.recache(always=True)
+
+    def recache(self, always=False):
+        if always or self.invalidx:
+            xconv = self.convert_xunits(self.xorig)
+            if isinstance(self.xorig, np.ma.MaskedArray):
+                x = np.ma.asarray(xconv, float).filled(np.nan)
+            else:
+                x = np.asarray(xconv, float)
+            x = x.ravel()
+        else:
+            x = self.x
+        if always or self.invalidy:
+            yconv = self.convert_yunits(self.yorig)
+            if isinstance(self.yorig, np.ma.MaskedArray):
+                y = np.ma.asarray(yconv, float).filled(np.nan)
+            else:
+                y = np.asarray(yconv, float)
+            y = y.ravel()
+        else:
+            y = self._y
+
+        if len(x) == 1 and len(y) > 1:
+            x = x * np.ones(y.shape, float)
+        if len(y) == 1 and len(x) > 1:
+            y = y * np.ones(x.shape, float)
+
+        if len(x) != len(y):
+            raise RuntimeError('xdata and ydata must be the same length')
+
+        self.xy = np.empty((len(x), 2), dtype=float)
+        self.xy[:, 0] = x
+        self.xy[:, 1] = y
+
+        self.x = self.xy[:, 0]  # just a view
+        self.y = self.xy[:, 1]  # just a view
+
+        self.subslice = False
+        if (self.axes and len(x) > 1000 and self.is_sorted(x) and
+                self.axes.name == 'rectilinear' and
+                self.axes.get_xscale() == 'linear' and
+                self.markevery is None and
+                self.get_clip_on() is True):
+            self._subslice = True
+            nanmask = np.isnan(x)
+            if nanmask.any():
+                self.x_filled = self.x.copy()
+                indices = np.arange(len(x))
+                self.x_filled[nanmask] = np.interp(indices[nanmask],
+                        indices[~nanmask], self._x[~nanmask])
+            else:
+                self.x_filled = self.x
+
+        if self.path is not None:
+            interpolation_steps = self.path._interpolation_steps
+        else:
+            interpolation_steps = 1
+        xy = STEP_LOOKUP_MAP[self.drawstyle](*self.xy.T)
+        self.path = Path(np.asarray(xy).T,
+                          _interpolation_steps=interpolation_steps)
+        self.transformed_path = None
+        self.invalidx = False
+        self.invalidy = False
+
+    def _transform_path(self, subslice=None):
+        """
+        Puts a TransformedPath instance at self._transformed_path;
+        all invalidation of the transform is then handled by the
+        TransformedPath instance.
+        """
+        # Masked arrays are now handled by the Path class itself
+        if subslice is not None:
+            xy = STEP_LOOKUP_MAP[self._drawstyle](*self._xy[subslice, :].T)
+            _path = Path(np.asarray(xy).T,
+                         _interpolation_steps=self._path._interpolation_steps)
+        else:
+            _path = self._path
+        self._transformed_path = TransformedPath(_path, self.get_transform())
+
+    def _is_sorted(self, x):
+        """return True if x is sorted in ascending order"""
+        # We don't handle the monotonically decreasing case.
+        return _path.is_sorted(x)
+
+    @allow_rasterization
+    def draw(self, renderer):
+        """draw the Line with `renderer` unless visibility is False"""
+        if not self.get_visible():
+            return
+
+        if self._invalidy or self._invalidx:
+            self.recache()
+        self.ind_offset = 0  # Needed for contains() method.
+        if self._subslice and self.axes:
+            x0, x1 = self.axes.get_xbound()
+            i0, = self._x_filled.searchsorted([x0], 'left')
+            i1, = self._x_filled.searchsorted([x1], 'right')
+            subslice = slice(max(i0 - 1, 0), i1 + 1)
+            self.ind_offset = subslice.start
+            self._transform_path(subslice)
+
+        transf_path = self._get_transformed_path()
+
+        if self.get_path_effects():
+            from matplotlib.patheffects import PathEffectRenderer
+            renderer = PathEffectRenderer(self.get_path_effects(), renderer)
+
+        renderer.open_group('line2d', self.get_gid())
+        if self._lineStyles[self._linestyle] != '_draw_nothing':
+            tpath, affine = transf_path.get_transformed_path_and_affine()
+            if len(tpath.vertices):
+                gc = renderer.new_gc()
+                self._set_gc_clip(gc)
+
+                ln_color_rgba = self._get_rgba_ln_color()
+                gc.set_foreground(ln_color_rgba, isRGBA=True)
+                gc.set_alpha(ln_color_rgba[3])
+
+                gc.set_antialiased(self._antialiased)
+                gc.set_linewidth(self._linewidth)
+
+                if self.is_dashed():
+                    cap = self._dashcapstyle
+                    join = self._dashjoinstyle
+                else:
+                    cap = self._solidcapstyle
+                    join = self._solidjoinstyle
+                gc.set_joinstyle(join)
+                gc.set_capstyle(cap)
+                gc.set_snap(self.get_snap())
+                if self.get_sketch_params() is not None:
+                    gc.set_sketch_params(*self.get_sketch_params())
+
+                gc.set_dashes(self._dashOffset, self._dashSeq)
+                renderer.draw_path(gc, tpath, affine.frozen())
+                gc.restore()
+
+        if self._marker and self._markersize > 0:
+            gc = renderer.new_gc()
+            self._set_gc_clip(gc)
+            rgbaFace = self._get_rgba_face()
+            rgbaFaceAlt = self._get_rgba_face(alt=True)
+            edgecolor = self.get_markeredgecolor()
+            if (isinstance(edgecolor, six.string_types)
+                    and edgecolor.lower() == 'none'):
+                gc.set_linewidth(0)
+                gc.set_foreground(rgbaFace, isRGBA=True)
+            else:
+                gc.set_foreground(edgecolor)
+                gc.set_linewidth(self._markeredgewidth)
+                mec = self._markeredgecolor
+                if (isinstance(mec, six.string_types) and mec == 'auto' and
+                        rgbaFace is not None):
+                    gc.set_alpha(rgbaFace[3])
+                else:
+                    gc.set_alpha(self.get_alpha())
+
+            marker = self._marker
+            tpath, affine = transf_path.get_transformed_points_and_affine()
+            if len(tpath.vertices):
+                # subsample the markers if markevery is not None
+                markevery = self.get_markevery()
+                if markevery is not None:
+                    subsampled = _mark_every_path(markevery, tpath,
+                                                  affine, self.axes.transAxes)
+                else:
+                    subsampled = tpath
+
+                snap = marker.get_snap_threshold()
+                if type(snap) == float:
+                    snap = renderer.points_to_pixels(self._markersize) >= snap
+                gc.set_snap(snap)
+                gc.set_joinstyle(marker.get_joinstyle())
+                gc.set_capstyle(marker.get_capstyle())
+                marker_path = marker.get_path()
+                marker_trans = marker.get_transform()
+                w = renderer.points_to_pixels(self._markersize)
+
+                if (isinstance(marker.get_marker(), six.string_types) and
+                        marker.get_marker() == ','):
+                    gc.set_linewidth(0)
+                else:
+                    # Don't scale for pixels, and don't stroke them
+                    marker_trans = marker_trans.scale(w)
+
+                renderer.draw_markers(gc, marker_path, marker_trans,
+                                      subsampled, affine.frozen(),
+                                      rgbaFace)
+
+                alt_marker_path = marker.get_alt_path()
+                if alt_marker_path:
+                    alt_marker_trans = marker.get_alt_transform()
+                    alt_marker_trans = alt_marker_trans.scale(w)
+                    if (isinstance(mec, six.string_types) and mec == 'auto' and
+                            rgbaFaceAlt is not None):
+                        gc.set_alpha(rgbaFaceAlt[3])
+                    else:
+                        gc.set_alpha(self.get_alpha())
+
+                    renderer.draw_markers(
+                            gc, alt_marker_path, alt_marker_trans, subsampled,
+                            affine.frozen(), rgbaFaceAlt)
+
+            gc.restore()
+
+        renderer.close_group('line2d')
+        self.stale = False
+
+    def _split_drawstyle_linestyle(self, ls):
+        '''Split drawstyle from linestyle string
+
+        If `ls` is only a drawstyle default to returning a linestyle
+        of '-'.
+
+        Parameters
+        ----------
+        ls : str
+            The linestyle to be processed
+
+        Returns
+        -------
+        ret_ds : str or None
+            If the linestyle string does not contain a drawstyle prefix
+            return None, otherwise return it.
+
+        ls : str
+            The linestyle with the drawstyle (if any) stripped.
+        '''
+        ret_ds = None
+        for ds in self.drawStyleKeys:  # long names are first in the list
+            if ls.startswith(ds):
+                ret_ds = ds
+                if len(ls) > len(ds):
+                    ls = ls[len(ds):]
+                else:
+                    ls = '-'
+                break
+
+        return ret_ds, ls
+
+    def set_dashes(self, seq):
+        """
+        Set the dash sequence, sequence of dashes with on off ink in
+        points.  If seq is empty or if seq = (None, None), the
+        linestyle will be set to solid.
+
+        ACCEPTS: sequence of on/off ink in points
+        """
+        if seq == (None, None) or len(seq) == 0:
+            self.set_linestyle('-')
+        else:
+            self.set_linestyle((0, seq))
+
+    #TODO: this should be in the validate function
+    # @docstring.dedent_interpd
+    # def set_marker(self, marker):
+    #     """
+    #     Set the line marker
+    #
+    #     ACCEPTS: :mod:`A valid marker style <matplotlib.markers>`
+    #
+    #     Parameters
+    #     ----------
+    #
+    #     marker: marker style
+    #         See `~matplotlib.markers` for full description of possible
+    #         argument
+    #
+    #     """
+    #     self._marker.set_marker(marker)
+    #     self.stale = True
+
+    def set_transform(self, t):
+        """
+        set the Transformation instance used by this artist
+
+        ACCEPTS: a :class:`matplotlib.transforms.Transform` instance
+        """
+        Artist.set_transform(self, t)
+        self.invalidx = True
+        self.invalidy = True
+        self.stale = True
+
+    def _get_rgba_face(self, alt=False):
+        facecolor = self._get_markerfacecolor(alt=alt)
+        if (isinstance(facecolor, six.string_types)
+                and facecolor.lower() == 'none'):
+            rgbaFace = None
+        else:
+            rgbaFace = mcolors.to_rgba(facecolor, self.alpha)
+        return rgbaFace
+
+    def _get_rgba_ln_color(self, alt=False):
+        return mcolors.to_rgba(self.color, self.alpha)
+
+    # for testing
+    def get_path(self):
+        """
+        Return the :class:`~matplotlib.path.Path` object associated
+        with this line.
+        """
+        if self.invalidy or self.invalidx:
+            self.recache()
+        return self.path
+
+
+#for monkey patching
+# print('before b_Line2D.Line2D: ', b_Line2D.Line2D) #matplotlib.artist.Artist
+#monkey patching
+b_Line2D.Line2D = Line2D
+# print('after b_Line2D.Line2D: ', b_Line2D.Line2D) #matplotlib._traits.artist.Artist
