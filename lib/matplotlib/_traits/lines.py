@@ -305,24 +305,17 @@ class Line2D(b_artist.Artist, HasTraits):
         Artist.__init__(self)
         print("Artist", Artist)
 
-        if not iterable(xdata):
-            raise RuntimeError('xdata must be a sequence')
-        if not iterable(ydata):
-            raise RuntimeError('ydata must be a sequence')
+        # if not iterable(xdata):
+        #     raise RuntimeError('xdata must be a sequence')
+        # if not iterable(ydata):
+        #     raise RuntimeError('ydata must be a sequence')
 
     # xdata=Instance('numpy.array', allow_none=True,default_value=None) #not sure about this line
-    # xdata=Instance('numpy.array', allow_none=True) #not sure about this line
+    xdata=Instance('numpy.array', allow_none=True) #not sure about this line
 
 
     # ydata=Instance('numpy.array', allow_none=True,default_value=None) #not sure about this line
-    # ydata=Instance('numpy.array', allow_none=True) #not sure about this line
-
-
-    xorig = np.asarray([])
-    # xorig = Instance('numpy.asarray', allow_none=True,default_value=[]) #not sure on this line ay have to declare default value in default decorator
-
-    yorig = np.asarray([])
-    # yorig = Instance('numpy.asarray', allow_none=True,default_value=[]) #not sure on this line ay have to declare default value in default decorator
+    ydata=Instance('numpy.array', allow_none=True) #not sure about this line
 
     # for x, y, & xy I am not sure if these following lines of code are correct, I may just leave them alone come testing time
     x = None
@@ -421,7 +414,7 @@ class Line2D(b_artist.Artist, HasTraits):
     us_dashSeq = None #TODO: figure this out
     us_dashOffset=Int(allow_none=True, default_value=None)
 
-    # set_data(xdata, ydata) #TODO: determine if this is needed
+    set_data(xdata, ydata) #TODO: determine if this is needed
 
     # not sure how much this will have to be refactored
     def __str__(self):
@@ -439,35 +432,35 @@ class Line2D(b_artist.Artist, HasTraits):
                              in zip(self.x, self.y)]))
 
     #this will have to be edited according to the traits
-    def __init__(self, **kwargs):
-        """
-        Create a :class:`~matplotlib.lines.Line2D` instance with *x*
-        and *y* data in sequences *xdata*, *ydata*.
-
-        The kwargs are :class:`~matplotlib.lines.Line2D` properties:
-
-        %(Line2D)s
-        """
-
-        #initialize Artist in Line2D
-        Artist.__init__(self)
-        # print("Artist: ", Artist)
+    # def __init__(self, **kwargs):
+    #     """
+    #     Create a :class:`~matplotlib.lines.Line2D` instance with *x*
+    #     and *y* data in sequences *xdata*, *ydata*.
+    #
+    #     The kwargs are :class:`~matplotlib.lines.Line2D` properties:
+    #
+    #     %(Line2D)s
+    #     """
+    #
+    #     #initialize Artist in Line2D
+    #     Artist.__init__(self)
+    #     # print("Artist: ", Artist)
 
     # NOTE: NOT SURE IF xdata & ydata are needed
-    #xdata default
-    # @default("xdata")
-    # def _xdata_default(self):
-    #     # from numpy import array
-    #     # print("xdata: generating default value")
-    #     return None
-    #xdata validate
-    # @validate("xdata")
-    # def _xdata_validate(self, proposal):
-    #     # print("xdata: cross validating %r" % proposal.value)
-    #     #convert sequences to numpy arrays
-    #     if not iterable(proposal.value):
-    #         raise RuntimeError('xdata must be a sequence')
-    #     return proposal.value
+    # xdata default
+    @default("xdata")
+    def _xdata_default(self):
+        from numpy import array
+        # print("xdata: generating default value")
+        return None
+    # xdata validate
+    @validate("xdata")
+    def _xdata_validate(self, proposal):
+        # print("xdata: cross validating %r" % proposal.value)
+        #convert sequences to numpy arrays
+        if not iterable(proposal.value):
+            raise RuntimeError('xdata must be a sequence')
+        return proposal.value
     #xdata observer
     # @observe("xdata", type="change")
     # def _xdata_observe(self, change):
@@ -475,19 +468,20 @@ class Line2D(b_artist.Artist, HasTraits):
     #     self.stale = True
     #     # print("set stale: %r" % self.stale)
 
-    #ydata default
-    # @default("ydata")
-    # def _ydata_default(self):
-    #     print("ydata: generating default value")
-    #     return None
-    #ydata validate
-    # @validate("ydata")
-    # def _ydata_validate(self, proposal):
-    #     # print("ydata: cross validating %r" % proposal.value)
-    #     #convert sequences to numpy arrays
-    #     if not iterable(proposal.value):
-    #         raise RuntimeError('ydata must be a sequence')
-    #     return proposal.value
+    # ydata default
+    @default("ydata")
+    def _ydata_default(self):
+        from numpy import array
+        # print("ydata: generating default value")
+        return None
+    # ydata validate
+    @validate("ydata")
+    def _ydata_validate(self, proposal):
+        # print("ydata: cross validating %r" % proposal.value)
+        #convert sequences to numpy arrays
+        if not iterable(proposal.value):
+            raise RuntimeError('ydata must be a sequence')
+        return proposal.value
     # #ydata observer
     # @observe("ydata", type="change")
     # def _ydata_observe(self, change):
@@ -1177,6 +1171,30 @@ class Line2D(b_artist.Artist, HasTraits):
 
         self.set_xdata(x)
         self.set_ydata(y)
+
+#for testing, I want to catch the NONE error
+
+    def set_xdata(self, x):
+        """
+        Set the data np.array for x
+
+        ACCEPTS: 1D array
+        """
+        self._xorig = x
+        self._invalidx = True
+        self.stale = True
+
+    def set_ydata(self, y):
+        """
+        Set the data np.array for y
+
+        ACCEPTS: 1D array
+        """
+        self._yorig = y
+        self._invalidy = True
+        self.stale = True
+
+#
 
     def recache_always(self):
         self.recache(always=True)
