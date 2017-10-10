@@ -281,35 +281,6 @@ class Line2D(b_artist.Artist, HasTraits):
     validCap = ('butt', 'round', 'projecting')
     validJoin = ('miter', 'round', 'bevel')
 
-    # xdata=Instance('numpy.array', allow_none=True,default_value=None) #not sure about this line
-    # xdata=Instance('numpy.array', allow_none=True) #not sure about this line
-    # ydata=Instance('numpy.array', allow_none=True,default_value=None) #not sure about this line
-    # ydata=Instance('numpy.array', allow_none=True) #not sure about this line
-
-    # xdata = Type(klass='numpy.array', allow_none=True)
-    # ydata = Type(klass='numpy.array', allow_none=True)
-
-    # self._xorig = np.asarray([])
-    # self._yorig = np.asarray([])
-
-
-    # xorig = Type(klass='numpy.asarray', allow_none=True)
-    # yorig = Type(klass='numpy.asarray', allow_none=True)
-    # xorig = numpy.asarray([])
-    # yorig = numpy.asarray([])
-
-    # for x, y, & xy I am not sure if these following lines of code are correct, I may just leave them alone come testing time
-    # x = numpy.array([])
-    # x = None
-    # x = np.array([])
-    # x=Instance('numpy.asarray', allow_none=True,default_value=None) # not sure on this line
-    # y = numpy.array([])
-    # y = None
-    # y = np.array([])
-    # y=Instance('numpy.asarray', allow_none=True,default_value=None) # not sure on this line
-    # xy = None
-    # xy = (x,y)
-
     linewidth=Float(allow_none=True, default_value=None)
     linestyle=Instance('matplotlib.text.Text', allow_none=True, default_value=None)
     # TODO: not sure if this is correct?
@@ -355,7 +326,6 @@ class Line2D(b_artist.Artist, HasTraits):
     # invalidy = True
     invalidy=Bool(default_value=True)
     # path = None
-    # path=Instance('matplotlib.path.Path', allow_none=True, default_value=None)
     path=Instance('matplotlib.path.Path', allow_none=True)
     transformed_path=Instance('matplotlib.transforms.TransformedPath', allow_none=True, default_value=None)
     subslice=Bool(default_value=False)
@@ -540,7 +510,6 @@ class Line2D(b_artist.Artist, HasTraits):
     #     # if not iterable(proposal.value):
     #         # raise RuntimeError('ydata must be a sequence')
     #     return proposal.value
-
 
     #linewidth validate
     @validate("linewidth")
@@ -885,8 +854,8 @@ class Line2D(b_artist.Artist, HasTraits):
 
         # Convert points to pixels
         # transformed_path = self._get_transformed_path()
-        print("transformed_path", transformed_path)
         transformed_path = self.transformed_path
+        print("transformed_path", transformed_path)
         path, affine = transformed_path.get_transformed_path_and_affine()
         path = affine.transform_path(path)
         xy = path.vertices
@@ -1024,7 +993,7 @@ class Line2D(b_artist.Artist, HasTraits):
                          _interpolation_steps=self._path._interpolation_steps)
         else:
             path = self.path
-        self.transformed_path = TransformedPath(_path, self.get_transform())
+        self._transformed_path = TransformedPath(_path, self.get_transform())
 
     def _is_sorted(self, x):
         """return True if x is sorted in ascending order"""
