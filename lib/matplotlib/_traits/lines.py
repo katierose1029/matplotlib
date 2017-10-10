@@ -281,41 +281,71 @@ class Line2D(b_artist.Artist, HasTraits):
     validCap = ('butt', 'round', 'projecting')
     validJoin = ('miter', 'round', 'bevel')
 
-    linewidth=Float(allow_none=True, default_value=None)
-    linestyle=Instance('matplotlib.text.Text', allow_none=True, default_value=None)
+    # linewidth=Float(allow_none=True, default_value=None)
+    linewidth=Float(allow_none=True, default_value=rcParams['lines.linewidth'])
+    # linestyle=Instance('matplotlib.text.Text', allow_none=True, default_value=None)
+    linestyle=Instance('matplotlib.text.Text', allow_none=True, default_value=rcParams['lines.linestyle'])
+
     # TODO: not sure if this is correct?
-    color=Unicode(allow_none=True, default_value=None)
+    # color=Unicode(allow_none=True, default_value=None)
+    color=Unicode(allow_none=True, default_value=rcParams['lines.color'])
     #color=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
-    marker=Instance('matplotlib.markers',allow_none=True, default_value=None)
-    markersize=Float(allow_none=True,default_value=True)
+
+    # marker=Instance('matplotlib.markers',allow_none=True, default_value=None)
+    marker=Instance('matplotlib.markers',allow_none=True, default_value=rcParams['lines.marker'])
+
+    # markersize=Float(allow_none=True,default_value=True)
+    markersize=Float(allow_none=True,default_value=rcParams['lines.markersize'])
+
     markeredgewidth=Float(allow_none=True,default_value=None)
+    # markeredgewidth=Float(allow_none=True,default_value=None)
+
     # TODO: not sure if this is correct?
     markerfacecolor=Unicode(allow_none=True, default_value=None)
+    # markerfacecolor=Unicode(allow_none=True, default_value=None)
+
     #markerfacecolor=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
     # same applies for the alternative face color
     markerfacecoloralt=Unicode(allow_none=True, default_value=None)
+    # markerfacecoloralt=Unicode(allow_none=True, default_value=None)
+
     #markerfacecoloralt=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
     # this gets passed into marker so I want to assume same for color however only accepts the following strings: ['full' | 'left' | 'right' | 'bottom' | 'top' | 'none']
     fillstyle=Unicode(allow_none=True, default_value=None)
+    # fillstyle=Unicode(allow_none=True, default_value=None)
+
     # fillstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
-    antialiased=Bool(default_value=False)
+    antialiased=Bool(default_value=rcParams['lines.antialiased'])
+    # antialiased=Bool(default_value=False)
+
     # accepts: ['butt' | 'round' | 'projecting']
-    dash_capstyle=Unicode(allow_none=True, default_value=None)
+    # dash_capstyle=Unicode(allow_none=True, default_value=None)
+    dash_capstyle=Unicode(allow_none=True, default_value=rcParams['lines.dash_capstyle'])
     # dash_capstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+
     # accepts: ['butt' | 'round' | 'projecting']
-    solid_capstyle=Unicode(allow_none=True, default_value=None)
+    # solid_capstyle=Unicode(allow_none=True, default_value=None)
+    solid_capstyle=Unicode(allow_none=True, default_value=rcParams['lines.solid_capstyle'])
     # solid_capstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+
     # accepts: ['miter' | 'round' | 'bevel']
-    dash_joinstyle=Unicode(allow_none=True, default_value=None)
+    # dash_joinstyle=Unicode(allow_none=True, default_value=None)
+    dash_joinstyle=Unicode(allow_none=True, default_value=rcParams['lines.dash_joinstyle'])
     # dash_joinstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+
     # accepts: ['miter' | 'round' | 'bevel']
-    solid_joinstyle=Unicode(allow_none=True, default_value=None)
+    # solid_joinstyle=Unicode(allow_none=True, default_value=None)
+    solid_joinstyle=Unicode(allow_none=True, default_value=rcParams['lines.solid_joinstyle'])
     # solid_joinstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+
     pickradius=Int(allow_none=True, default_value=5)
+
     # accepts: ['default' | 'steps' | 'steps-pre' | 'steps-mid' | 'steps-post']
     # drawstyle=Unicode(allow_none=True, default_value=None)
     # drawstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
-    drawstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+    # drawstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
+    drawstyle=Instance('matplotlib.text.Text', allow_none=True,default_value='default')
+
     # for this one I want to attempt at using the ANY trait
     markevery=Any(allow_none=True, default_value=None)
     #only found once in the original lines code so not sure what to do with this
