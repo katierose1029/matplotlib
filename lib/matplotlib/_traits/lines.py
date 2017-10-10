@@ -825,36 +825,6 @@ class Line2D(b_artist.Artist, HasTraits):
         # print("invalidy: cross validating %r" % proposal.value)
         return proposal.value
 
-    #x default
-    # @default("x")
-    # def _x_default(self):
-        # print("x: generating default value")
-        # return None
-    #x validate
-    # @validate("x")
-    # def _x_validate(self, proposal):
-        # print("x: cross validating %r" % proposal.value)
-        # return proposal.value
-    #x observer
-    # @observe("x", type="change")
-    # def _x_observe(self, change):
-        # print("x: observed a change from %r to %r" % (change.old, change.new))
-
-    #y default
-    # @default("y")
-    # def _y_default(self):
-        # print("y: generating default value")
-        # return None
-    #y validate
-    # @validate("y")
-    # def _y_validate(self, proposal):
-        # print("y: cross validating %r" % proposal.value)
-        # return proposal.value
-    # y observer
-    # @observe("y", type="change")
-    # def _y_observe(self, change):
-        # print("y: observed a change from %r to %r" % (change.old, change.new))
-
     # path default
     @default("path")
     def _path_default(self):
@@ -914,7 +884,9 @@ class Line2D(b_artist.Artist, HasTraits):
             return False, {}
 
         # Convert points to pixels
-        transformed_path = self._get_transformed_path()
+        # transformed_path = self._get_transformed_path()
+        print("transformed_path", transformed_path)
+        transformed_path = self.transformed_path
         path, affine = transformed_path.get_transformed_path_and_affine()
         path = affine.transform_path(path)
         xy = path.vertices
@@ -1031,7 +1003,8 @@ class Line2D(b_artist.Artist, HasTraits):
             interpolation_steps = self.path._interpolation_steps
         else:
             interpolation_steps = 1
-        xy = STEP_LOOKUP_MAP[self.drawstyle](*self.xy.T)
+        # xy = STEP_LOOKUP_MAP[self.drawstyle](*self.xy.T)
+        xy = STEP_LOOKUP_MAP[self.drawstyle](self.xy.T)
         self.path = Path(np.asarray(xy).T,
                           _interpolation_steps=interpolation_steps)
         self.transformed_path = None
@@ -1047,11 +1020,11 @@ class Line2D(b_artist.Artist, HasTraits):
         # Masked arrays are now handled by the Path class itself
         if subslice is not None:
             xy = STEP_LOOKUP_MAP[self._drawstyle](*self._xy[subslice, :].T)
-            _path = Path(np.asarray(xy).T,
+            path = Path(np.asarray(xy).T,
                          _interpolation_steps=self._path._interpolation_steps)
         else:
-            _path = self._path
-        self._transformed_path = TransformedPath(_path, self.get_transform())
+            path = self.path
+        self.transformed_path = TransformedPath(_path, self.get_transform())
 
     def _is_sorted(self, x):
         """return True if x is sorted in ascending order"""

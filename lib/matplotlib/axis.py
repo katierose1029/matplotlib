@@ -456,7 +456,7 @@ class XTick(Tick):
                           alpha=rcParams['grid.alpha'],
                           markersize=0)
         l.set_transform(self.axes.get_xaxis_transform(which='grid'))
-        # print("l.path at this point", l.path)
+        print("l.path at this point", l.path)
         # print("l.path at this point", l.get_path())
         l.get_path()._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
         # l.path._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
