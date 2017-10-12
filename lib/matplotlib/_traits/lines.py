@@ -30,11 +30,10 @@ from matplotlib.markers import (
     TICKLEFT, TICKRIGHT, TICKUP, TICKDOWN)
 
 from traitlets import HasTraits, Any, Instance, Unicode, Float, Bool, Int, validate, observe, default, Type, List
+from .traits import PathTrait
 
 #for monkey patching into base lines
 import matplotlib.lines as b_Line2D
-
-
 
 
 def _get_dash_pattern(style):
@@ -342,9 +341,9 @@ class Line2D(b_artist.Artist, HasTraits):
 
     # accepts: ['default' | 'steps' | 'steps-pre' | 'steps-mid' | 'steps-post']
     # drawstyle=Unicode(allow_none=True, default_value=None)
+    drawstyle=Unicode(allow_none=True, default_value='default')
     # drawstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
-    # drawstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
-    drawstyle=Instance('matplotlib.text.Text', allow_none=True,default_value='default')
+    # drawstyle=Instance('matplotlib.text.Text', allow_none=True,default_value='default')
 
     # for this one I want to attempt at using the ANY trait
     markevery=Any(allow_none=True, default_value=None)
@@ -355,8 +354,14 @@ class Line2D(b_artist.Artist, HasTraits):
     invalidx=Bool(default_value=True)
     # invalidy = True
     invalidy=Bool(default_value=True)
+
     # path = None
-    path=Instance('matplotlib.path.Path', allow_none=True)
+    # path=Instance('matplotlib.path.Path', allow_none=True)
+    # path = PathTrait(allow_none=True, default_value=None)
+    # path = PathTrait(allow_none=True, default_value=[(0.0,0.0),(1.0,0.0),(1.0,1.0),(1.0,0.0)])
+    path = PathTrait(allow_none=False, default_value=Path([(0.0,0.0),(1.0,0.0),(1.0,1.0),(1.0,0.0)]))
+
+
     transformed_path=Instance('matplotlib.transforms.TransformedPath', allow_none=True, default_value=None)
     subslice=Bool(default_value=False)
     # used in subslicing; only x is needed
@@ -825,11 +830,11 @@ class Line2D(b_artist.Artist, HasTraits):
         return proposal.value
 
     # path default
-    @default("path")
-    def _path_default(self):
-        from matplotlib.path import Path
-        # print("path: generating default value")
-        return None
+    # @default("path")
+    # def _path_default(self):
+    #     from matplotlib.path import Path
+    #     # print("path: generating default value")
+    #     return None
     #path validate
     @validate("path")
     def _path_validate(self, proposal):
@@ -1003,6 +1008,10 @@ class Line2D(b_artist.Artist, HasTraits):
         else:
             interpolation_steps = 1
         # xy = STEP_LOOKUP_MAP[self.drawstyle](*self.xy.T)
+        print("self.drawstyle ", self.drawstyle)
+        print("self.xy ", self.xy)
+        print("self.xy.T ", self.xy.T)
+
         xy = STEP_LOOKUP_MAP[self.drawstyle](self.xy.T)
         self.path = Path(np.asarray(xy).T,
                           _interpolation_steps=interpolation_steps)
@@ -1036,13 +1045,13 @@ class Line2D(b_artist.Artist, HasTraits):
         if not self.get_visible():
             return
 
-        if self._invalidy or self._invalidx:
+        if self.invalidy or self.invalidx:
             self.recache()
         self.ind_offset = 0  # Needed for contains() method.
-        if self._subslice and self.axes:
+        if self.subslice and self.axes:
             x0, x1 = self.axes.get_xbound()
-            i0, = self._x_filled.searchsorted([x0], 'left')
-            i1, = self._x_filled.searchsorted([x1], 'right')
+            i0, = self.x_filled.searchsorted([x0], 'left')
+            i1, = self.x_filled.searchsorted([x1], 'right')
             subslice = slice(max(i0 - 1, 0), i1 + 1)
             self.ind_offset = subslice.start
             self._transform_path(subslice)

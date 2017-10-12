@@ -1776,7 +1776,9 @@ class _AxesBase(martist.Artist):
         """
         Figures out the data limit of the given line, updating self.dataLim.
         """
-        path = line.get_path()
+        # path = line.get_path()
+        print("line.path ", line.path)
+        path = line.path
         if path.vertices.size == 0:
             return
 

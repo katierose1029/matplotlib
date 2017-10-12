@@ -457,9 +457,14 @@ class XTick(Tick):
                           markersize=0)
         l.set_transform(self.axes.get_xaxis_transform(which='grid'))
         print("l.path at this point", l.path)
-        print("l.get_path() at this point", l.get_path())
-        l.get_path()._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
-        # l.path._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
+        # print("l.get_path() at this point", l.get_path())
+        # l.get_path()._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
+        p = l.path
+        print("p ", p)
+        interpolation_steps = p._interpolation_steps
+        print("interpolation_steps ", interpolation_steps)
+        l.path._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
+        print("l.path._interpolation_steps ", l.path._interpolation_steps)
 
         self._set_artist_props(l)
 
@@ -584,7 +589,16 @@ class YTick(Tick):
                           markersize=0)
 
         l.set_transform(self.axes.get_yaxis_transform(which='grid'))
-        l.get_path()._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
+        # l.get_path()._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
+        print("get_gridline l.path at this point", l.path)
+        # print("l.get_path() at this point", l.get_path())
+        # l.get_path()._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
+        p = l.path
+        print("get_gridline p ", p)
+        interpolation_steps = p._interpolation_steps
+        print("get_gridline interpolation_steps ", interpolation_steps)
+        l.path._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
+        print("get_gridline l.path._interpolation_steps ", l.path._interpolation_steps)
         self._set_artist_props(l)
         return l
 
