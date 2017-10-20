@@ -284,6 +284,7 @@ class Line2D(b_artist.Artist, HasTraits):
     linewidth=Float(allow_none=True, default_value=rcParams['lines.linewidth'])
     # linestyle=Instance('matplotlib.text.Text', allow_none=True, default_value=None)
     linestyle=Instance('matplotlib.text.Text', allow_none=True, default_value=rcParams['lines.linestyle'])
+    print("_traits/lines.py line 287 linestyle", linestyle)
 
     # TODO: not sure if this is correct?
     # color=Unicode(allow_none=True, default_value=None)
@@ -380,27 +381,16 @@ class Line2D(b_artist.Artist, HasTraits):
     y = numpy.array([])
     xy = None
 
-    # print("_traits/lines.py line 377 xorig ", xorig)
-    # print("_traits/lines.py line 378 yorig ", yorig)
-    # print("_traits/lines.py line 379 x ", x)
-    # print("_traits/lines.py line 380 y", y)
-    # print("_traits/lines.py line 381 xy", xy)
-
     def set_data(self, *args):
         """
         Set the x and y data
 
         ACCEPTS: 2D array (rows are x, y) or two 1D arrays
         """
-
-        # print("_traits/lines.py line 396 function set_data called set_data(xdata, ydata)")
         if len(args) == 1:
             x, y = args[0]
         else:
             x, y = args
-
-        # print("_traits/lines.py line 402 function set_data x", x)
-        # print("_traits/lines.py line 403 function set_data y", y)
 
         self.set_xdata(x)
         self.set_ydata(y)
@@ -411,7 +401,6 @@ class Line2D(b_artist.Artist, HasTraits):
 
         ACCEPTS: 1D array
         """
-        # print("_traits/lines.py line 414 function set_xdata called set_xdata")
         self.xorig = x
         self.invalidx = True
         self.stale = True
@@ -422,7 +411,6 @@ class Line2D(b_artist.Artist, HasTraits):
 
         ACCEPTS: 1D array
         """
-        # print("_traits/lines.py line 425 function set_ydata called set_ydata")
         self.yorig = y
         self.invalidy = True
         self.stale = True
@@ -471,23 +459,18 @@ class Line2D(b_artist.Artist, HasTraits):
         if not iterable(ydata):
             raise RuntimeError('ydata must be a sequence')
 
+        print("_traits/lines.py line 462 xdata: ", xdata)
+        print("_traits/lines.py line 463 ydata: ", ydata)
+
+
         # self.xorig = numpy.asarray([])
         # self.yorig = numpy.asarray([])
         # self.x = numpy.array([])
         # self.y = numpy.array([])
         # self.xy = None
 
-        # print("_traits/lines.py line 480 function __init__ before set_data self.xy ", self.xy)
-        # print("_traits/lines.py line 481 function __init__ before set_data self.x ", self.x)
-        # print("_traits/lines.py line 482 function __init__ before set_data self.y ", self.y)
-        # print("_traits/lines.py line 483 function __init__ before set_data xdata ", xdata)
-        # print("_traits/lines.py line 484 function __init__ before set_data ydata ", ydata)
-        # print("_traits/lines.py line 485 function __init__ setting the data here")
         self.set_data(xdata, ydata)
-        # print("_traits/lines.py line 487 function __init__ successfully set the data")
-        # print("_traits/lines.py line 488 function __init__ after set_data self.xy ", self.xy)
-        # print("_traits/lines.py line 489 function __init__ after set_data self.x ", self.x)
-        # print("_traits/lines.py line 490 function __init__ after set_data self.y ", self.y)
+
     # # # NOTE: NOT SURE IF xdata & ydata are needed
     # # xdata default
     # @default("xdata")
@@ -869,11 +852,9 @@ class Line2D(b_artist.Artist, HasTraits):
         # Convert points to pixels
         # transformed_path = self._get_transformed_path()
         transformed_path = self.transformed_path
-        print("_traits/lines.py line 872 function contains transformed_path", transformed_path)
         path, affine = transformed_path.get_transformed_path_and_affine()
         path = affine.transform_path(path)
         xy = path.vertices
-        print("_traits/lines.py line 876 function contains xy = path.vertices", xy)
         xt = xy[:, 0]
         yt = xy[:, 1]
 
@@ -988,10 +969,6 @@ class Line2D(b_artist.Artist, HasTraits):
         else:
             interpolation_steps = 1
         xy = STEP_LOOKUP_MAP[self.drawstyle](*self.xy.T)
-        # xy = STEP_LOOKUP_MAP[self.drawstyle](self.xy.T)
-        # print("_traits/lines.py line 992 xy[0] aka x", xy[:, 0])
-        # print("_traits/lines.py line 992 xy[1] aka y", xy[:, 1])
-        print("_traits/lines.py line 994 xy", xy)
 
         self.path = Path(np.asarray(xy).T,
                           _interpolation_steps=interpolation_steps)
@@ -1011,7 +988,6 @@ class Line2D(b_artist.Artist, HasTraits):
             # xy = STEP_LOOKUP_MAP[self._drawstyle](*self._xy[subslice, :].T)
             path = Path(np.asarray(xy).T,
                          _interpolation_steps=self._path._interpolation_steps)
-            print("_traits/lines.py line 1046 function draw path ", path)
         else:
             path = self.path
         self.transformed_path = TransformedPath(_path, self.get_transform())
@@ -1039,24 +1015,17 @@ class Line2D(b_artist.Artist, HasTraits):
             subslice = slice(max(i0 - 1, 0), i1 + 1)
             self.ind_offset = subslice.start
             self.transform_path(subslice)
-            print("_traits/lines.py line 1046 function draw self.transform_path ", self.transform_path)
 
         # transf_path = self._get_transformed_path()
         trans_path = self.transform_path
-        print("_traits/lines.py line 1050 function draw trans_path ", trans_path)
-
 
         # if self.get_path_effects():
         #     from matplotlib.patheffects import PathEffectRenderer
         #     renderer = PathEffectRenderer(self.get_path_effects(), renderer)
 
-        # print("_traits/lines.py line 1057 function draw path_effects if statement ", path_effects)
         if self.path_effects:
             from matplotlib.patheffects import PathEffectRenderer
             renderer = PathEffectRenderer(self.get_path_effects(), renderer)
-
-        # print("_traits/lines.py line 1062 function draw outside path_effects if statement ", path_effects)
-
 
         renderer.open_group('line2d', self.get_gid())
         print("_traits/lines.py line 1062 function self.linestyle",self.linestyle)
@@ -1257,16 +1226,10 @@ class Line2D(b_artist.Artist, HasTraits):
             self.recache()
         return self.path
 
-# print("_traits.lines.Lin2D")
 lineStyles = Line2D.lineStyles
-# print("lineStyles: ", lineStyles)
 lineMarkers = MarkerStyle.markers
-# print("lineMarkers: ", lineMarkers)
 drawStyles = Line2D.drawStyles
-# print("drawStyles: ", drawStyles)
-fillStyles = MarkerStyle.fillstyles
-# print("fillStyles: ", fillStyles)
-
+fillStyles = MarkerStyle.fillstyle
 
 #for monkey patching
 b_Line2D.Line2D = Line2D
