@@ -86,6 +86,7 @@ def streamplot(axes, x, y, u, v, density=1, linewidth=None, color=None,
 
     if zorder is None:
         zorder = mlines.Line2D.zorder
+        # print("streamplot.py line 89 printing zorder", zorder)
 
     # default to data coordinates
     if transform is None:

@@ -305,7 +305,7 @@ class Line2D(b_artist.Artist, HasTraits):
 
     #markerfacecolor=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
     # same applies for the alternative face color
-    markerfacecoloralt=Unicode(allow_none=True, default_value=None)
+    markerfacecoloralt=Unicode(allow_none=True, default_value='none')
     # markerfacecoloralt=Unicode(allow_none=True, default_value=None)
 
     #markerfacecoloralt=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
@@ -343,7 +343,7 @@ class Line2D(b_artist.Artist, HasTraits):
     # drawstyle=Unicode(allow_none=True, default_value=None)
     drawstyle=Unicode(allow_none=True, default_value='default')
     # drawstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
-    # drawstyle=Instance('matplotlib.text.Text', allow_none=True,default_value='default')
+    # drawstyle=Instance('matplotlib.text.Text', allow_none=False,default_value='default')
 
     # for this one I want to attempt at using the ANY trait
     markevery=Any(allow_none=True, default_value=None)
@@ -374,6 +374,18 @@ class Line2D(b_artist.Artist, HasTraits):
     us_dashSeq = None #TODO: figure this out
     us_dashOffset=Int(allow_none=True, default_value=None)
 
+    xorig = numpy.asarray([])
+    yorig = numpy.asarray([])
+    x = numpy.array([])
+    y = numpy.array([])
+    xy = None
+
+    # print("_traits/lines.py line 377 xorig ", xorig)
+    # print("_traits/lines.py line 378 yorig ", yorig)
+    # print("_traits/lines.py line 379 x ", x)
+    # print("_traits/lines.py line 380 y", y)
+    # print("_traits/lines.py line 381 xy", xy)
+
     def set_data(self, *args):
         """
         Set the x and y data
@@ -381,14 +393,14 @@ class Line2D(b_artist.Artist, HasTraits):
         ACCEPTS: 2D array (rows are x, y) or two 1D arrays
         """
 
-        print("called set_data(xdata, ydata)")
+        # print("_traits/lines.py line 396 function set_data called set_data(xdata, ydata)")
         if len(args) == 1:
             x, y = args[0]
         else:
             x, y = args
 
-        print("x", x)
-        print("y", y)
+        # print("_traits/lines.py line 402 function set_data x", x)
+        # print("_traits/lines.py line 403 function set_data y", y)
 
         self.set_xdata(x)
         self.set_ydata(y)
@@ -399,7 +411,7 @@ class Line2D(b_artist.Artist, HasTraits):
 
         ACCEPTS: 1D array
         """
-        print("called set_xdata")
+        # print("_traits/lines.py line 414 function set_xdata called set_xdata")
         self.xorig = x
         self.invalidx = True
         self.stale = True
@@ -410,7 +422,7 @@ class Line2D(b_artist.Artist, HasTraits):
 
         ACCEPTS: 1D array
         """
-        print("called set_ydata")
+        # print("_traits/lines.py line 425 function set_ydata called set_ydata")
         self.yorig = y
         self.invalidy = True
         self.stale = True
@@ -431,23 +443,23 @@ class Line2D(b_artist.Artist, HasTraits):
                              in zip(self.x, self.y)]))
 
     def __init__(self, xdata, ydata,
-                 linewidth=None,  # all Nones default to rc
-                 linestyle=None,
-                 color=None,
-                 marker=None,
-                 markersize=None,
+                 linewidth=rcParams['lines.linewidth'],
+                 linestyle=rcParams['lines.linestyle'],
+                 color=rcParams['lines.color'],
+                 marker=rcParams['lines.marker'],
+                 markersize=rcParams['lines.markersize'],
                  markeredgewidth=None,
                  markeredgecolor=None,
                  markerfacecolor=None,
                  markerfacecoloralt='none',
                  fillstyle=None,
-                 antialiased=None,
-                 dash_capstyle=None,
-                 solid_capstyle=None,
-                 dash_joinstyle=None,
-                 solid_joinstyle=None,
+                 antialiased=rcParams['lines.antialiased'],
+                 dash_capstyle=rcParams['lines.dash_capstyle'],
+                 solid_capstyle=rcParams['lines.solid_capstyle'],
+                 dash_joinstyle=rcParams['lines.dash_joinstyle'],
+                 solid_joinstyle=rcParams['lines.solid_joinstyle'],
                  pickradius=5,
-                 drawstyle=None,
+                 drawstyle='default',
                  markevery=None,
                  **kwargs
                  ):
@@ -459,46 +471,33 @@ class Line2D(b_artist.Artist, HasTraits):
         if not iterable(ydata):
             raise RuntimeError('ydata must be a sequence')
 
-        # xorig = numpy.asarray([])
-        # yorig = numpy.asarray([])
+        # self.xorig = numpy.asarray([])
+        # self.yorig = numpy.asarray([])
+        # self.x = numpy.array([])
+        # self.y = numpy.array([])
+        # self.xy = None
 
-        self.xorig = numpy.asarray([])
-        self.yorig = numpy.asarray([])
-
-        # x = numpy.array([])
-        # y = numpy.array([])
-        # xy = (x,y)
-
-        self.x = numpy.array([])
-        self.y = numpy.array([])
-        # self.xy = (x,y)
-
-        # x = None
-        # y = None
-        # xy = None
-
-        # self.x = None
-        # self.y = None
-        self.xy = None
-
-        print("setting the data here")
+        # print("_traits/lines.py line 480 function __init__ before set_data self.xy ", self.xy)
+        # print("_traits/lines.py line 481 function __init__ before set_data self.x ", self.x)
+        # print("_traits/lines.py line 482 function __init__ before set_data self.y ", self.y)
+        # print("_traits/lines.py line 483 function __init__ before set_data xdata ", xdata)
+        # print("_traits/lines.py line 484 function __init__ before set_data ydata ", ydata)
+        # print("_traits/lines.py line 485 function __init__ setting the data here")
         self.set_data(xdata, ydata)
-        print("successfully set the data")
-        print("self.xy ", self.xy)
-
-
+        # print("_traits/lines.py line 487 function __init__ successfully set the data")
+        # print("_traits/lines.py line 488 function __init__ after set_data self.xy ", self.xy)
+        # print("_traits/lines.py line 489 function __init__ after set_data self.x ", self.x)
+        # print("_traits/lines.py line 490 function __init__ after set_data self.y ", self.y)
     # # # NOTE: NOT SURE IF xdata & ydata are needed
     # # xdata default
     # @default("xdata")
     # def _xdata_default(self):
     #     from numpy import array
-    #     # print("xdata: generating default value")
     #     # return []
     #     return None
     # # xdata validate
     # @validate("xdata")
     # def _xdata_validate(self, proposal):
-    #     # print("xdata: cross validating %r" % proposal.value)
     #     #convert sequences to numpy arrays
     #     # if not iterable(proposal.value):
     #         # raise RuntimeError('xdata must be a sequence')
@@ -716,7 +715,6 @@ class Line2D(b_artist.Artist, HasTraits):
     #pickradius validate
     @validate("pickradius")
     def _pickradius_validate(self, proposal):
-        # print("pickradius: cross validating %r" % proposal.value)
         return proposal.value
 
     #drawstyle validate
@@ -799,64 +797,45 @@ class Line2D(b_artist.Artist, HasTraits):
     #verticalOffset default
     # @default("verticalOffset")
     # def _verticalOffset_default(self):
-        # print("verticalOffset: generating default value")
         # return False
     #verticalOffset validate
     # @validate("verticalOffset")
     # def _verticalOffset_validate(self, proposal):
-        # print("verticalOffset: cross validating %r" % proposal.value)
         # return proposal.value
-    #verticalOffset observer
-    # @observe("verticalOffset", type="change")
-    # def _verticalOffset_observe(self, change):
-        # print("verticalOffset: observed a change from %r to %r" % (change.old, change.new))
 
     #ind_offset validate
     @validate("ind_offset")
     def _ind_offset_validate(self, proposal):
-        # print("ind_offset: cross validating %r" % proposal.value)
         return proposal.value
 
     #invalidx validate
     @validate("invalidx")
     def _invalidx_validate(self, proposal):
-        # print("invalidx: cross validating %r" % proposal.value)
         return proposal.value
 
     #invalidy validate
     @validate("invalidy")
     def _invalidy_validate(self, proposal):
-        # print("invalidy: cross validating %r" % proposal.value)
         return proposal.value
 
-    # path default
-    # @default("path")
-    # def _path_default(self):
-    #     from matplotlib.path import Path
-    #     # print("path: generating default value")
-    #     return None
     #path validate
     @validate("path")
     def _path_validate(self, proposal):
-        # print("path: cross validating %r" % proposal.value)
         return proposal.value
 
     #transformed_path validate
     @validate("transformed_path")
     def _transformed_path_validate(self, proposal):
-        # print("transformed_path: cross validating %r" % proposal.value)
         return proposal.value
 
     #subslice validate
     @validate("subslice")
     def _subslice_validate(self, proposal):
-        # print("subslice: cross validating %r" % proposal.value)
         return proposal.value
 
     #x_filled validate
     @validate("x_filled")
     def _x_filled_validate(self, proposal):
-        # print("x_filled: cross validating %r" % proposal.value)
         return proposal.value
 
 
@@ -875,25 +854,26 @@ class Line2D(b_artist.Artist, HasTraits):
 
         TODO: sort returned indices by distance
         """
-        if callable(self._contains):
-            return self._contains(self, mouseevent)
+        if callable(self.contains):
+            return self.contains(self, mouseevent)
 
         if not is_numlike(self.pickradius):
             raise ValueError("pick radius should be a distance")
 
         # Make sure we have data to plot
-        if self._invalidy or self._invalidx:
+        if self.invalidy or self.invalidx:
             self.recache()
-        if len(self._xy) == 0:
+        if len(self.xy) == 0:
             return False, {}
 
         # Convert points to pixels
         # transformed_path = self._get_transformed_path()
         transformed_path = self.transformed_path
-        print("transformed_path", transformed_path)
+        print("_traits/lines.py line 872 function contains transformed_path", transformed_path)
         path, affine = transformed_path.get_transformed_path_and_affine()
         path = affine.transform_path(path)
         xy = path.vertices
+        print("_traits/lines.py line 876 function contains xy = path.vertices", xy)
         xt = xy[:, 0]
         yt = xy[:, 1]
 
@@ -1007,12 +987,12 @@ class Line2D(b_artist.Artist, HasTraits):
             interpolation_steps = self.path._interpolation_steps
         else:
             interpolation_steps = 1
-        # xy = STEP_LOOKUP_MAP[self.drawstyle](*self.xy.T)
-        print("self.drawstyle ", self.drawstyle)
-        print("self.xy ", self.xy)
-        print("self.xy.T ", self.xy.T)
+        xy = STEP_LOOKUP_MAP[self.drawstyle](*self.xy.T)
+        # xy = STEP_LOOKUP_MAP[self.drawstyle](self.xy.T)
+        # print("_traits/lines.py line 992 xy[0] aka x", xy[:, 0])
+        # print("_traits/lines.py line 992 xy[1] aka y", xy[:, 1])
+        print("_traits/lines.py line 994 xy", xy)
 
-        xy = STEP_LOOKUP_MAP[self.drawstyle](self.xy.T)
         self.path = Path(np.asarray(xy).T,
                           _interpolation_steps=interpolation_steps)
         self.transformed_path = None
@@ -1027,17 +1007,21 @@ class Line2D(b_artist.Artist, HasTraits):
         """
         # Masked arrays are now handled by the Path class itself
         if subslice is not None:
-            xy = STEP_LOOKUP_MAP[self._drawstyle](*self._xy[subslice, :].T)
+            xy = STEP_LOOKUP_MAP[self.drawstyle](self.xy[subslice, :].T)
+            # xy = STEP_LOOKUP_MAP[self._drawstyle](*self._xy[subslice, :].T)
             path = Path(np.asarray(xy).T,
                          _interpolation_steps=self._path._interpolation_steps)
+            print("_traits/lines.py line 1046 function draw path ", path)
         else:
             path = self.path
-        self._transformed_path = TransformedPath(_path, self.get_transform())
+        self.transformed_path = TransformedPath(_path, self.get_transform())
 
     def _is_sorted(self, x):
         """return True if x is sorted in ascending order"""
         # We don't handle the monotonically decreasing case.
-        return _path.is_sorted(x)
+        # return _path.is_sorted(x)
+        return path.is_sorted(x) #TODO: test
+
 
     @allow_rasterization
     def draw(self, renderer):
@@ -1054,16 +1038,29 @@ class Line2D(b_artist.Artist, HasTraits):
             i1, = self.x_filled.searchsorted([x1], 'right')
             subslice = slice(max(i0 - 1, 0), i1 + 1)
             self.ind_offset = subslice.start
-            self._transform_path(subslice)
+            self.transform_path(subslice)
+            print("_traits/lines.py line 1046 function draw self.transform_path ", self.transform_path)
 
-        transf_path = self._get_transformed_path()
+        # transf_path = self._get_transformed_path()
+        trans_path = self.transform_path
+        print("_traits/lines.py line 1050 function draw trans_path ", trans_path)
 
-        if self.get_path_effects():
+
+        # if self.get_path_effects():
+        #     from matplotlib.patheffects import PathEffectRenderer
+        #     renderer = PathEffectRenderer(self.get_path_effects(), renderer)
+
+        # print("_traits/lines.py line 1057 function draw path_effects if statement ", path_effects)
+        if self.path_effects:
             from matplotlib.patheffects import PathEffectRenderer
             renderer = PathEffectRenderer(self.get_path_effects(), renderer)
 
+        # print("_traits/lines.py line 1062 function draw outside path_effects if statement ", path_effects)
+
+
         renderer.open_group('line2d', self.get_gid())
-        if self._lineStyles[self._linestyle] != '_draw_nothing':
+        print("_traits/lines.py line 1062 function self.linestyle",self.linestyle)
+        if self.lineStyles[self.linestyle] != '_draw_nothing':
             tpath, affine = transf_path.get_transformed_path_and_affine()
             if len(tpath.vertices):
                 gc = renderer.new_gc()
@@ -1260,6 +1257,26 @@ class Line2D(b_artist.Artist, HasTraits):
             self.recache()
         return self.path
 
+# print("_traits.lines.Lin2D")
+lineStyles = Line2D.lineStyles
+# print("lineStyles: ", lineStyles)
+lineMarkers = MarkerStyle.markers
+# print("lineMarkers: ", lineMarkers)
+drawStyles = Line2D.drawStyles
+# print("drawStyles: ", drawStyles)
+fillStyles = MarkerStyle.fillstyles
+# print("fillStyles: ", fillStyles)
+
 
 #for monkey patching
 b_Line2D.Line2D = Line2D
+
+docstring.interpd.update(Line2D=artist.kwdoc(Line2D))
+#TODO: print statement to see what this line does: right now returns None
+# print("docstring.interpd.update(Line2D=artist.kwdoc(Line2D)): ", docstring.interpd.update(Line2D=artist.kwdoc(Line2D)))
+
+# You can not set the docstring of an instancemethod,
+# but you can on the underlying function.  Go figure.
+docstring.dedent_interpd(Line2D.__init__)
+#TODO: print statement to see what this line does:
+# print("docstring.dedent_interpd(Line2D.__init__): ", docstring.dedent_interpd(Line2D.__init__))

@@ -456,22 +456,54 @@ class XTick(Tick):
                           alpha=rcParams['grid.alpha'],
                           markersize=0)
         l.set_transform(self.axes.get_xaxis_transform(which='grid'))
-        print("l.path at this point", l.path)
+        # print("axis.py line 459 function _get_gridline l.path at this point", l.path)
         # print("l.get_path() at this point", l.get_path())
         # l.get_path()._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
         p = l.path
-        print("p ", p)
+        # print("axis.py line 463 function _get_gridline p ", p)
         interpolation_steps = p._interpolation_steps
-        print("interpolation_steps ", interpolation_steps)
+        # print("axis.py line 465 function _get_gridline interpolation_steps ", interpolation_steps)
         l.path._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
-        print("l.path._interpolation_steps ", l.path._interpolation_steps)
+        # print("axis.py line 467 function _get_gridline l.path._interpolation_steps ", l.path._interpolation_steps)
 
         self._set_artist_props(l)
+
+        # print("axis.py line 471 function _get_gridline testing l")
+        # print("l.linewidth", l.linewidth)
+        # print("l.linestyle", l.linestyle)
+        # print("l.color", l.color)
+        # print("l.marker", l.marker)
+        # print("l.markersize", l.markersize)
+        # print("l.markeredgewidth", l.markeredgewidth)
+        # print("l.markerfacecolor", l.markerfacecolor)
+        # print("l.markerfacecoloralt", l.markerfacecoloralt)
+        # print("l.fillstyle", l.fillstyle)
+        # print("l.antialiased", l.antialiased)
+        # print("l.dash_capstyle", l.dash_capstyle)
+        # print("l.solid_capstyle", l.solid_capstyle)
+        # print("l.dash_joinstyle", l.dash_joinstyle)
+        # print("l.solid_joinstyle", l.solid_joinstyle)
+        # print("l.pickradius", l.pickradius)
+        # print("l.drawstyle", l.drawstyle)
+        # print("l.markevery", l.markevery)
+        # print("l.verticalOffset", l.verticalOffset)
+        # print("l.ind_offset", l.ind_offset)
+        # print("l.invalidx", l.invalidx)
+        # print("l.invalidy", l.invalidy)
+        # print("l.path", l.path)
+        # print("l.transformed_path", l.transformed_path)
+        # print("l.subslice", l.subslice)
+        # print("l.x_filled", l.x_filled)
+        # print("l.dashSeq", l.dashSeq)
+        # print("l.dashOffset", l.dashOffset)
+        # print("l.us_dashSeq", l.us_dashSeq)
+        # print("l.us_dashOffset", l.us_dashOffset)
 
         return l
 
     def update_position(self, loc):
         'Set the location of tick in data coords with scalar *loc*'
+        # print("axis.py line 506 function update_position testing input loc ", loc)
         if self.tick1On:
             self.tick1line.set_xdata((loc,))
         if self.tick2On:
@@ -590,16 +622,44 @@ class YTick(Tick):
 
         l.set_transform(self.axes.get_yaxis_transform(which='grid'))
         # l.get_path()._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
-        print("get_gridline l.path at this point", l.path)
-        # print("l.get_path() at this point", l.get_path())
-        # l.get_path()._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
+        # print("axis.py line 625 function _get_gridline l.path at this point", l.path)
         p = l.path
-        print("get_gridline p ", p)
+        # print("axis.py line 627 function _get_gridline p ", p)
         interpolation_steps = p._interpolation_steps
-        print("get_gridline interpolation_steps ", interpolation_steps)
+        # print("axis.py line 629 function _get_gridline interpolation_steps ", interpolation_steps)
         l.path._interpolation_steps = GRIDLINE_INTERPOLATION_STEPS
-        print("get_gridline l.path._interpolation_steps ", l.path._interpolation_steps)
+        # print("axis.py line 631 function _get_gridline l.path._interpolation_steps ", l.path._interpolation_steps)
         self._set_artist_props(l)
+        # print("axis.py line 633 function _get_gridline testing l")
+        # print("l.linewidth", l.linewidth)
+        # print("l.linestyle", l.linestyle)
+        # print("l.color", l.color)
+        # print("l.marker", l.marker)
+        # print("l.markersize", l.markersize)
+        # print("l.markeredgewidth", l.markeredgewidth)
+        # print("l.markerfacecolor", l.markerfacecolor)
+        # print("l.markerfacecoloralt", l.markerfacecoloralt)
+        # print("l.fillstyle", l.fillstyle)
+        # print("l.antialiased", l.antialiased)
+        # print("l.dash_capstyle", l.dash_capstyle)
+        # print("l.solid_capstyle", l.solid_capstyle)
+        # print("l.dash_joinstyle", l.dash_joinstyle)
+        # print("l.solid_joinstyle", l.solid_joinstyle)
+        # print("l.pickradius", l.pickradius)
+        # print("l.drawstyle", l.drawstyle)
+        # print("l.markevery", l.markevery)
+        # print("l.verticalOffset", l.verticalOffset)
+        # print("l.ind_offset", l.ind_offset)
+        # print("l.invalidx", l.invalidx)
+        # print("l.invalidy", l.invalidy)
+        # print("l.path", l.path)
+        # print("l.transformed_path", l.transformed_path)
+        # print("l.subslice", l.subslice)
+        # print("l.x_filled", l.x_filled)
+        # print("l.dashSeq", l.dashSeq)
+        # print("l.dashOffset", l.dashOffset)
+        # print("l.us_dashSeq", l.us_dashSeq)
+        # print("l.us_dashOffset", l.us_dashOffset)
         return l
 
     def update_position(self, loc):

@@ -1740,6 +1740,7 @@ def rgrids(*args, **kwargs):
     else:
         lines, labels = ax.set_rgrids(*args, **kwargs)
 
+    # print("pyplot.py line 1743 lines list ", lines)
     return ( silent_list('Line2D rgridline', lines),
              silent_list('Text rgridlabel', labels) )
 
@@ -1799,7 +1800,7 @@ def thetagrids(*args, **kwargs):
         labels = ax.xaxis.get_ticklabels()
     else:
         lines, labels = ax.set_thetagrids(*args, **kwargs)
-
+    # print("pyplot.py line 1803 printing lines list", lines)
     return (silent_list('Line2D thetagridline', lines),
             silent_list('Text thetagridlabel', labels)
             )

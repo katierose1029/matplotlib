@@ -16,13 +16,6 @@ import matplotlib.cbook as cbook
 import matplotlib.artist as artist
 from matplotlib.artist import allow_rasterization
 
-# import matplotlib._traits
-# print('_traits.artist', traits.artist)
-# import matplotlib._traits.artist as t_artist
-# from matplotlib._traits.artist import *
-# from matplotlib._traits.artist import Artist
-# print('matplotlib._traits.artist.Artist: ', Artist)
-
 import matplotlib.colors as colors
 from matplotlib import docstring
 import matplotlib.transforms as transforms
@@ -110,8 +103,8 @@ class Patch(artist.Artist):
 
         %(Patch)s
         """
-        artist.Artist.__init__(self)
         # print('matplotlib.patches.Patch artist.Artist: ', artist.Artist)
+        artist.Artist.__init__(self)
 
         if linewidth is None:
             linewidth = mpl.rcParams['patch.linewidth']
