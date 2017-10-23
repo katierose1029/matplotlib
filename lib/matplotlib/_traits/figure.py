@@ -65,7 +65,7 @@ def _stale_figure_callback(self,val):
 		self.figure.stale = val
 
 class AxesStack(Stack):
-	def __init__(self):
+    def __init__(self):
         Stack.__init__(self)
         self._ind = 0
 
@@ -75,7 +75,6 @@ class SubplotParams(object):
         self.update(left, bottom, right, top, wspace, hspace)
 	
 class Figure(Artist, HasTraits, b_figure.Figure):
-
     def __str__(self):
         return "Figure(%gx%g)" % tuple(self.bbox.size)
 
@@ -94,7 +93,7 @@ class Figure(Artist, HasTraits, b_figure.Figure):
     edgecolor = instance("matplotlib.figure.edgecolor", default_value=rcParams['figure.edgecolor'], allow_none = True)
     linewidth = Float(default_value = 0.0)
     frameon = Bool(default_value=rcParams['figure.frameon'],allow_none = True)
-    subplotpars = SubplotParams(default_value = None);
+    subplotpars = SubplotParams()
     tight_layout = instance("matplotlib.figure.autolayout", default_value=None)
     if not np.isfinite(figsize).all():
         raise ValueError('figure size must be finite not '
@@ -106,7 +105,7 @@ class Figure(Artist, HasTraits, b_figure.Figure):
     patch = Rectangle(xy=(0, 0), width=1, height=1,
                     facecolor=facecolor, edgecolor=edgecolor, linewidth=linewidth)
     patch.set_aa(False)
-    hold = instance("matplotlib.axes.hold", default_value =rcParams['axes.hold']);
+    hold = instance("matplotlib.axes.hold", default_value =rcParams['axes.hold'])
     canvas = None
     suptitle = None
     # End of Intialization
@@ -114,7 +113,7 @@ class Figure(Artist, HasTraits, b_figure.Figure):
     bbox_inches = Bbox.from_bounds(0, 0, *figsize)
     dpi_scale_trans = Affine2D().scale(dpi, dpi)
     bbox = TransformedBbox(self.bbox_inches, self.dpi_scale_trans)
-    # set_tight_layout(tight_layout) TODO: make this function before you uncomment and pass in tight_layout
+    set_tight_layout(tight_layout)
     axstack = AxesStack()
     # clf() #clear figure TODO: make this function before you uncomment
     cachedRenderer = None
@@ -174,58 +173,159 @@ class Figure(Artist, HasTraits, b_figure.Figure):
                 "so cannot show the figure")
 
 
+    # TODO: Finish up the validates. Check which ones need default functions (and possibly observe function)
+    # defaults, validates, observe functions
 
-    axes = property(fget=_get_axes, doc="Read-only: list of axes in Figure")
+    @default("axes")
+    def _axes_default(self):
+        from matplotlib.axes import Axes
+        return None
 
-    #TODO: Finish up the validates. Check which ones need default functions (and possibly observe function)
-    #defaults, validates, observe functions
+    @validate("axes")
+    def sca(self, proposal):
+        'Set the current axes to be a and return a (a = proposal.value)'
+        self._axstack.bubble(proposal.value)
+        for func in self._axobservers:
+            func(self)
+        return [proposal.value] # TODO: [proposal.value] or proposal.value
+
+    @validate("canvas")
+    def _canvas_validate(self, proposal):
+        """
+        Set the canvas that contains the figure
+        ACCEPTS: a FigureCanvas instance
+        """
+        self.canvas = proposal.value
+        return proposal.value
+
+    @validate("dpi")
+    def _dpi_validate(self, proposal):
+        """
+                Set the dots-per-inch of the figure
+                ACCEPTS: float
+                """
+        self.dpi = proposal.value
+        self.stale = True
+        return proposal.value
+
+    @validate("edgecolor")
+    def _edgecolor_validate(self, proposal):
+        """
+                Set the edge color of the Figure rectangle
+                ACCEPTS: any matplotlib color - see help(colors)
+                """
+        self.patch.set_edgecolor(proposal.value)
+        return proposal.value
+
+    @validate("facecolor")
+    def _facecolor_validate(self, proposal):
+        """
+                Set the face color of the Figure rectangle
+                ACCEPTS: any matplotlib color - see help(colors)
+                """
+        self.patch.set_facecolor(proposal.value)
+        return proposal.value
+
+    @validate("figheight")
+    def _figheight_validate(self, proposal, forward=False):
+        """
+        Set the height of the figure in inches
+        ACCEPTS: float
+        """
+        self.set_size_inches(self.get_figwidth(), proposal.value, forward=forward)
+        return proposal.value
+
     @validate("figsize")
     def _figsize_validate(self, proposal):
         if not self.figsize == proposal.value:
             self.figsize = proposal.value
+        return proposal.value
 
-    @validate("dpi")
-    def _dpi_validate(self, proposal):
-
-        return None
-
-    @validate("facecolor")
-    def _facecolor_validate(self, proposal):
-
-        return None
-
-    @validate("edgecolor")
-    def _edgecolor_validate(self, proposal):
-
-        return None
-
-    @validate("linewidth")
-    def _linewidth_validate(self, proposal):
-
-        return None
+    @validate("figwidth")
+    def _figwidth_validate(self, proposal, forward=False):
+        """
+        Set the width of the figure in inches
+        ACCEPTS: float
+        """
+        self.set_size_inches(proposal.value, self.get_figheight(), forward=forward)
+        return proposal.value
 
     @validate("frameon")
     def _frameon_validate(self, proposal):
+        """
+        Set whether the figure frame (background) is displayed or invisible
+        ACCEPTS: boolean
+        """
+        self.frameon = proposal.value
+        self.stale = True
+        return proposal.value
 
-        return None
+    # This probably isn't necessary... it just has to be a number
+    # @validate("linewidth")
+    # def _linewidth_validate(self, proposal):
+    #     return proposal.value
 
-    #@validate("subplotpars") TODO: make a validate for subplot
+    # @validate("subplotpars")
+    # def _subplotpars_validate(self,proposal):
+    #     return proposal.value
 
     @validate("tight_layout")
     def _tight_layout_validate(self, proposal):
-
-        return None
-
+        return proposal.value
 
 
 
-
-    # getter setter functions from original figure.py
+    # TODO: getter and misc functions from original figure.py. Should I keep all of these?
     def _get_axes(self):
             return self._axstack.as_list()
 
     def _get_dpi(self):
         return self._dpi
+
+    def get_tight_layout(self):
+        """
+        Return the Boolean flag, True to use :meth:`tight_layout` when drawing.
+        """
+        return self._tight
+
+    def get_children(self):
+        'get a list of artists contained in the figure'
+        children = [self.patch]
+        children.extend(self.artists)
+        children.extend(self.axes)
+        children.extend(self.lines)
+        children.extend(self.patches)
+        children.extend(self.texts)
+        children.extend(self.images)
+        children.extend(self.legends)
+        return children
+
+    def get_edgecolor(self):
+        'Get the edge color of the Figure rectangle'
+        return self.patch.get_edgecolor()
+
+    def get_facecolor(self):
+        'Get the face color of the Figure rectangle'
+        return self.patch.get_facecolor()
+
+    def get_figwidth(self):
+        'Return the figwidth as a float'
+        return self.bbox_inches.width
+
+    def get_figheight(self):
+        'Return the figheight as a float'
+        return self.bbox_inches.height
+
+    def get_dpi(self):
+        'Return the dpi as a float'
+        return self.dpi
+
+    def get_frameon(self):
+        'get the boolean indicating frameon'
+        return self.frameon
+
+    def get_axes(self):
+        return self.axes
 
     def _set_dpi(self, dpi, forward=True):
         """
@@ -238,15 +338,15 @@ class Figure(Artist, HasTraits, b_figure.Figure):
         self.callbacks.process('dpi_changed', self)
         self._dpi_validate(dpi)
 
+    axes = property(fget=_get_axes, doc="Read-only: list of axes in Figure")
     dpi = property(_get_dpi, _set_dpi)
 
-    def get_tight_layout(self):
-        """
-        Return the Boolean flag, True to use :meth:`tight_layout` when drawing.
-        """
-        return self._tight
+    def _set_artist_props(self, a):
+        if a != self:
+            a.set_figure(self)
+        a.stale_callback = _stale_figure_callback
+        a.set_transform(self.transFigure)
 
-    # TODO: tight should be a proposal.value
     def set_tight_layout(self, tight):
         """
         Set whether :meth:`tight_layout` is used upon drawing.
@@ -264,18 +364,6 @@ class Figure(Artist, HasTraits, b_figure.Figure):
         self._tight_parameters = tight if isinstance(tight, dict) else {}
         self.stale = True
 
-    def get_children(self):
-        'get a list of artists contained in the figure'
-        children = [self.patch]
-        children.extend(self.artists)
-        children.extend(self.axes)
-        children.extend(self.lines)
-        children.extend(self.patches)
-        children.extend(self.texts)
-        children.extend(self.images)
-        children.extend(self.legends)
-        return children
-
     def contains(self, mouseevent):
         """
         Test whether the mouse event occurred on the figure.
@@ -290,14 +378,6 @@ class Figure(Artist, HasTraits, b_figure.Figure):
     def get_window_extent(self, *args, **kwargs):
         'get the figure bounding box in display space; kwargs are void'
         return self.bbox
-
-    def set_canvas(self, canvas):
-        """
-        Set the canvas that contains the figure
-
-        ACCEPTS: a FigureCanvas instance
-        """
-        self.canvas = canvas
 
     def set_size_inches(self, w, h=None, forward=True):
         """Set the figure size in inches (1in == 2.54cm)
@@ -356,80 +436,6 @@ class Figure(Artist, HasTraits, b_figure.Figure):
         matplotlib.Figure.set_size_inches
         """
         return np.array(self.bbox_inches.p1)
-
-    def get_edgecolor(self):
-        'Get the edge color of the Figure rectangle'
-        return self.patch.get_edgecolor()
-
-    def get_facecolor(self):
-        'Get the face color of the Figure rectangle'
-        return self.patch.get_facecolor()
-
-    def get_figwidth(self):
-        'Return the figwidth as a float'
-        return self.bbox_inches.width
-
-    def get_figheight(self):
-        'Return the figheight as a float'
-        return self.bbox_inches.height
-
-    def get_dpi(self):
-        'Return the dpi as a float'
-        return self.dpi
-
-    def get_frameon(self):
-        'get the boolean indicating frameon'
-        return self.frameon
-
-    def set_edgecolor(self, color):
-        """
-        Set the edge color of the Figure rectangle
-
-        ACCEPTS: any matplotlib color - see help(colors)
-        """
-        self.patch.set_edgecolor(color)
-
-    def set_facecolor(self, color):
-        """
-        Set the face color of the Figure rectangle
-
-        ACCEPTS: any matplotlib color - see help(colors)
-        """
-        self.patch.set_facecolor(color)
-
-    def set_dpi(self, val):
-        """
-        Set the dots-per-inch of the figure
-
-        ACCEPTS: float
-        """
-        self.dpi = val
-        self.stale = True
-
-    def set_figwidth(self, val, forward=False):
-        """
-        Set the width of the figure in inches
-
-        ACCEPTS: float
-        """
-        self.set_size_inches(val, self.get_figheight(), forward=forward)
-
-    def set_figheight(self, val, forward=False):
-        """
-        Set the height of the figure in inches
-
-        ACCEPTS: float
-        """
-        self.set_size_inches(self.get_figwidth(), val, forward=forward)
-
-    def set_frameon(self, b):
-        """
-        Set whether the figure frame (background) is displayed or invisible
-
-        ACCEPTS: boolean
-        """
-        self.frameon = b
-        self.stale = True
 
     def delaxes(self, a):
         'remove a from the figure and update the current axes'
@@ -641,8 +647,6 @@ class Figure(Artist, HasTraits, b_figure.Figure):
         a.stale_callback = _stale_figure_callback
         return a
 
-    def get_axes(self):
-        return self.axes
 
     def legend(self, *args, **kwargs):
         """
@@ -857,11 +861,6 @@ class Figure(Artist, HasTraits, b_figure.Figure):
         self.stale = True
         return l
 
-    def _set_artist_props(self, a):
-        if a != self:
-            a.set_figure(self)
-        a.stale_callback = _stale_figure_callback
-        a.set_transform(self.transFigure)
 
     def __getstate__(self):
         state = super(Figure, self).__getstate__()
@@ -934,7 +933,6 @@ class Figure(Artist, HasTraits, b_figure.Figure):
         'whenever the axes state change, ``func(self)`` will be called'
         self._axobservers.append(func)
 
-    #not sure if still needed ORIGINAL FUNCTION
     def autofmt_xdate(self, bottom=0.2, rotation=30, ha='right', which=None):
         """
         Date ticklabels often overlap, so it is useful to rotate them
@@ -1485,13 +1483,6 @@ class Figure(Artist, HasTraits, b_figure.Figure):
         # no axes found, so create one which spans the figure
         return self.add_subplot(1, 1, 1, **kwargs)
 
-    def sca(self, a):
-        'Set the current axes to be a and return a'
-        self._axstack.bubble(a)
-        for func in self._axobservers:
-            func(self)
-        return a
-
     def _gci(self):
         """
         helper for :func:`~matplotlib.pyplot.gci`;
@@ -1811,63 +1802,3 @@ class Figure(Artist, HasTraits, b_figure.Figure):
             pad=pad, h_pad=h_pad, w_pad=w_pad, rect=rect)
         self.subplots_adjust(**kwargs)
 
-def figaspect(arg):
-    """
-    Create a figure with specified aspect ratio.  If *arg* is a number,
-    use that aspect ratio.  If *arg* is an array, figaspect will
-    determine the width and height for a figure that would fit array
-    preserving aspect ratio.  The figure width, height in inches are
-    returned.  Be sure to create an axes with equal with and height,
-    e.g.,
-
-    Example usage::
-
-      # make a figure twice as tall as it is wide
-      w, h = figaspect(2.)
-      fig = Figure(figsize=(w,h))
-      ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
-      ax.imshow(A, **kwargs)
-
-
-      # make a figure with the proper aspect for an array
-      A = rand(5,3)
-      w, h = figaspect(A)
-      fig = Figure(figsize=(w,h))
-      ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
-      ax.imshow(A, **kwargs)
-
-    Thanks to Fernando Perez for this function
-    """
-
-    isarray = hasattr(arg, 'shape') and not np.isscalar(arg)
-
-    # min/max sizes to respect when autoscaling.  If John likes the idea, they
-    # could become rc parameters, for now they're hardwired.
-    figsize_min = np.array((4.0, 2.0))  # min length for width/height
-    figsize_max = np.array((16.0, 16.0))  # max length for width/height
-
-    # Extract the aspect ratio of the array
-    if isarray:
-        nr, nc = arg.shape[:2]
-        arr_ratio = float(nr) / nc
-    else:
-        arr_ratio = float(arg)
-
-    # Height of user figure defaults
-    fig_height = rcParams['figure.figsize'][1]
-
-    # New size for the figure, keeping the aspect ratio of the caller
-    newsize = np.array((fig_height / arr_ratio, fig_height))
-
-    # Sanity checks, don't drop either dimension below figsize_min
-    newsize /= min(1.0, *(newsize / figsize_min))
-
-    # Avoid humongous windows as well
-    newsize /= max(1.0, *(newsize / figsize_max))
-
-    # Finally, if we have a really funky aspect ratio, break it but respect
-    # the min/max dimensions (we don't want figures 10 feet tall!)
-    newsize = np.clip(newsize, figsize_min, figsize_max)
-    return newsize
-
-docstring.interpd.update(Figure=martist.kwdoc(Figure))
