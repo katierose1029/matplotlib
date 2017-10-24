@@ -561,6 +561,12 @@ def test_pcolorimage_setdata():
     assert im._A[0, 0] == im._Ax[0] == im._Ay[0] == 0, 'value changed'
 
 
+def test_pcolorimage_extent():
+    im = plt.hist2d([1, 2, 3], [3, 5, 6],
+                    bins=[[0, 3, 7], [1, 2, 3]])[-1]
+    assert im.get_extent() == (0, 7, 1, 3)
+
+
 def test_minimized_rasterized():
     # This ensures that the rasterized content in the colorbars is
     # only as thick as the colorbar, and doesn't extend to other parts
@@ -806,10 +812,12 @@ def test_imshow_flatfield():
      colors.LogNorm,
      lambda: colors.SymLogNorm(1),
      lambda: colors.PowerNorm(1)])
-@pytest.mark.filterwarnings("ignore:Attempting to set identical left==right")
 def test_empty_imshow(make_norm):
     fig, ax = plt.subplots()
-    im = ax.imshow([[]], norm=make_norm())
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore", "Attempting to set identical left==right")
+        im = ax.imshow([[]], norm=make_norm())
     im.set_extent([-5, 5, -5, 5])
     fig.canvas.draw()
 
@@ -825,3 +833,21 @@ def test_imshow_float128():
 def test_imshow_bool():
     fig, ax = plt.subplots()
     ax.imshow(np.array([[True, False], [False, True]], dtype=bool))
+
+
+def test_imshow_deprecated_interd_warn():
+    im = plt.imshow([[1, 2], [3, np.nan]])
+    for k in ('_interpd', '_interpdr', 'iterpnames'):
+        with warnings.catch_warnings(record=True) as warns:
+            getattr(im, k)
+        assert len(warns) == 1
+
+
+def test_full_invalid():
+    x = np.ones((10, 10))
+    x[:] = np.nan
+
+    f, ax = plt.subplots()
+    ax.imshow(x)
+
+    f.canvas.draw()

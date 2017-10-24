@@ -878,7 +878,6 @@ class RcParams(MutableMapping, dict):
             the parent RcParams dictionary.
 
         """
-        import re
         pattern_re = re.compile(pattern)
         return RcParams((key, value)
                         for key, value in self.items()
@@ -1352,7 +1351,14 @@ def _init_tests():
     except ImportError:
         pass
     else:
-        faulthandler.enable()
+        # CPython's faulthandler since v3.6 handles exceptions on Windows
+        # https://bugs.python.org/issue23848 but until v3.6.4 it was
+        # printing non-fatal exceptions https://bugs.python.org/issue30557
+        import platform
+        if not (sys.platform == 'win32' and
+                (3, 6) < sys.version_info < (3, 6, 4) and
+                platform.python_implementation() == 'CPython'):
+            faulthandler.enable()
 
     # The version of FreeType to install locally for running the
     # tests.  This must match the value in `setupext.py`
@@ -1700,7 +1706,6 @@ def _preprocess_data(replace_names=None, replace_all_args=False,
                 elif label_namer in kwargs:
                     kwargs['label'] = get_label(kwargs[label_namer], label)
                 else:
-                    import warnings
                     msg = ("Tried to set a label via parameter '%s' in "
                            "func '%s' but couldn't find such an argument. \n"
                            "(This is a programming error, please report to "

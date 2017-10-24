@@ -4,7 +4,6 @@ from __future__ import (absolute_import, division, print_function,
 import six
 from six.moves import xrange, zip, zip_longest
 
-from collections import Sized
 import functools
 import itertools
 import math
@@ -353,8 +352,7 @@ class Axes(_AxesBase):
             corner of the legend in axes coordinates (in which case
             ``bbox_to_anchor`` will be ignored).
 
-        bbox_to_anchor : :class:`matplotlib.transforms.BboxBase` instance \
-or tuple of floats
+        bbox_to_anchor : `~.BboxBase` or pair of floats
             Specify any arbitrary location for the legend in `bbox_transform`
             coordinates (default Axes coordinates).
 
@@ -1631,40 +1629,45 @@ or tuple of floats
     # @_preprocess_data() # let 'plot' do the unpacking..
     @docstring.dedent_interpd
     def semilogy(self, *args, **kwargs):
-        r"""Make a plot with log scaling on the `y` axis.
+        """
+        Make a plot with log scaling on the *y* axis.
 
         Parameters
         ----------
-        basey : scalar > 1
-            Base of the `y` logarithm.
+        basey : float, optional
+            Base of the *y* logarithm. The scalar should be larger
+            than 1.
 
-        subsy : None or iterable
-            The location of the minor yticks. None defaults to
+        subsy : array_like, optional
+            The location of the minor yticks; *None* defaults to
             autosubs, which depend on the number of decades in the
-            plot. See :meth:`~matplotlib.axes.Axes.set_yscale` for
+            plot; see :meth:`~matplotlib.axes.Axes.set_yscale` for
             details.
 
-        nonposy : {'mask' | 'clip'} str
-            Non-positive values in `y` can be masked as
+        nonposy : string, optional, {'mask', 'clip'}
+            Non-positive values in *y* can be masked as
             invalid, or clipped to a very small positive number.
 
         Returns
         -------
-        `~matplotlib.lines.Line2D`
-            Line instance of the plot.
+        `~matplotlib.pyplot.plot`
+            Log-scaled plot on the *y* axis.
 
         Other Parameters
         ----------------
         **kwargs :
-            This function supports all the keyword arguments of
-            :func:`~matplotlib.pyplot.plot` and
-            :meth:`matplotlib.axes.Axes.set_xscale`.
-
-            Keyword arguments also control the
-            :class:`~matplotlib.lines.Line2D` properties:
+            Keyword arguments control the :class:`~matplotlib.lines.Line2D`
+            properties:
 
             %(Line2D)s
+
+        Notes
+        -----
+        This function supports all the keyword arguments of
+        :func:`~matplotlib.pyplot.plot` and
+        :meth:`matplotlib.axes.Axes.set_yscale`.
         """
+
         if not self._hold:
             self.cla()
         d = {'basey': kwargs.pop('basey', 10),
@@ -2104,9 +2107,10 @@ or tuple of floats
         if edgecolor is None:
             edgecolor = itertools.repeat(None)
         else:
-            edgecolor = itertools.chain(mcolors.to_rgba_array(edgecolor),
-                                        # Fallback if edgecolor == "none".
-                                        itertools.repeat([0, 0, 0, 0]))
+            edgecolor = itertools.chain(
+                itertools.cycle(mcolors.to_rgba_array(edgecolor)),
+                # Fallback if edgecolor == "none".
+                itertools.repeat([0, 0, 0, 0]))
 
         # lets do some conversions now since some types cannot be
         # subtracted uniformly
@@ -3020,8 +3024,7 @@ or tuple of floats
             # special case for empty lists
             if len(err) > 1:
                 fe = safe_first_element(err)
-                if (len(err) != len(data)
-                        or isinstance(fe, Sized) and len(fe) > 1):
+                if (len(err) != len(data) or np.size(fe) > 1):
                     raise ValueError("err must be [ scalar | N, Nx1 "
                                      "or 2xN array-like ]")
             # using list comps rather than arrays to preserve units
@@ -4226,10 +4229,10 @@ or tuple of floats
         linewidths : scalar, optional, default is *None*
             If *None*, defaults to 1.0.
 
-        edgecolors : {'face', 'none', *None*} or mpl color, optional, default\
-            is 'face'
+        edgecolors : {'face', 'none', *None*} or color, optional
 
-            If 'face', draws the edges in the same color as the fill color.
+            If 'face' (the default), draws the edges in the same color as the
+            fill color.
 
             If 'none', no edge is drawn; this can sometimes lead to unsightly
             unpainted pixels between the hexagons.
@@ -4876,7 +4879,9 @@ or tuple of floats
                     diff_order = diff_values.argsort()
                     diff_root_x = np.interp(
                         0, diff_values[diff_order], x_values[diff_order])
-                    diff_root_y = np.interp(diff_root_x, x_values, y1_values)
+                    x_order = x_values.argsort()
+                    diff_root_y = np.interp(diff_root_x, x_values[x_order],
+                                            y1_values[x_order])
                     return diff_root_x, diff_root_y
 
                 start = get_interp_point(ind0)
@@ -5026,7 +5031,9 @@ or tuple of floats
                     diff_order = diff_values.argsort()
                     diff_root_y = np.interp(
                         0, diff_values[diff_order], y_values[diff_order])
-                    diff_root_x = np.interp(diff_root_y, y_values, x1_values)
+                    y_order = y_values.argsort()
+                    diff_root_x = np.interp(diff_root_y, y_values[y_order],
+                                            x1_values[y_order])
                     return diff_root_x, diff_root_y
 
                 start = get_interp_point(ind0)
@@ -5840,6 +5847,7 @@ or tuple of floats
                                         norm=norm,
                                         alpha=alpha,
                                         **kwargs)
+                im.set_extent((xl, xr, yb, yt))
             self.add_image(im)
             ret = im
 
@@ -6096,13 +6104,6 @@ or tuple of floats
         --------
         hist2d : 2D histograms
 
-        Notes
-        -----
-        Until numpy release 1.5, the underlying numpy histogram function was
-        incorrect with ``normed=True`` if bin sizes were unequal.  MPL
-        inherited that error. It is now corrected within MPL when using
-        earlier numpy versions.
-
         """
         # Avoid shadowing the builtin.
         bin_range = range
@@ -6195,8 +6196,10 @@ or tuple of floats
         else:
             hist_kwargs = dict(range=bin_range)
 
-        n = []
+        # List to store all the top coordinates of the histograms
+        tops = []
         mlast = None
+        # Loop through datasets
         for i in xrange(nx):
             # this will automatically overwrite bins,
             # so that each histogram uses the same bins
@@ -6204,29 +6207,26 @@ or tuple of floats
             m = m.astype(float)  # causes problems later if it's an int
             if mlast is None:
                 mlast = np.zeros(len(bins)-1, m.dtype)
-            if density and not stacked:
-                db = np.diff(bins)
-                m = (m.astype(float) / db) / m.sum()
             if stacked:
-                if mlast is None:
-                    mlast = np.zeros(len(bins)-1, m.dtype)
                 m += mlast
                 mlast[:] = m
-            n.append(m)
+            tops.append(m)
 
+        # If a stacked density plot, normalize so the area of all the stacked
+        # histograms together is 1
         if stacked and density:
             db = np.diff(bins)
-            for m in n:
-                m[:] = (m.astype(float) / db) / n[-1].sum()
+            for m in tops:
+                m[:] = (m.astype(float) / db) / tops[-1].sum()
         if cumulative:
             slc = slice(None)
             if cbook.is_numlike(cumulative) and cumulative < 0:
                 slc = slice(None, None, -1)
 
             if density:
-                n = [(m * np.diff(bins))[slc].cumsum()[slc] for m in n]
+                tops = [(m * np.diff(bins))[slc].cumsum()[slc] for m in tops]
             else:
-                n = [m[slc].cumsum()[slc] for m in n]
+                tops = [m[slc].cumsum()[slc] for m in tops]
 
         patches = []
 
@@ -6244,7 +6244,7 @@ or tuple of floats
 
             if rwidth is not None:
                 dr = np.clip(rwidth, 0, 1)
-            elif (len(n) > 1 and
+            elif (len(tops) > 1 and
                   ((not stacked) or rcParams['_internal.classic_mode'])):
                 dr = 0.8
             else:
@@ -6270,7 +6270,7 @@ or tuple of floats
                 _barfunc = self.bar
                 bottom_kwarg = 'bottom'
 
-            for m, c in zip(n, color):
+            for m, c in zip(tops, color):
                 if bottom is None:
                     bottom = np.zeros(len(m))
                 if stacked:
@@ -6314,7 +6314,7 @@ or tuple of floats
                     # For data that is normed to form a probability density,
                     # set to minimum data value / logbase
                     # (gives 1 full tick-label unit for the lowest filled bin)
-                    ndata = np.array(n)
+                    ndata = np.array(tops)
                     minimum = (np.min(ndata[ndata > 0])) / logbase
                 else:
                     # For non-normed (density = False) data,
@@ -6337,7 +6337,7 @@ or tuple of floats
             fill = (histtype == 'stepfilled')
 
             xvals, yvals = [], []
-            for m in n:
+            for m in tops:
                 if stacked:
                     # starting point for drawing polygon
                     y[0] = y[1]
@@ -6400,9 +6400,9 @@ or tuple of floats
                     p.set_label('_nolegend_')
 
         if nx == 1:
-            return n[0], bins, cbook.silent_list('Patch', patches[0])
+            return tops[0], bins, cbook.silent_list('Patch', patches[0])
         else:
-            return n, bins, cbook.silent_list('Lists of Patches', patches)
+            return tops, bins, cbook.silent_list('Lists of Patches', patches)
 
     @_preprocess_data(replace_names=["x", "y", "weights"], label_namer=None)
     def hist2d(self, x, y, bins=10, range=None, normed=False, weights=None,

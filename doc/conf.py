@@ -41,25 +41,25 @@ exclude_patterns = ['api/api_changes/*', 'users/whats_new/*']
 
 
 def _check_deps():
-    names = ["colorspacious",
-             "IPython.sphinxext.ipython_console_highlighting",
-             "matplotlib",
-             "numpydoc",
-             "PIL.Image",
-             "scipy",
-             "sphinx_gallery"]
+    names = {"colorspacious": 'colorspacious',
+             "IPython.sphinxext.ipython_console_highlighting": 'ipython',
+             "matplotlib": 'matplotlib',
+             "numpydoc": 'numpydoc',
+             "PIL.Image": 'pillow',
+             "sphinx_gallery": 'sphinx_gallery'}
     if sys.version_info < (3, 3):
-        names.append("mock")
+        names["mock"] = 'mock'
     missing = []
     for name in names:
         try:
             __import__(name)
         except ImportError:
-            missing.append(name)
+            missing.append(names[name])
     if missing:
         raise ImportError(
             "The following dependencies are missing to build the "
             "documentation: {}".format(", ".join(missing)))
+
 
 _check_deps()
 
@@ -132,10 +132,11 @@ sphinx_gallery_conf = {
         'scipy': 'https://docs.scipy.org/doc/scipy/reference',
     },
     'backreferences_dir': 'api/_as_gen',
-    'subsection_order': ExplicitOrder(explicit_order_folders)
+    'subsection_order': ExplicitOrder(explicit_order_folders),
+    'min_reported_time': 1,
 }
 
-plot_gallery = True
+plot_gallery = 'True'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

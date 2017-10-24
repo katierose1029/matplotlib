@@ -33,6 +33,7 @@ import matplotlib.text as mtext
 import matplotlib.image as mimage
 from matplotlib.offsetbox import OffsetBox
 from matplotlib.artist import allow_rasterization
+from matplotlib.legend import Legend
 
 from matplotlib.rcsetup import cycler
 from matplotlib.rcsetup import validate_axisbelow
@@ -1096,6 +1097,7 @@ class _AxesBase(martist.Artist):
 
         self.stale = True
 
+    @property
     @cbook.deprecated("2.1", alternative="Axes.patch")
     def axesPatch(self):
         return self.patch
@@ -1831,9 +1833,6 @@ class _AxesBase(martist.Artist):
         if p.get_clip_path() is None:
             p.set_clip_path(self.patch)
         self._update_patch_limits(p)
-        if self.name != 'rectilinear':
-            path = p.get_path()
-            path._interpolation_steps = max(path._interpolation_steps, 100)
         self.patches.append(p)
         p._remove_method = lambda h: self.patches.remove(h)
         return p
@@ -2077,10 +2076,10 @@ class _AxesBase(martist.Artist):
         *m* times the data interval will be added to each
         end of that interval before it is used in autoscaling.
 
-        accepts: float in range 0 to 1
+        accepts: float greater than -0.5
         """
-        if m < 0 or m > 1:
-            raise ValueError("margin must be in range 0 to 1")
+        if m <= -0.5:
+            raise ValueError("margin must be greater than -0.5")
         self._xmargin = m
         self.stale = True
 
@@ -2091,10 +2090,10 @@ class _AxesBase(martist.Artist):
         *m* times the data interval will be added to each
         end of that interval before it is used in autoscaling.
 
-        accepts: float in range 0 to 1
+        accepts: float greater than -0.5
         """
-        if m < 0 or m > 1:
-            raise ValueError("margin must be in range 0 to 1")
+        if m <= -0.5:
+            raise ValueError("margin must be greater than -0.5")
         self._ymargin = m
         self.stale = True
 
@@ -3075,7 +3074,7 @@ class _AxesBase(martist.Artist):
 
         minor : bool, optional
             If True select the minor ticklabels,
-            else select the minor ticklabels
+            else select the major ticklabels
 
         Returns
         -------
@@ -3395,7 +3394,7 @@ class _AxesBase(martist.Artist):
 
         minor : bool, optional
             If True select the minor ticklabels,
-            else select the minor ticklabels
+            else select the major ticklabels
 
         Returns
         -------
@@ -3641,8 +3640,9 @@ class _AxesBase(martist.Artist):
                     xzc + xwidth/2./scl, yzc + ywidth/2./scl]
         elif len(bbox) != 4:
             # should be len 3 or 4 but nothing else
-            warnings.warn('Warning in _set_view_from_bbox: bounding box is not a\
-                  tuple of length 3 or 4. Ignoring the view change...')
+            warnings.warn(
+                "Warning in _set_view_from_bbox: bounding box is not a tuple "
+                "of length 3 or 4. Ignoring the view change.")
             return
 
         # Just grab bounding box
@@ -3805,7 +3805,7 @@ class _AxesBase(martist.Artist):
                     dy = dy / abs(dy) * abs(dx)
                 else:
                     dx = dx / abs(dx) * abs(dy)
-            return (dx, dy)
+            return dx, dy
 
         p = self._pan_start
         dx = x - p.x
@@ -3814,29 +3814,30 @@ class _AxesBase(martist.Artist):
             return
         if button == 1:
             dx, dy = format_deltas(key, dx, dy)
-            result = p.bbox.translated(-dx, -dy) \
-                .transformed(p.trans_inverse)
+            result = p.bbox.translated(-dx, -dy).transformed(p.trans_inverse)
         elif button == 3:
             try:
-                dx = -dx / float(self.bbox.width)
-                dy = -dy / float(self.bbox.height)
+                dx = -dx / self.bbox.width
+                dy = -dy / self.bbox.height
                 dx, dy = format_deltas(key, dx, dy)
                 if self.get_aspect() != 'auto':
-                    dx = 0.5 * (dx + dy)
-                    dy = dx
-
+                    dx = dy = 0.5 * (dx + dy)
                 alpha = np.power(10.0, (dx, dy))
                 start = np.array([p.x, p.y])
                 oldpoints = p.lim.transformed(p.trans)
                 newpoints = start + alpha * (oldpoints - start)
-                result = mtransforms.Bbox(newpoints) \
-                    .transformed(p.trans_inverse)
+                result = (mtransforms.Bbox(newpoints)
+                          .transformed(p.trans_inverse))
             except OverflowError:
                 warnings.warn('Overflow while panning')
                 return
 
-        self.set_xlim(*result.intervalx)
-        self.set_ylim(*result.intervaly)
+        valid = np.isfinite(result.transformed(p.trans))
+        points = result.get_points().astype(object)
+        # Just ignore invalid limits (typically, underflow in log-scale).
+        points[~valid] = None
+        self.set_xlim(points[:, 0])
+        self.set_ylim(points[:, 1])
 
     @cbook.deprecated("2.1")
     def get_cursor_props(self):
@@ -3970,6 +3971,8 @@ class _AxesBase(martist.Artist):
         for child in self.get_children():
             if isinstance(child, OffsetBox) and child.get_visible():
                 bb.append(child.get_window_extent(renderer))
+            elif isinstance(child, Legend) and child.get_visible():
+                bb.append(child._legend_box.get_window_extent(renderer))
 
         _bbox = mtransforms.Bbox.union(
             [b for b in bb if b.width != 0 or b.height != 0])

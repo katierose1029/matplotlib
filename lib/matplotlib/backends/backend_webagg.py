@@ -78,8 +78,8 @@ class WebAggApplication(tornado.web.Application):
     class SingleFigurePage(tornado.web.RequestHandler):
         def __init__(self, application, request, **kwargs):
             self.url_prefix = kwargs.pop('url_prefix', '')
-            return tornado.web.RequestHandler.__init__(self, application,
-                                                       request, **kwargs)
+            tornado.web.RequestHandler.__init__(self, application,
+                                                request, **kwargs)
 
         def get(self, fignum):
             fignum = int(fignum)
@@ -98,8 +98,8 @@ class WebAggApplication(tornado.web.Application):
     class AllFiguresPage(tornado.web.RequestHandler):
         def __init__(self, application, request, **kwargs):
             self.url_prefix = kwargs.pop('url_prefix', '')
-            return tornado.web.RequestHandler.__init__(self, application,
-                                                       request, **kwargs)
+            tornado.web.RequestHandler.__init__(self, application,
+                                                request, **kwargs)
 
         def get(self):
             ws_uri = 'ws://{req.host}{prefix}/'.format(req=self.request,
@@ -108,8 +108,7 @@ class WebAggApplication(tornado.web.Application):
                 "all_figures.html",
                 prefix=self.url_prefix,
                 ws_uri=ws_uri,
-                figures=sorted(
-                    list(Gcf.figs.items()), key=lambda item: item[0]),
+                figures=sorted(Gcf.figs.items()),
                 toolitems=core.NavigationToolbar2WebAgg.toolitems)
 
     class MplJs(tornado.web.RequestHandler):
@@ -326,7 +325,7 @@ def ipython_inline_display(figure):
 @_Backend.export
 class _BackendWebAgg(_Backend):
     FigureCanvas = FigureCanvasWebAgg
-    FigureManager = FigureManagerWebAgg
+    FigureManager = core.FigureManagerWebAgg
 
     @staticmethod
     def trigger_manager_draw(manager):

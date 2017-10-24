@@ -90,7 +90,11 @@ The plot directive has the following configuration options:
         Whether to show a link to the source in HTML.
 
     plot_pre_code
-        Code that should be executed before each plot.
+        Code that should be executed before each plot. If not specified or None
+        it will default to a string containing::
+
+            import numpy as np
+            from matplotlib import pyplot as plt
 
     plot_basedir
         Base directory, to which ``plot::`` file names are relative
@@ -155,15 +159,7 @@ sphinx_version = sphinx.__version__.split(".")
 sphinx_version = tuple([int(re.split('[^0-9]', x)[0])
                         for x in sphinx_version[:2]])
 
-try:
-    # Sphinx depends on either Jinja or Jinja2
-    import jinja2
-    def format_template(template, **kw):
-        return jinja2.Template(template).render(**kw)
-except ImportError:
-    import jinja
-    def format_template(template, **kw):
-        return jinja.from_string(template, **kw)
+import jinja2  # Sphinx dependency.
 
 import matplotlib
 import matplotlib.cbook as cbook
@@ -186,8 +182,11 @@ __version__ = 2
 
 def plot_directive(name, arguments, options, content, lineno,
                    content_offset, block_text, state, state_machine):
+    """Implementation of the ``.. plot::`` directive.
+
+    See the module docstring for details.
+    """
     return run(arguments, content, options, state_machine, state, lineno)
-plot_directive.__doc__ = __doc__
 
 
 def _option_boolean(arg):
@@ -823,8 +822,7 @@ def run(arguments, content, options, state_machine, state, lineno):
         else:
             src_link = None
 
-        result = format_template(
-            config.plot_template or TEMPLATE,
+        result = jinja2.Template(config.plot_template or TEMPLATE).render(
             default_fmt=default_fmt,
             dest_dir=dest_dir_link,
             build_dir=build_dir_link,

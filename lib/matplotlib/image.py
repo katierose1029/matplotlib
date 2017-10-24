@@ -180,15 +180,18 @@ def _rgb_to_rgba(A):
 class _ImageBase(martist.Artist, cm.ScalarMappable):
     zorder = 0
 
+    @property
     @cbook.deprecated("2.1")
     def _interpd(self):
         return _interpd_
 
+    @property
     @cbook.deprecated("2.1")
     def _interpdr(self):
         return {v: k for k, v in six.iteritems(_interpd_)}
 
-    @cbook.deprecated("2.1")
+    @property
+    @cbook.deprecated("2.1", alternative="mpl.image.interpolation_names")
     def iterpnames(self):
         return interpolations_names
 
@@ -365,10 +368,14 @@ class _ImageBase(martist.Artist, cm.ScalarMappable):
                     scaled_dtype = A.dtype
                 else:
                     scaled_dtype = np.float32
-                # old versions of numpy do not work with `np.nammin`
-                # and `np.nanmax` as inputs
-                a_min = np.ma.min(A).astype(scaled_dtype)
-                a_max = np.ma.max(A).astype(scaled_dtype)
+
+                a_min = A.min()
+                if a_min is np.ma.masked:
+                    a_min, a_max = 0, 1  # all masked, so values don't matter
+                else:
+                    a_min = a_min.astype(scaled_dtype)
+                    a_max = A.max().astype(scaled_dtype)
+
                 # scale the input data to [.1, .9].  The Agg
                 # interpolators clip to [0, 1] internally, use a
                 # smaller input scale to identify which of the

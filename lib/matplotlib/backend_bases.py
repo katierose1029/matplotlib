@@ -1845,6 +1845,7 @@ class FigureCanvasBase(object):
         s = 'resize_event'
         event = ResizeEvent(s, self)
         self.callbacks.process(s, event)
+        self.draw_idle()
 
     def close_event(self, guiEvent=None):
         """Pass a `CloseEvent` to all functions connected to ``close_event``.
@@ -2605,7 +2606,7 @@ def key_press_handler(event, canvas, toolbar=None):
         elif scalex == 'linear':
             try:
                 ax.set_xscale('log')
-            except ValueError:
+            except ValueError as exc:
                 warnings.warn(str(exc))
                 ax.set_xscale('linear')
             ax.figure.canvas.draw_idle()
