@@ -115,7 +115,7 @@ class Figure(Artist, HasTraits, b_figure.Figure):
     bbox = TransformedBbox(self.bbox_inches, self.dpi_scale_trans)
     set_tight_layout(tight_layout)
     axstack = AxesStack()
-    # clf() #clear figure TODO: make this function before you uncomment
+    clf() #clear figure
     cachedRenderer = None
     ''' 
     if not np.isfinite(figsize).all():
@@ -173,8 +173,8 @@ class Figure(Artist, HasTraits, b_figure.Figure):
                 "so cannot show the figure")
 
 
-    # TODO: Finish up the validates. Check which ones need default functions (and possibly observe function)
-    # defaults, validates, observe functions
+    # TODO: Finish up the validates. Check which ones need obsserve functions
+    # validates and observe functions
 
     @default("axes")
     def _axes_default(self):
@@ -182,12 +182,17 @@ class Figure(Artist, HasTraits, b_figure.Figure):
         return None
 
     @validate("axes")
-    def sca(self, proposal):
+    def _axes_validate(self, proposal):
         'Set the current axes to be a and return a (a = proposal.value)'
         self._axstack.bubble(proposal.value)
         for func in self._axobservers:
             func(self)
         return [proposal.value] # TODO: [proposal.value] or proposal.value
+
+    @observe("axes")
+    def _axes_observe(self, change):
+        self.stale = True
+        print(change)
 
     @validate("canvas")
     def _canvas_validate(self, proposal):
@@ -197,6 +202,11 @@ class Figure(Artist, HasTraits, b_figure.Figure):
         """
         self.canvas = proposal.value
         return proposal.value
+
+    @observe("canvas")
+    def _canvas_observe(self, change):
+        self.stale = True
+        print(change)
 
     @validate("dpi")
     def _dpi_validate(self, proposal):
@@ -208,6 +218,11 @@ class Figure(Artist, HasTraits, b_figure.Figure):
         self.stale = True
         return proposal.value
 
+    @observe("dpi")
+    def _dpi_observe(self, change):
+        self.stale = True
+        print(change)
+
     @validate("edgecolor")
     def _edgecolor_validate(self, proposal):
         """
@@ -216,6 +231,11 @@ class Figure(Artist, HasTraits, b_figure.Figure):
                 """
         self.patch.set_edgecolor(proposal.value)
         return proposal.value
+
+    @observe("edgecolor")
+    def _edgecolor_observe(self,change):
+        self.stale = True
+        print(change)
 
     @validate("facecolor")
     def _facecolor_validate(self, proposal):
@@ -226,6 +246,11 @@ class Figure(Artist, HasTraits, b_figure.Figure):
         self.patch.set_facecolor(proposal.value)
         return proposal.value
 
+    @observe("facecolor")
+    def _facecolor_observe(self, change):
+        self.stale = True
+        print(change)
+
     @validate("figheight")
     def _figheight_validate(self, proposal, forward=False):
         """
@@ -235,11 +260,21 @@ class Figure(Artist, HasTraits, b_figure.Figure):
         self.set_size_inches(self.get_figwidth(), proposal.value, forward=forward)
         return proposal.value
 
+    @observe("figheight")
+    def _figheight_observe(self, change):
+        self.stale = True
+        print(change)
+
     @validate("figsize")
     def _figsize_validate(self, proposal):
         if not self.figsize == proposal.value:
             self.figsize = proposal.value
         return proposal.value
+
+    @observe("figsize")
+    def _figsize_observe(self, change):
+        self.stale = True
+        print(change)
 
     @validate("figwidth")
     def _figwidth_validate(self, proposal, forward=False):
@@ -250,6 +285,11 @@ class Figure(Artist, HasTraits, b_figure.Figure):
         self.set_size_inches(proposal.value, self.get_figheight(), forward=forward)
         return proposal.value
 
+    @observe("figwidth")
+    def _figwidth_observe(self, change):
+        self.stale = True
+        print(change)
+
     @validate("frameon")
     def _frameon_validate(self, proposal):
         """
@@ -259,6 +299,11 @@ class Figure(Artist, HasTraits, b_figure.Figure):
         self.frameon = proposal.value
         self.stale = True
         return proposal.value
+
+    @observe("frameon")
+    def _frameon_observe(self, change):
+        self.stale = True
+        print(change)
 
     # This probably isn't necessary... it just has to be a number
     # @validate("linewidth")
@@ -273,6 +318,10 @@ class Figure(Artist, HasTraits, b_figure.Figure):
     def _tight_layout_validate(self, proposal):
         return proposal.value
 
+    @observe("tight_layout")
+    def _tight_layout_observe(self, change):
+        self.stale = True
+        print(change)
 
 
     # TODO: getter and misc functions from original figure.py. Should I keep all of these?
