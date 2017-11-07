@@ -19,7 +19,8 @@ from matplotlib.cbook import (
     iterable, is_numlike, ls_mapper, ls_mapper_r, STEP_LOOKUP_MAP)
 from matplotlib.markers import MarkerStyle
 from matplotlib.path import Path
-from matplotlib.transforms import Bbox, TransformedPath, IdentityTransform
+from matplotlib.transforms import Bbox, IdentityTransform
+# from matplotlib.transforms import Bbox, TransformedPath, IdentityTransform
 # Imported here for backward compatibility, even though they don't
 # really belong.
 from numpy import ma
@@ -30,7 +31,7 @@ from matplotlib.markers import (
     TICKLEFT, TICKRIGHT, TICKUP, TICKDOWN)
 
 from traitlets import HasTraits, Any, Instance, Unicode, Float, Bool, Int, validate, observe, default, Type, List
-from .traits import PathTrait
+from .traits import PathTrait, TransformedPathTrait
 
 #for monkey patching into base lines
 import matplotlib.lines as b_Line2D
@@ -280,100 +281,63 @@ class Line2D(b_artist.Artist, HasTraits):
     validCap = ('butt', 'round', 'projecting')
     validJoin = ('miter', 'round', 'bevel')
 
-    # linewidth=Float(allow_none=True, default_value=None)
-    linewidth=Float(allow_none=True, default_value=rcParams['lines.linewidth'])
-    # linestyle=Instance('matplotlib.text.Text', allow_none=True, default_value=None)
-    linestyle=Instance('matplotlib.text.Text', allow_none=True, default_value=rcParams['lines.linestyle'])
-    print("_traits/lines.py line 287 linestyle", linestyle)
 
-    # TODO: not sure if this is correct?
+    linewidth=Float(allow_none=True, default_value=rcParams['lines.linewidth'])
+    linestyle = Unicode(allow_none=True, default_value=rcParams['lines.linestyle'])
+    #TODO: not sure if this is correct?
     # color=Unicode(allow_none=True, default_value=None)
     color=Unicode(allow_none=True, default_value=rcParams['lines.color'])
-    #color=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
-
-    # marker=Instance('matplotlib.markers',allow_none=True, default_value=None)
-    marker=Instance('matplotlib.markers',allow_none=True, default_value=rcParams['lines.marker'])
-
-    # markersize=Float(allow_none=True,default_value=True)
+    #TODO: check if import statement is in default function; set defaulty value there
+    marker=Instance('matplotlib.markers',allow_none=True)
     markersize=Float(allow_none=True,default_value=rcParams['lines.markersize'])
-
     markeredgewidth=Float(allow_none=True,default_value=None)
-    # markeredgewidth=Float(allow_none=True,default_value=None)
-
-    # TODO: not sure if this is correct?
+    #TODO: not sure if this is correct?
     markerfacecolor=Unicode(allow_none=True, default_value=None)
-    # markerfacecolor=Unicode(allow_none=True, default_value=None)
-
-    #markerfacecolor=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
     # same applies for the alternative face color
     markerfacecoloralt=Unicode(allow_none=True, default_value='none')
-    # markerfacecoloralt=Unicode(allow_none=True, default_value=None)
-
-    #markerfacecoloralt=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
-    # this gets passed into marker so I want to assume same for color however only accepts the following strings: ['full' | 'left' | 'right' | 'bottom' | 'top' | 'none']
+    #TODO: this gets passed into marker so I want to assume same for color however only accepts the following strings: ['full' | 'left' | 'right' | 'bottom' | 'top' | 'none']
     fillstyle=Unicode(allow_none=True, default_value=None)
-    # fillstyle=Unicode(allow_none=True, default_value=None)
-
-    # fillstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
     antialiased=Bool(default_value=rcParams['lines.antialiased'])
-    # antialiased=Bool(default_value=False)
-
     # accepts: ['butt' | 'round' | 'projecting']
-    # dash_capstyle=Unicode(allow_none=True, default_value=None)
     dash_capstyle=Unicode(allow_none=True, default_value=rcParams['lines.dash_capstyle'])
-    # dash_capstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
-
     # accepts: ['butt' | 'round' | 'projecting']
-    # solid_capstyle=Unicode(allow_none=True, default_value=None)
     solid_capstyle=Unicode(allow_none=True, default_value=rcParams['lines.solid_capstyle'])
-    # solid_capstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
-
     # accepts: ['miter' | 'round' | 'bevel']
-    # dash_joinstyle=Unicode(allow_none=True, default_value=None)
     dash_joinstyle=Unicode(allow_none=True, default_value=rcParams['lines.dash_joinstyle'])
-    # dash_joinstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
 
     # accepts: ['miter' | 'round' | 'bevel']
-    # solid_joinstyle=Unicode(allow_none=True, default_value=None)
     solid_joinstyle=Unicode(allow_none=True, default_value=rcParams['lines.solid_joinstyle'])
-    # solid_joinstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
-
     pickradius=Int(allow_none=True, default_value=5)
-
+    #TODO: assure this attribute works
     # accepts: ['default' | 'steps' | 'steps-pre' | 'steps-mid' | 'steps-post']
-    # drawstyle=Unicode(allow_none=True, default_value=None)
     drawstyle=Unicode(allow_none=True, default_value='default')
-    # drawstyle=Instance('matplotlib.text.Text', allow_none=True,default_value=None)
-    # drawstyle=Instance('matplotlib.text.Text', allow_none=False,default_value='default')
-
-    # for this one I want to attempt at using the ANY trait
+    #TODO: assure this attribute works
     markevery=Any(allow_none=True, default_value=None)
-    #only found once in the original lines code so not sure what to do with this
-    verticalOffset = None
+    verticalOffset = None   #only found once in the original lines code so not sure what to do with this
     ind_offset = Int(allow_none=True,default_value=0)
-    # invalidx = True
     invalidx=Bool(default_value=True)
-    # invalidy = True
     invalidy=Bool(default_value=True)
-
-    # path = None
-    # path=Instance('matplotlib.path.Path', allow_none=True)
-    # path = PathTrait(allow_none=True, default_value=None)
-    # path = PathTrait(allow_none=True, default_value=[(0.0,0.0),(1.0,0.0),(1.0,1.0),(1.0,0.0)])
+    #TODO: assure this works because I am not sure of the default value
     path = PathTrait(allow_none=False, default_value=Path([(0.0,0.0),(1.0,0.0),(1.0,1.0),(1.0,0.0)]))
+    # transformed_path=Instance('matplotlib.transforms.TransformedPath', allow_none=True) #default_value set in default function
+    # TransformedPath(path, self.get_transform())
+    transformed_path=TransformedPathTrait(allow_none=False, default_value=TransformedPath(self.path, self.get_transform())) #TODO: assure this works
+    subslice=Bool(default_value=False)  # used in subslicing; only x is needed
+    #TODO: assure numpy.array is imported in default function & assure this works
+    # x_filled=Instance('numpy.array', allow_none=True, default_value=None)
+    x_filled=Instance('numpy.array', allow_none=True)
 
 
-    transformed_path=Instance('matplotlib.transforms.TransformedPath', allow_none=True, default_value=None)
-    subslice=Bool(default_value=False)
-    # used in subslicing; only x is needed
-    x_filled=Instance('numpy.array', allow_none=True, default_value=None)
+    #TODO: figure this out
     dashSeq = None
-    # dashSeq = Instance('') #TODO: figure this out
+    # dashSeq = Instance('')
+
     dashOffset=Int(allow_none=True, default_value=None)
-    # unscaled dash + offset
-    # this is needed scaling the dash pattern by linewidth
-    us_dashSeq = None #TODO: figure this out
+    # unscaled dash + offset; this is needed scaling the dash pattern by linewidth
+    #TODO: figure this out
+    us_dashSeq = None #NOTE: could be an Instance?
     us_dashOffset=Int(allow_none=True, default_value=None)
+
 
     xorig = numpy.asarray([])
     yorig = numpy.asarray([])
@@ -459,74 +423,7 @@ class Line2D(b_artist.Artist, HasTraits):
         if not iterable(ydata):
             raise RuntimeError('ydata must be a sequence')
 
-        print("_traits/lines.py line 462 xdata: ", xdata)
-        print("_traits/lines.py line 463 ydata: ", ydata)
-
-
-        # self.xorig = numpy.asarray([])
-        # self.yorig = numpy.asarray([])
-        # self.x = numpy.array([])
-        # self.y = numpy.array([])
-        # self.xy = None
-
         self.set_data(xdata, ydata)
-
-    # # # NOTE: NOT SURE IF xdata & ydata are needed
-    # # xdata default
-    # @default("xdata")
-    # def _xdata_default(self):
-    #     from numpy import array
-    #     # return []
-    #     return None
-    # # xdata validate
-    # @validate("xdata")
-    # def _xdata_validate(self, proposal):
-    #     #convert sequences to numpy arrays
-    #     # if not iterable(proposal.value):
-    #         # raise RuntimeError('xdata must be a sequence')
-    #     return proposal.value
-    #
-    # # ydata default
-    # @default("ydata")
-    # def _ydata_default(self):
-    #     from numpy import array
-    #     # return []
-    #     return None
-    # # ydata validate
-    # @validate("ydata")
-    # def _ydata_validate(self, proposal):
-    #     #convert sequences to numpy arrays
-    #     # if not iterable(proposal.value):
-    #     #     raise RuntimeError('ydata must be a sequence')
-    #     return proposal.value
-
-    # # xorig default
-    # @default("xorig")
-    # def _xorig_default(self):
-    #     from numpy import asarray
-    #     return []
-    #     # return None
-    # # xorig validate
-    # @validate("xorig")
-    # def _xorig_validate(self, proposal):
-    #     #convert sequences to numpy arrays
-    #     # if not iterable(proposal.value):
-    #         # raise RuntimeError('ydata must be a sequence')
-    #     return proposal.value
-    #
-    # # yorig default
-    # @default("yorig")
-    # def _yorig_default(self):
-    #     from numpy import asarray
-    #     return []
-    #     # return None
-    # # yorig validate
-    # @validate("yorig")
-    # def _yorig_validate(self, proposal):
-    #     #convert sequences to numpy arrays
-    #     # if not iterable(proposal.value):
-    #         # raise RuntimeError('ydata must be a sequence')
-    #     return proposal.value
 
     #linewidth validate
     @validate("linewidth")
@@ -582,13 +479,21 @@ class Line2D(b_artist.Artist, HasTraits):
     def _color_observe(self, change):
         self.stale = True
 
+    #marker default
+    @default("marker")
+    def _marker_default(self):
+        #TODO: assure these import statements work properly
+        import matplotlib.markers
+        from matplotlib.markers import MarkerStyle
+        #TODO: if successful; delete line
+        print("TESTING marker default value: ", rcParams['lines.marker'])
+        return rcParams['lines.marker']
     #marker validate
-    #@docstring.dedent_interpd
     @validate("marker")
     def _marker_validate(self, proposal):
         if proposal.value is None:
             return rcParams['lines.marker']
-        # TODO: find a method to make the line below work
+        #TODO: find a method to make the line below work
         self.marker.set_marker(marker) #TODO: testing
         return proposal.value
     #marker observer
@@ -776,16 +681,6 @@ class Line2D(b_artist.Artist, HasTraits):
     def _markevery_observe(self, change):
         self.stale = True
 
-    # TODO: figure out what to do with this!!!!!
-    #verticalOffset default
-    # @default("verticalOffset")
-    # def _verticalOffset_default(self):
-        # return False
-    #verticalOffset validate
-    # @validate("verticalOffset")
-    # def _verticalOffset_validate(self, proposal):
-        # return proposal.value
-
     #ind_offset validate
     @validate("ind_offset")
     def _ind_offset_validate(self, proposal):
@@ -801,11 +696,17 @@ class Line2D(b_artist.Artist, HasTraits):
     def _invalidy_validate(self, proposal):
         return proposal.value
 
+    #TODO: assure this works correctly
     #path validate
     @validate("path")
     def _path_validate(self, proposal):
         return proposal.value
 
+    #transformed default
+    @default("transformed_path")
+    def _transformed_path_default(self):
+        from matplotlib.transforms import TransformedPath
+        return None
     #transformed_path validate
     @validate("transformed_path")
     def _transformed_path_validate(self, proposal):
@@ -816,6 +717,11 @@ class Line2D(b_artist.Artist, HasTraits):
     def _subslice_validate(self, proposal):
         return proposal.value
 
+    #x_filled default
+    @default("x_filled")
+    def _x_filled_default(self):
+        from numpy import array
+        return None
     #x_filled validate
     @validate("x_filled")
     def _x_filled_validate(self, proposal):
@@ -980,17 +886,19 @@ class Line2D(b_artist.Artist, HasTraits):
         """
         Puts a TransformedPath instance at self._transformed_path;
         all invalidation of the transform is then handled by the
-        TransformedPath instance.
+        TransformedPath instance
         """
         # Masked arrays are now handled by the Path class itself
         if subslice is not None:
-            xy = STEP_LOOKUP_MAP[self.drawstyle](self.xy[subslice, :].T)
+            xy = STEP_LOOKUP_MAP[self.drawstyle](*self.xy[subslice, :].T) #TODO: 10.23.17 assure that this works
             # xy = STEP_LOOKUP_MAP[self._drawstyle](*self._xy[subslice, :].T)
             path = Path(np.asarray(xy).T,
-                         _interpolation_steps=self._path._interpolation_steps)
+                         interpolation_steps=self.path.interpolation_steps)
+            print("__traits/lines.py line 992 path: ", path)
         else:
             path = self.path
-        self.transformed_path = TransformedPath(_path, self.get_transform())
+        self.transformed_path = TransformedPath(path, self.get_transform())
+        print("__traits/lines.py line 996 self.transformed_path: ", self.transformed_path)
 
     def _is_sorted(self, x):
         """return True if x is sorted in ascending order"""
@@ -1016,8 +924,12 @@ class Line2D(b_artist.Artist, HasTraits):
             self.ind_offset = subslice.start
             self.transform_path(subslice)
 
+        print("_traits/lines.py line 925 self.transformed_path: ", self.transformed_path)
+        # print("_traits/lines.py line 1023 transf_path: ", transf_path)
         # transf_path = self._get_transformed_path()
-        trans_path = self.transform_path
+        transf_path = self.transformed_path
+        print("_traits/lines.py line 929 transf_path: ", transf_path)
+
 
         # if self.get_path_effects():
         #     from matplotlib.patheffects import PathEffectRenderer
@@ -1028,7 +940,7 @@ class Line2D(b_artist.Artist, HasTraits):
             renderer = PathEffectRenderer(self.get_path_effects(), renderer)
 
         renderer.open_group('line2d', self.get_gid())
-        print("_traits/lines.py line 1062 function self.linestyle",self.linestyle)
+        # print("_traits/lines.py line 1062 function self.linestyle",self.linestyle)
         if self.lineStyles[self.linestyle] != '_draw_nothing':
             tpath, affine = transf_path.get_transformed_path_and_affine()
             if len(tpath.vertices):
@@ -1229,7 +1141,7 @@ class Line2D(b_artist.Artist, HasTraits):
 lineStyles = Line2D.lineStyles
 lineMarkers = MarkerStyle.markers
 drawStyles = Line2D.drawStyles
-fillStyles = MarkerStyle.fillstyle
+fillStyles = MarkerStyle.fillstyles
 
 #for monkey patching
 b_Line2D.Line2D = Line2D
@@ -1238,7 +1150,7 @@ docstring.interpd.update(Line2D=artist.kwdoc(Line2D))
 #TODO: print statement to see what this line does: right now returns None
 # print("docstring.interpd.update(Line2D=artist.kwdoc(Line2D)): ", docstring.interpd.update(Line2D=artist.kwdoc(Line2D)))
 
-# You can not set the docstring of an instancemethod,
+# You can not set the docstring of an instance method,
 # but you can on the underlying function.  Go figure.
 docstring.dedent_interpd(Line2D.__init__)
 #TODO: print statement to see what this line does:

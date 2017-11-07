@@ -65,6 +65,48 @@ class TransformTrait(TraitType):
             return value
 
 class PathTrait(TraitType):
+    default_value = None
+    allow_none = False
+    info_text = 'matplotlib.path.Path'
+    def validate(self, obj, value):
+        if value is None:
+            #try returning an instance of Path
+            # return Path([(0.0,0.0),(1.0,0.0),(1.0,1.0),(1.0,0.0)])
+            # return Path(verts, code)
+            return None #TODO: handle this
+        if isinstance(value, Path):
+            return value
+
+class TransformedPathTrait(TraitType):
+    default_value = None
+    allow_none = False
+    info_text = 'matplotlib.transforms.TransformedPath'
+    def validate(self, obj, value):
+        if value is None:
+            return None #TODO: handle this
+        if isinstance(value, TransformedPath):
+            return value
+
+#this is in traits but for some reason, my code could not pick up on it?
+class Callable(TraitType):
+    """A trait which is callable.
+
+    Notes
+    -----
+    Classes are callable, as are instances
+    with a __call__() method."""
+
+    info_text = 'a callable'
+
+    def validate(self, obj, value):
+        if six.callable(value):
+            return value
+        else:
+            self.error(obj, value)
+
+
+
+#PATH TRAIT SCRAP CODE
     #TODO: assure that an instance of path is being passed.
     #vets & codes are from documentation found at https://matplotlib.org/users/path_tutorial.html
 
@@ -87,33 +129,3 @@ class PathTrait(TraitType):
     # default_value=Path([(0.0,0.0),(1.0,0.0),(1.0,1.0),(1.0,0.0)])
     # default_value = Path(verts, codes)
     # default_value = Path()
-    default_value = None
-
-    allow_none = False
-    info_text = 'matplotlib.path.Path'
-    def validate(self, obj, value):
-        if value is None:
-            #try returning an instance of Path
-            # return Path([(0.0,0.0),(1.0,0.0),(1.0,1.0),(1.0,0.0)])
-            # return Path(verts, code)
-            return None #TODO: handle this
-        if isinstance(value, Path):
-            return value
-
-
-#this is in traits but for some reason, my code could not pick up on it?
-class Callable(TraitType):
-    """A trait which is callable.
-
-    Notes
-    -----
-    Classes are callable, as are instances
-    with a __call__() method."""
-
-    info_text = 'a callable'
-
-    def validate(self, obj, value):
-        if six.callable(value):
-            return value
-        else:
-            self.error(obj, value)
