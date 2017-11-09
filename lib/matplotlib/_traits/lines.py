@@ -1170,6 +1170,10 @@ class Line2D(b_artist.Artist, HasTraits):
             self.recache()
         return self.path
 
+    def is_dashed(self):
+        'return True if line is dashstyle'
+        return self.linestyle in ('--', '-.', ':')
+
 lineStyles = Line2D.lineStyles
 lineMarkers = MarkerStyle.markers
 drawStyles = Line2D.drawStyles
