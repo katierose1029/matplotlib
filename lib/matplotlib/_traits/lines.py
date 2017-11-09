@@ -18,9 +18,9 @@ from matplotlib._traits.artist import Artist, allow_rasterization
 from matplotlib.cbook import (
     iterable, is_numlike, ls_mapper, ls_mapper_r, STEP_LOOKUP_MAP)
 from matplotlib.markers import MarkerStyle
-from matplotlib.path import Path
-from matplotlib.transforms import Bbox, IdentityTransform
-# from matplotlib.transforms import Bbox, TransformedPath, IdentityTransform
+# from matplotlib.path import Path
+# from matplotlib.transforms import Bbox, IdentityTransform
+from matplotlib.transforms import Bbox, TransformedPath, IdentityTransform
 # Imported here for backward compatibility, even though they don't
 # really belong.
 from numpy import ma
@@ -318,10 +318,18 @@ class Line2D(b_artist.Artist, HasTraits):
     invalidx=Bool(default_value=True)
     invalidy=Bool(default_value=True)
     #TODO: assure this works because I am not sure of the default value
-    path = PathTrait(allow_none=False, default_value=Path([(0.0,0.0),(1.0,0.0),(1.0,1.0),(1.0,0.0)]))
+    # path = PathTrait(allow_none=False, default_value=Path([(0.0,0.0),(1.0,0.0),(1.0,1.0),(1.0,0.0)])) #TODO: fix this
+    path=Instance('matplotlib.path.Path', allow_none=False)
+    # print("isinstance(path, Path):", isinstance(path, Path))
+    # print("isinstance(path, PathTrait):", isinstance(path, PathTrait))
+
     # transformed_path=Instance('matplotlib.transforms.TransformedPath', allow_none=True) #default_value set in default function
     # TransformedPath(path, self.get_transform())
-    transformed_path=TransformedPathTrait(allow_none=False, default_value=TransformedPath(self.path, self.get_transform())) #TODO: assure this works
+    # transformed_path=TransformedPathTrait(allow_none=False) #TODO: assure this works
+    transformed_path=Instance('matplotlib.transforms.TransformedPath', allow_none=False)
+    # print("isinstance(transformed_path, TransformedPath):", isinstance(transformed_path, TransformedPath))
+    # print("isinstance(transformed_path, TransformedPathTrait):", isinstance(transformed_path, TransformedPathTrait))
+
     subslice=Bool(default_value=False)  # used in subslicing; only x is needed
     #TODO: assure numpy.array is imported in default function & assure this works
     # x_filled=Instance('numpy.array', allow_none=True, default_value=None)
@@ -697,19 +705,42 @@ class Line2D(b_artist.Artist, HasTraits):
         return proposal.value
 
     #TODO: assure this works correctly
+    @default("path")
+    def _path_default(self):
+        from matplotlib.path import Path
+        print("creating default value for Path")
+        verts = [
+        (0., 0.), # left, bottom
+        (0., 1.), # left, top
+        (1., 1.), # right, top
+        (1., 0.), # right, bottom
+        (0., 0.), # ignored
+        ]
+        codes = [Path.MOVETO,
+             Path.LINETO,
+             Path.LINETO,
+             Path.LINETO,
+             Path.CLOSEPOLY,
+             ]
+        return Path(verts, codes)
     #path validate
     @validate("path")
     def _path_validate(self, proposal):
+        from matplotlib.path import Path
+        print("isinstance(proposal.value, Path):", isinstance(proposal.value, Path))
         return proposal.value
 
     #transformed default
     @default("transformed_path")
     def _transformed_path_default(self):
         from matplotlib.transforms import TransformedPath
-        return None
-    #transformed_path validate
+        # return TransformedPath(self.path, self.get_transform())
+        #self.transform in relation to the artist
+        return TransformedPath(self.path, IdentityTransform())
     @validate("transformed_path")
     def _transformed_path_validate(self, proposal):
+        from matplotlib.transforms import TransformedPath
+        print("isinstance(proposal.value, TransformedPath):", isinstance(proposal.value, TransformedPath))
         return proposal.value
 
     #subslice validate
@@ -820,6 +851,7 @@ class Line2D(b_artist.Artist, HasTraits):
         self.recache(always=True)
 
     def recache(self, always=False):
+        from matplotlib.path import Path
         if always or self.invalidx:
             xconv = self.convert_xunits(self.xorig)
             if isinstance(self.xorig, np.ma.MaskedArray):
@@ -878,7 +910,7 @@ class Line2D(b_artist.Artist, HasTraits):
 
         self.path = Path(np.asarray(xy).T,
                           _interpolation_steps=interpolation_steps)
-        self.transformed_path = None
+        # self.transformed_path = None
         self.invalidx = False
         self.invalidy = False
 
@@ -951,15 +983,15 @@ class Line2D(b_artist.Artist, HasTraits):
                 gc.set_foreground(ln_color_rgba, isRGBA=True)
                 gc.set_alpha(ln_color_rgba[3])
 
-                gc.set_antialiased(self._antialiased)
-                gc.set_linewidth(self._linewidth)
+                gc.set_antialiased(self.antialiased)
+                gc.set_linewidth(self.linewidth)
 
                 if self.is_dashed():
-                    cap = self._dashcapstyle
-                    join = self._dashjoinstyle
+                    cap = self.dashcapstyle
+                    join = self.dashjoinstyle
                 else:
-                    cap = self._solidcapstyle
-                    join = self._solidjoinstyle
+                    cap = self.solidcapstyle
+                    join = self.solidjoinstyle
                 gc.set_joinstyle(join)
                 gc.set_capstyle(cap)
                 gc.set_snap(self.get_snap())

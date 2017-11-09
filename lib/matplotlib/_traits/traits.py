@@ -65,16 +65,33 @@ class TransformTrait(TraitType):
             return value
 
 class PathTrait(TraitType):
-    default_value = None
+    #verts & codes are from documentation found at https://matplotlib.org/users/path_tutorial.html
+    verts = [
+    (0., 0.), # left, bottom
+    (0., 1.), # left, top
+    (1., 1.), # right, top
+    (1., 0.), # right, bottom
+    (0., 0.), # ignored
+    ]
+    codes = [Path.MOVETO,
+         Path.LINETO,
+         Path.LINETO,
+         Path.LINETO,
+         Path.CLOSEPOLY,
+         ]
+    # print("[Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY] ", [Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
+    default_value = Path(verts, codes)
+    # default_value = None
     allow_none = False
     info_text = 'matplotlib.path.Path'
     def validate(self, obj, value):
         if value is None:
             #try returning an instance of Path
             # return Path([(0.0,0.0),(1.0,0.0),(1.0,1.0),(1.0,0.0)])
-            # return Path(verts, code)
-            return None #TODO: handle this
+            return Path(verts, code)
+            # return None #TODO: handle this
         if isinstance(value, Path):
+            # print("PathTrait value returned is: ", value)
             return value
 
 class TransformedPathTrait(TraitType):
@@ -85,6 +102,7 @@ class TransformedPathTrait(TraitType):
         if value is None:
             return None #TODO: handle this
         if isinstance(value, TransformedPath):
+            print("TransformedPathTrait value returned is: ", value)
             return value
 
 #this is in traits but for some reason, my code could not pick up on it?
@@ -108,22 +126,8 @@ class Callable(TraitType):
 
 #PATH TRAIT SCRAP CODE
     #TODO: assure that an instance of path is being passed.
-    #vets & codes are from documentation found at https://matplotlib.org/users/path_tutorial.html
 
-    # verts = [
-    # (0., 0.), # left, bottom
-    # (0., 1.), # left, top
-    # (1., 1.), # right, top
-    # (1., 0.), # right, bottom
-    # (0., 0.), # ignored
-    # ]
-    # codes = [Path.MOVETO,
-        #  Path.LINETO,
-        #  Path.LINETO,
-        #  Path.LINETO,
-        #  Path.CLOSEPOLY,
-        #  ]
-    # print("[Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY] ", [Path.MOVETO, Path.LINETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY])
+
 
     # default_value = None
     # default_value=Path([(0.0,0.0),(1.0,0.0),(1.0,1.0),(1.0,0.0)])
