@@ -288,7 +288,9 @@ class Line2D(b_artist.Artist, HasTraits):
     # color=Unicode(allow_none=True, default_value=None)
     color=Unicode(allow_none=True, default_value=rcParams['lines.color'])
     #TODO: check if import statement is in default function; set defaulty value there
-    marker=Instance('matplotlib.markers',allow_none=True)
+    marker=Unicode(allow_none=True)
+    # marker=Instance('matplotlib.markers',allow_none=False)
+    # marker=Instance('matplotlib.markers.MarkerStyle',allow_none=False)
     markersize=Float(allow_none=True,default_value=rcParams['lines.markersize'])
     markeredgewidth=Float(allow_none=True,default_value=None)
     #TODO: not sure if this is correct?
@@ -492,9 +494,6 @@ class Line2D(b_artist.Artist, HasTraits):
     def _marker_default(self):
         #TODO: assure these import statements work properly
         import matplotlib.markers
-        from matplotlib.markers import MarkerStyle
-        #TODO: if successful; delete line
-        print("TESTING marker default value: ", rcParams['lines.marker'])
         return rcParams['lines.marker']
     #marker validate
     @validate("marker")
@@ -502,7 +501,7 @@ class Line2D(b_artist.Artist, HasTraits):
         if proposal.value is None:
             return rcParams['lines.marker']
         #TODO: find a method to make the line below work
-        self.marker.set_marker(marker) #TODO: testing
+        # self.marker.set_marker(marker) #TODO: testing
         return proposal.value
     #marker observer
     @observe("marker", type="change")
@@ -987,22 +986,32 @@ class Line2D(b_artist.Artist, HasTraits):
                 gc.set_linewidth(self.linewidth)
 
                 if self.is_dashed():
-                    cap = self.dashcapstyle
-                    join = self.dashjoinstyle
+                    # cap = self.dashcapstyle
+                    cap = self.dash_capstyle
+                    # print("if self.is_dashed() cap: ", cap)
+                    # join = self.dashjoinstyle
+                    join = self.dash_joinstyle
+                    # print("if self.is_dashed() join: ", join)
                 else:
-                    cap = self.solidcapstyle
-                    join = self.solidjoinstyle
+                    # cap = self.solidcapstyle
+                    cap = self.solid_capstyle
+                    # print("else cap: ", cap)
+                    # join = self.solidjoinstyle
+                    join = self.solid_joinstyle
+                    # print("else join: ", join)
                 gc.set_joinstyle(join)
                 gc.set_capstyle(cap)
                 gc.set_snap(self.get_snap())
                 if self.get_sketch_params() is not None:
                     gc.set_sketch_params(*self.get_sketch_params())
 
-                gc.set_dashes(self._dashOffset, self._dashSeq)
+                gc.set_dashes(self.dashOffset, self.dashSeq)
                 renderer.draw_path(gc, tpath, affine.frozen())
                 gc.restore()
 
-        if self._marker and self._markersize > 0:
+        print("self.marker: ", self.marker)
+        print("self.markersize: ", self.markersize)
+        if self.marker and self.markersize > 0:
             gc = renderer.new_gc()
             self._set_gc_clip(gc)
             rgbaFace = self._get_rgba_face()
@@ -1150,6 +1159,8 @@ class Line2D(b_artist.Artist, HasTraits):
 
     def _get_rgba_face(self, alt=False):
         facecolor = self._get_markerfacecolor(alt=alt)
+        # print("self.markerfacecolor: ", self.markerfacecolor)
+        # facecolor = self.markerfacecolor #TODO: work in alt
         if (isinstance(facecolor, six.string_types)
                 and facecolor.lower() == 'none'):
             rgbaFace = None
@@ -1173,6 +1184,22 @@ class Line2D(b_artist.Artist, HasTraits):
     def is_dashed(self):
         'return True if line is dashstyle'
         return self.linestyle in ('--', '-.', ':')
+
+    def _get_markerfacecolor(self, alt=False):
+        if alt:
+            fc = self.markerfacecoloralt
+        else:
+            fc = self.markerfacecolor
+        if (isinstance(fc, six.string_types) and fc.lower() == 'auto'):
+            if self.get_fillstyle() == 'none':
+                return 'none'
+            else:
+                return self._color
+        else:
+            return fc
+
+    def get_markerfacecolor(self):
+        return self._get_markerfacecolor(alt=False)
 
 lineStyles = Line2D.lineStyles
 lineMarkers = MarkerStyle.markers
