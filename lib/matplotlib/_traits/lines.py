@@ -30,7 +30,10 @@ from matplotlib.markers import (
     CARETLEFTBASE, CARETRIGHTBASE, CARETUPBASE, CARETDOWNBASE,
     TICKLEFT, TICKRIGHT, TICKUP, TICKDOWN)
 
-from traitlets import HasTraits, Any, Instance, Unicode, Float, Bool, Int, validate, observe, default, Type, List
+from traitlets import (
+            HasTraits, Any, Instance, Unicode,
+            Float, Bool, Int, validate, observe,
+            default, Type, List, Tuple, Union)
 from .traits import PathTrait, TransformedPathTrait
 
 #for monkey patching into base lines
@@ -283,10 +286,12 @@ class Line2D(b_artist.Artist, HasTraits):
 
 
     linewidth=Float(allow_none=True, default_value=rcParams['lines.linewidth'])
-    linestyle = Unicode(allow_none=True, default_value=rcParams['lines.linestyle'])
+    linestyle=Unicode(allow_none=True, default_value=rcParams['lines.linestyle'])
     #TODO: not sure if this is correct?
-    # color=Unicode(allow_none=True, default_value=None)
-    color=Unicode(allow_none=True, default_value=rcParams['lines.color'])
+    # color=Unicode(allow_none=True, default_value=rcParams['lines.color'])
+    # color=Union([Unicode(), Float(), Tuple()], allow_none=True, default_value=rcParams['lines.color'])
+    color=Union([Unicode(), Float(), Tuple()], allow_none=False, default_value='C0')
+    print("color: ", color)
     #TODO: check if import statement is in default function; set defaulty value there
     marker=Unicode(allow_none=True)
     # marker=Instance('matplotlib.markers',allow_none=False)
@@ -482,7 +487,7 @@ class Line2D(b_artist.Artist, HasTraits):
     @validate("color")
     def _color_validate(self, proposal):
         if proposal.value is None:
-            return rcParams['lines.color']
+            return 'C0'
         return proposal.value
     #color observer
     @observe("color", type="change")
@@ -1159,8 +1164,7 @@ class Line2D(b_artist.Artist, HasTraits):
 
     def _get_rgba_face(self, alt=False):
         facecolor = self._get_markerfacecolor(alt=alt)
-        # print("self.markerfacecolor: ", self.markerfacecolor)
-        # facecolor = self.markerfacecolor #TODO: work in alt
+        print("facecolor: ", facecolor)
         if (isinstance(facecolor, six.string_types)
                 and facecolor.lower() == 'none'):
             rgbaFace = None
