@@ -1191,10 +1191,11 @@ class Line2D(b_artist.Artist, HasTraits):
         else:
             fc = self.markerfacecolor
         if (isinstance(fc, six.string_types) and fc.lower() == 'auto'):
-            if self.get_fillstyle() == 'none':
+            # if self.get_fillstyle() == 'none':
+            if self.marker.get_fillstyle() == 'none':
                 return 'none'
             else:
-                return self._color
+                return self.color
         else:
             return fc
 
