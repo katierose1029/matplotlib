@@ -285,43 +285,43 @@ class Line2D(b_artist.Artist, HasTraits):
     validJoin = ('miter', 'round', 'bevel')
 
 
-    linewidth=Float(allow_none=True, default_value=rcParams['lines.linewidth'])
-    linestyle=Unicode(allow_none=True, default_value=rcParams['lines.linestyle'])
+    linewidth=Float(allow_none=False, default_value=rcParams['lines.linewidth'])
+    linestyle=Unicode(allow_none=False, default_value=rcParams['lines.linestyle'])
     #TODO: not sure if this is correct?
-    # color=Unicode(allow_none=True, default_value=rcParams['lines.color'])
-    # color=Union([Unicode(), Float(), Tuple()], allow_none=True, default_value=rcParams['lines.color'])
-    color=Union([Unicode(), Float(), Tuple()], allow_none=False, default_value='C0')
+    # color=Unicode(allow_none=False, default_value=rcParams['lines.color'])
+    # color=Union([Unicode(), Float(), Tuple()], allow_none=False, default_value=rcParams['lines.color'])
+    color=Unicode(allow_none=False, default_value='C0')
     print("color: ", color)
     #TODO: check if import statement is in default function; set defaulty value there
-    marker=Unicode(allow_none=True)
+    marker=Unicode(allow_none=False)
     # marker=Instance('matplotlib.markers',allow_none=False)
     # marker=Instance('matplotlib.markers.MarkerStyle',allow_none=False)
-    markersize=Float(allow_none=True,default_value=rcParams['lines.markersize'])
-    markeredgewidth=Float(allow_none=True,default_value=None)
+    markersize=Float(allow_none=False,default_value=rcParams['lines.markersize'])
+    markeredgewidth=Float(allow_none=False,default_value=1.0)
     #TODO: not sure if this is correct?
-    markerfacecolor=Unicode(allow_none=True, default_value=None)
+    markerfacecolor=Unicode(allow_none=False, default_value='')
     # same applies for the alternative face color
-    markerfacecoloralt=Unicode(allow_none=True, default_value='none')
+    markerfacecoloralt=Unicode(allow_none=False, default_value='none')
     #TODO: this gets passed into marker so I want to assume same for color however only accepts the following strings: ['full' | 'left' | 'right' | 'bottom' | 'top' | 'none']
-    fillstyle=Unicode(allow_none=True, default_value=None)
+    fillstyle=Unicode(allow_none=False, default_value='')
     antialiased=Bool(default_value=rcParams['lines.antialiased'])
     # accepts: ['butt' | 'round' | 'projecting']
-    dash_capstyle=Unicode(allow_none=True, default_value=rcParams['lines.dash_capstyle'])
+    dash_capstyle=Unicode(allow_none=False, default_value=rcParams['lines.dash_capstyle'])
     # accepts: ['butt' | 'round' | 'projecting']
-    solid_capstyle=Unicode(allow_none=True, default_value=rcParams['lines.solid_capstyle'])
+    solid_capstyle=Unicode(allow_none=False, default_value=rcParams['lines.solid_capstyle'])
     # accepts: ['miter' | 'round' | 'bevel']
-    dash_joinstyle=Unicode(allow_none=True, default_value=rcParams['lines.dash_joinstyle'])
+    dash_joinstyle=Unicode(allow_none=False, default_value=rcParams['lines.dash_joinstyle'])
 
     # accepts: ['miter' | 'round' | 'bevel']
-    solid_joinstyle=Unicode(allow_none=True, default_value=rcParams['lines.solid_joinstyle'])
-    pickradius=Int(allow_none=True, default_value=5)
+    solid_joinstyle=Unicode(allow_none=False, default_value=rcParams['lines.solid_joinstyle'])
+    pickradius=Int(allow_none=False, default_value=5)
     #TODO: assure this attribute works
     # accepts: ['default' | 'steps' | 'steps-pre' | 'steps-mid' | 'steps-post']
-    drawstyle=Unicode(allow_none=True, default_value='default')
+    drawstyle=Unicode(allow_none=False, default_value='default')
     #TODO: assure this attribute works
-    markevery=Any(allow_none=True, default_value=None)
+    markevery=Any(allow_none=False, default_value=None)
     verticalOffset = None   #only found once in the original lines code so not sure what to do with this
-    ind_offset = Int(allow_none=True,default_value=0)
+    ind_offset = Int(allow_none=False,default_value=0)
     invalidx=Bool(default_value=True)
     invalidy=Bool(default_value=True)
     #TODO: assure this works because I am not sure of the default value
@@ -330,7 +330,7 @@ class Line2D(b_artist.Artist, HasTraits):
     # print("isinstance(path, Path):", isinstance(path, Path))
     # print("isinstance(path, PathTrait):", isinstance(path, PathTrait))
 
-    # transformed_path=Instance('matplotlib.transforms.TransformedPath', allow_none=True) #default_value set in default function
+    # transformed_path=Instance('matplotlib.transforms.TransformedPath', allow_none=False) #default_value set in default function
     # TransformedPath(path, self.get_transform())
     # transformed_path=TransformedPathTrait(allow_none=False) #TODO: assure this works
     transformed_path=Instance('matplotlib.transforms.TransformedPath', allow_none=False)
@@ -339,19 +339,16 @@ class Line2D(b_artist.Artist, HasTraits):
 
     subslice=Bool(default_value=False)  # used in subslicing; only x is needed
     #TODO: assure numpy.array is imported in default function & assure this works
-    # x_filled=Instance('numpy.array', allow_none=True, default_value=None)
-    x_filled=Instance('numpy.array', allow_none=True)
+    # x_filled=Instance('numpy.array', allow_none=False, default_value=None)
+    x_filled=Instance('numpy.array', allow_none=False)
 
 
-    #TODO: figure this out
+    #TODO: TEST
     dashSeq = None
-    # dashSeq = Instance('')
-
-    dashOffset=Int(allow_none=True, default_value=None)
+    dashOffset=Int(allow_none=False, default_value=0)
     # unscaled dash + offset; this is needed scaling the dash pattern by linewidth
-    #TODO: figure this out
     us_dashSeq = None #NOTE: could be an Instance?
-    us_dashOffset=Int(allow_none=True, default_value=None)
+    us_dashOffset=Int(allow_none=False, default_value=0)
 
 
     xorig = numpy.asarray([])
@@ -415,11 +412,11 @@ class Line2D(b_artist.Artist, HasTraits):
                  color=rcParams['lines.color'],
                  marker=rcParams['lines.marker'],
                  markersize=rcParams['lines.markersize'],
-                 markeredgewidth=None,
-                 markeredgecolor=None,
-                 markerfacecolor=None,
+                 markeredgewidth='',
+                 markeredgecolor='',
+                 markerfacecolor = '',
                  markerfacecoloralt='none',
-                 fillstyle=None,
+                 fillstyle='',
                  antialiased=rcParams['lines.antialiased'],
                  dash_capstyle=rcParams['lines.dash_capstyle'],
                  solid_capstyle=rcParams['lines.solid_capstyle'],
@@ -712,7 +709,7 @@ class Line2D(b_artist.Artist, HasTraits):
     @default("path")
     def _path_default(self):
         from matplotlib.path import Path
-        print("creating default value for Path")
+        # print("creating default value for Path")
         verts = [
         (0., 0.), # left, bottom
         (0., 1.), # left, top
@@ -731,7 +728,7 @@ class Line2D(b_artist.Artist, HasTraits):
     @validate("path")
     def _path_validate(self, proposal):
         from matplotlib.path import Path
-        print("isinstance(proposal.value, Path):", isinstance(proposal.value, Path))
+        # print("isinstance(proposal.value, Path):", isinstance(proposal.value, Path))
         return proposal.value
 
     #transformed default
@@ -744,7 +741,7 @@ class Line2D(b_artist.Artist, HasTraits):
     @validate("transformed_path")
     def _transformed_path_validate(self, proposal):
         from matplotlib.transforms import TransformedPath
-        print("isinstance(proposal.value, TransformedPath):", isinstance(proposal.value, TransformedPath))
+        # print("isinstance(proposal.value, TransformedPath):", isinstance(proposal.value, TransformedPath))
         return proposal.value
 
     #subslice validate
@@ -1028,7 +1025,7 @@ class Line2D(b_artist.Artist, HasTraits):
                 gc.set_foreground(rgbaFace, isRGBA=True)
             else:
                 gc.set_foreground(edgecolor)
-                gc.set_linewidth(self._markeredgewidth)
+                gc.set_linewidth(self.markeredgewidth)
                 mec = self._markeredgecolor
                 if (isinstance(mec, six.string_types) and mec == 'auto' and
                         rgbaFace is not None):
