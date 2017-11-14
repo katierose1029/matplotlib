@@ -299,7 +299,7 @@ class Line2D(b_artist.Artist, HasTraits):
     markersize=Float(allow_none=False,default_value=rcParams['lines.markersize'])
     markeredgewidth=Float(allow_none=False,default_value=1.0)
     #TODO: not sure if this is correct?
-    markerfacecolor=Unicode(allow_none=False, default_value='')
+    markerfacecolor=Unicode(allow_none=False, default_value='C0') #TODO: test this
     # same applies for the alternative face color
     markerfacecoloralt=Unicode(allow_none=False, default_value='none')
     #TODO: this gets passed into marker so I want to assume same for color however only accepts the following strings: ['full' | 'left' | 'right' | 'bottom' | 'top' | 'none']
@@ -1170,6 +1170,8 @@ class Line2D(b_artist.Artist, HasTraits):
         return rgbaFace
 
     def _get_rgba_ln_color(self, alt=False):
+        print("self.color: ", self.color)
+        print("self.alpha", self.alpha)
         return mcolors.to_rgba(self.color, self.alpha)
 
     # for testing
@@ -1202,6 +1204,18 @@ class Line2D(b_artist.Artist, HasTraits):
 
     def get_markerfacecolor(self):
         return self._get_markerfacecolor(alt=False)
+
+    def get_markeredgecolor(self):
+        mec = self.markeredgecolor
+        if isinstance(mec, six.string_types) and mec == 'auto':
+            if rcParams['_internal.classic_mode']:
+                if self.marker.get_marker() in ('.', ','):
+                    return self.color
+                if self.marker.is_filled() and self.get_fillstyle() != 'none':
+                     return 'k'  # Bad hard-wired default...
+            return self.color
+        else:
+            return mec
 
 lineStyles = Line2D.lineStyles
 lineMarkers = MarkerStyle.markers
