@@ -302,6 +302,7 @@ class Line2D(b_artist.Artist, HasTraits):
     markerfacecolor=Unicode(allow_none=False, default_value='C0') #TODO: test this
     # same applies for the alternative face color
     markerfacecoloralt=Unicode(allow_none=False, default_value='none')
+    markeredgecolor=Unicode(allow_none=False,default_value='auto')
     #TODO: this gets passed into marker so I want to assume same for color however only accepts the following strings: ['full' | 'left' | 'right' | 'bottom' | 'top' | 'none']
     fillstyle=Unicode(allow_none=False, default_value='')
     antialiased=Bool(default_value=rcParams['lines.antialiased'])
@@ -412,9 +413,9 @@ class Line2D(b_artist.Artist, HasTraits):
                  color=rcParams['lines.color'],
                  marker=rcParams['lines.marker'],
                  markersize=rcParams['lines.markersize'],
-                 markeredgewidth='',
-                 markeredgecolor='',
-                 markerfacecolor = '',
+                 markeredgewidth='1.0',
+                 markeredgecolor='auto',
+                 markerfacecolor = 'C0',
                  markerfacecoloralt='none',
                  fillstyle='',
                  antialiased=rcParams['lines.antialiased'],
@@ -1026,7 +1027,7 @@ class Line2D(b_artist.Artist, HasTraits):
             else:
                 gc.set_foreground(edgecolor)
                 gc.set_linewidth(self.markeredgewidth)
-                mec = self._markeredgecolor
+                mec = self.markeredgecolor
                 if (isinstance(mec, six.string_types) and mec == 'auto' and
                         rgbaFace is not None):
                     gc.set_alpha(rgbaFace[3])
@@ -1161,7 +1162,7 @@ class Line2D(b_artist.Artist, HasTraits):
 
     def _get_rgba_face(self, alt=False):
         facecolor = self._get_markerfacecolor(alt=alt)
-        print("facecolor: ", facecolor)
+        print("_get_rgba_face facecolor: ", facecolor)
         if (isinstance(facecolor, six.string_types)
                 and facecolor.lower() == 'none'):
             rgbaFace = None
