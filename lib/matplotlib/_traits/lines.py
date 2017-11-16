@@ -303,6 +303,7 @@ class Line2D(b_artist.Artist, HasTraits):
     # same applies for the alternative face color
     markerfacecoloralt=Unicode(allow_none=False, default_value='none')
     markeredgecolor=Unicode(allow_none=False,default_value='auto')
+    markevery=Union(Int())
     #TODO: this gets passed into marker so I want to assume same for color however only accepts the following strings: ['full' | 'left' | 'right' | 'bottom' | 'top' | 'none']
     fillstyle=Unicode(allow_none=False, default_value='')
     antialiased=Bool(default_value=rcParams['lines.antialiased'])
@@ -832,9 +833,12 @@ class Line2D(b_artist.Artist, HasTraits):
         bbox.update_from_data_xy(trans_data_to_xy(self.get_xydata()),
                                  ignore=True)
         # correct for marker size, if any
-        if self._marker:
-            ms = (self._markersize / 72.0 * self.figure.dpi) * 0.5
+        print("get_window_extent marker: ", self.marker)
+        if self.marker:
+            ms = (self.markersize / 72.0 * self.figure.dpi) * 0.5
+            print("get_window_extent ms: ", ms)
             bbox = bbox.padded(ms)
+            print("get_window_extent bbox: ", bbox)
         return bbox
 
     # @Artist.axes.setter
@@ -1034,11 +1038,14 @@ class Line2D(b_artist.Artist, HasTraits):
                 else:
                     gc.set_alpha(self.get_alpha())
 
-            marker = self._marker
+            print("self.marker: ", self.marker)
+            marker = self.marker
+            print("marker: ", marker)
             tpath, affine = transf_path.get_transformed_points_and_affine()
             if len(tpath.vertices):
                 # subsample the markers if markevery is not None
-                markevery = self.get_markevery()
+                # markevery = self.get_markevery()
+                markevery = self.markevery
                 if markevery is not None:
                     subsampled = _mark_every_path(markevery, tpath,
                                                   affine, self.axes.transAxes)
@@ -1047,13 +1054,13 @@ class Line2D(b_artist.Artist, HasTraits):
 
                 snap = marker.get_snap_threshold()
                 if type(snap) == float:
-                    snap = renderer.points_to_pixels(self._markersize) >= snap
+                    snap = renderer.points_to_pixels(self.markersize) >= snap
                 gc.set_snap(snap)
                 gc.set_joinstyle(marker.get_joinstyle())
                 gc.set_capstyle(marker.get_capstyle())
                 marker_path = marker.get_path()
                 marker_trans = marker.get_transform()
-                w = renderer.points_to_pixels(self._markersize)
+                w = renderer.points_to_pixels(self.markersize)
 
                 if (isinstance(marker.get_marker(), six.string_types) and
                         marker.get_marker() == ','):
