@@ -100,3 +100,4 @@ class Callable(TraitType):
             return value
         else:
             self.error(obj, value)
+

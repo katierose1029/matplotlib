@@ -15,9 +15,12 @@ import numpy as np
 
 from . import artist, colors as mcolors, docstring, rcParams
 from .artist import Artist, allow_rasterization
+
+# import matplotlib._traits.artist as artist
+# from matplotlib._traits.artist import Artist, allow_rasterization
+
 from .cbook import (
-    _to_unmasked_float_array, iterable, is_numlike, ls_mapper, ls_mapper_r,
-    STEP_LOOKUP_MAP)
+    iterable, is_numlike, ls_mapper, ls_mapper_r, STEP_LOOKUP_MAP)
 from .markers import MarkerStyle
 from .path import Path
 from .transforms import Bbox, TransformedPath, IdentityTransform
@@ -616,7 +619,7 @@ class Line2D(Artist):
             bbox = bbox.padded(ms)
         return bbox
 
-    @Artist.axes.setter
+    # @Artist.axes.setter
     def axes(self, ax):
         # call the set method from the base-class property
         Artist.axes.fset(self, ax)
@@ -649,17 +652,37 @@ class Line2D(Artist):
     def recache(self, always=False):
         if always or self._invalidx:
             xconv = self.convert_xunits(self._xorig)
-            x = _to_unmasked_float_array(xconv).ravel()
+            if isinstance(self._xorig, np.ma.MaskedArray):
+                x = np.ma.asarray(xconv, float).filled(np.nan)
+            else:
+                x = np.asarray(xconv, float)
+            x = x.ravel()
         else:
             x = self._x
         if always or self._invalidy:
             yconv = self.convert_yunits(self._yorig)
-            y = _to_unmasked_float_array(yconv).ravel()
+            if isinstance(self._yorig, np.ma.MaskedArray):
+                y = np.ma.asarray(yconv, float).filled(np.nan)
+            else:
+                y = np.asarray(yconv, float)
+            y = y.ravel()
         else:
             y = self._y
 
-        self._xy = np.column_stack(np.broadcast_arrays(x, y)).astype(float)
-        self._x, self._y = self._xy.T  # views
+        if len(x) == 1 and len(y) > 1:
+            x = x * np.ones(y.shape, float)
+        if len(y) == 1 and len(x) > 1:
+            y = y * np.ones(x.shape, float)
+
+        if len(x) != len(y):
+            raise RuntimeError('xdata and ydata must be the same length')
+
+        self._xy = np.empty((len(x), 2), dtype=float)
+        self._xy[:, 0] = x
+        self._xy[:, 1] = y
+
+        self._x = self._xy[:, 0]  # just a view
+        self._y = self._xy[:, 1]  # just a view
 
         self._subslice = False
         if (self.axes and len(x) > 1000 and self._is_sorted(x) and
@@ -877,7 +900,7 @@ class Line2D(Artist):
                 if self._marker.get_marker() in ('.', ','):
                     return self._color
                 if self._marker.is_filled() and self.get_fillstyle() != 'none':
-                    return 'k'  # Bad hard-wired default...
+                     return 'k'  # Bad hard-wired default...
             return self._color
         else:
             return mec
@@ -1171,7 +1194,7 @@ class Line2D(Artist):
 
     def set_markerfacecoloralt(self, fc):
         """
-        Set the alternate marker face color.
+        Set the alternate marker face `color`.
 
         ACCEPTS: any matplotlib color
         """

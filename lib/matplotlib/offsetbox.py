@@ -23,6 +23,9 @@ from six.moves import xrange, zip
 import warnings
 import matplotlib.transforms as mtransforms
 import matplotlib.artist as martist
+# import matplotlib._traits.artist as martist
+# from matplotlib._traits.artist import allow_rasterization
+
 import matplotlib.text as mtext
 import matplotlib.path as mpath
 import numpy as np
@@ -71,19 +74,22 @@ def _get_packed_offsets(wd_list, total, sep, mode="fixed"):
     # d_list is currently not used.
 
     if mode == "fixed":
-        offsets_ = np.cumsum([0] + [w + sep for w in w_list])
+        offsets_ = np.add.accumulate([0] + [w + sep for w in w_list])
         offsets = offsets_[:-1]
+
         if total is None:
             total = offsets_[-1] - sep
+
         return total, offsets
 
     elif mode == "expand":
         if len(w_list) > 1:
             sep = (total - sum(w_list)) / (len(w_list) - 1.)
         else:
-            sep = 0
-        offsets_ = np.cumsum([0] + [w + sep for w in w_list])
+            sep = 0.
+        offsets_ = np.add.accumulate([0] + [w + sep for w in w_list])
         offsets = offsets_[:-1]
+
         return total, offsets
 
     elif mode == "equal":
@@ -91,8 +97,10 @@ def _get_packed_offsets(wd_list, total, sep, mode="fixed"):
         if total is None:
             total = (maxh + sep) * len(w_list)
         else:
-            sep = total / len(w_list) - maxh
-        offsets = (maxh + sep) * np.arange(len(w_list))
+            sep = float(total) / (len(w_list)) - maxh
+
+        offsets = np.array([(maxh + sep) * i for i in range(len(w_list))])
+
         return total, offsets
 
     else:
@@ -182,7 +190,7 @@ class OffsetBox(martist.Artist):
         for c in self.get_children():
             c.set_figure(fig)
 
-    @martist.Artist.axes.setter
+    # @martist.Artist.axes.setter
     def axes(self, ax):
         # TODO deal with this better
         martist.Artist.axes.fset(self, ax)
@@ -1807,3 +1815,4 @@ if __name__ == "__main__":
 
     plt.draw()
     plt.show()
+

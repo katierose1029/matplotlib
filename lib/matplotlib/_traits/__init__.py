@@ -10,7 +10,7 @@ Traits/MPL interface
 # def install_traits():
 #     import matplotlib.lines
 #     matplotlib.lines.Line2D  = Line2DWithTra"""
-Traits/MPL interface
+# Traits/MPL interface
 """
 # from .artist import Artist
 
@@ -20,4 +20,5 @@ Traits/MPL interface
 #start of the install_traits() function
 # def install_traits():
 #     import matplotlib.lines
-#     matplotlib.lines.Line2D  = Line2DWithTraitsits
+#     matplotlib.lines.Line2D  = Line2DWithTraitsit
+"""
