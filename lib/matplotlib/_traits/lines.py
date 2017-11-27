@@ -280,6 +280,7 @@ class Line2D(b_artist.Artist, HasTraits):
     filled_markers = MarkerStyle.filled_markers
     fillStyles = MarkerStyle.fillstyles
 
+
     zorder = 2
     validCap = ('butt', 'round', 'projecting')
     validJoin = ('miter', 'round', 'bevel')
@@ -291,11 +292,13 @@ class Line2D(b_artist.Artist, HasTraits):
     # color=Unicode(allow_none=False, default_value=rcParams['lines.color'])
     # color=Union([Unicode(), Float(), Tuple()], allow_none=False, default_value=rcParams['lines.color'])
     color=Unicode(allow_none=False, default_value='C0')
-    print("color: ", color)
-    #TODO: check if import statement is in default function; set defaulty value there
-    marker=Unicode(allow_none=False)
-    # marker=Instance('matplotlib.markers',allow_none=False)
+    # print("color: ", color)
+
+
+    # marker=Unicode(allow_none=False)
+    marker=Instance('matplotlib.markers',allow_none=False)
     # marker=Instance('matplotlib.markers.MarkerStyle',allow_none=False)
+
     markersize=Float(allow_none=False,default_value=rcParams['lines.markersize'])
     markeredgewidth=Float(allow_none=False,default_value=1.0)
     #TODO: not sure if this is correct?
@@ -303,7 +306,7 @@ class Line2D(b_artist.Artist, HasTraits):
     # same applies for the alternative face color
     markerfacecoloralt=Unicode(allow_none=False, default_value='none')
     markeredgecolor=Unicode(allow_none=False,default_value='auto')
-    markevery=Union(Int())
+    markevery=Union([Int(), Float(), Tuple()])
     #TODO: this gets passed into marker so I want to assume same for color however only accepts the following strings: ['full' | 'left' | 'right' | 'bottom' | 'top' | 'none']
     fillstyle=Unicode(allow_none=False, default_value='')
     antialiased=Bool(default_value=rcParams['lines.antialiased'])
@@ -329,19 +332,9 @@ class Line2D(b_artist.Artist, HasTraits):
     #TODO: assure this works because I am not sure of the default value
     # path = PathTrait(allow_none=False, default_value=Path([(0.0,0.0),(1.0,0.0),(1.0,1.0),(1.0,0.0)])) #TODO: fix this
     path=Instance('matplotlib.path.Path', allow_none=False)
-    # print("isinstance(path, Path):", isinstance(path, Path))
-    # print("isinstance(path, PathTrait):", isinstance(path, PathTrait))
-
-    # transformed_path=Instance('matplotlib.transforms.TransformedPath', allow_none=False) #default_value set in default function
-    # TransformedPath(path, self.get_transform())
-    # transformed_path=TransformedPathTrait(allow_none=False) #TODO: assure this works
     transformed_path=Instance('matplotlib.transforms.TransformedPath', allow_none=False)
-    # print("isinstance(transformed_path, TransformedPath):", isinstance(transformed_path, TransformedPath))
-    # print("isinstance(transformed_path, TransformedPathTrait):", isinstance(transformed_path, TransformedPathTrait))
-
     subslice=Bool(default_value=False)  # used in subslicing; only x is needed
     #TODO: assure numpy.array is imported in default function & assure this works
-    # x_filled=Instance('numpy.array', allow_none=False, default_value=None)
     x_filled=Instance('numpy.array', allow_none=False)
 
 
@@ -1229,6 +1222,7 @@ lineStyles = Line2D.lineStyles
 lineMarkers = MarkerStyle.markers
 drawStyles = Line2D.drawStyles
 fillStyles = MarkerStyle.fillstyles
+
 
 #for monkey patching
 b_Line2D.Line2D = Line2D
