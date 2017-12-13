@@ -35,7 +35,7 @@ from matplotlib.cbook import _string_to_bool
 from matplotlib.cbook import deprecated
 from matplotlib import docstring
 from matplotlib.backend_bases import FigureCanvasBase
-from matplotlib._traits.figure import Figure, figaspect
+from matplotlib.figure import Figure, figaspect
 from matplotlib.gridspec import GridSpec
 from matplotlib.image import imread as _imread
 from matplotlib.image import imsave as _imsave
