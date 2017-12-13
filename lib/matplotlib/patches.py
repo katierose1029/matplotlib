@@ -12,8 +12,17 @@ import math
 import matplotlib as mpl
 import numpy as np
 import matplotlib.cbook as cbook
+
 import matplotlib.artist as artist
 from matplotlib.artist import allow_rasterization
+
+# import matplotlib._traits
+# print('_traits.artist', traits.artist)
+# import matplotlib._traits.artist as t_artist
+# from matplotlib._traits.artist import *
+# from matplotlib._traits.artist import Artist
+# print('matplotlib._traits.artist.Artist: ', Artist)
+
 import matplotlib.colors as colors
 from matplotlib import docstring
 import matplotlib.transforms as transforms
@@ -102,6 +111,7 @@ class Patch(artist.Artist):
         %(Patch)s
         """
         artist.Artist.__init__(self)
+        # print('matplotlib.patches.Patch artist.Artist: ', artist.Artist)
 
         if linewidth is None:
             linewidth = mpl.rcParams['patch.linewidth']
@@ -299,7 +309,7 @@ class Patch(artist.Artist):
                 color = 'none'
                 set_hatch_color = False
 
-        self._edgecolor = colors.to_rgba(color, self._alpha)
+        self._edgecolor = colors.to_rgba(color, self.alpha)
         if set_hatch_color:
             self._hatch_color = self._edgecolor
         self.stale = True
@@ -320,7 +330,7 @@ class Patch(artist.Artist):
     def _set_facecolor(self, color):
         if color is None:
             color = mpl.rcParams['patch.facecolor']
-        alpha = self._alpha if self._fill else 0
+        alpha = self.alpha if self._fill else 0
         self._facecolor = colors.to_rgba(color, alpha)
         self.stale = True
 

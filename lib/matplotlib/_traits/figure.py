@@ -60,6 +60,7 @@ from traitlets import HasTraits, Any, Instance, Unicode, Float, Bool, Int, valid
 # for monkey patching
 import matplotlib.figure as b_figure
 
+
 def _stale_figure_callback(self,val):
 	if self.figure:
 		self.figure.stale = val
@@ -2020,4 +2021,6 @@ def figaspect(arg):
 b_figure.Figure = Figure
 
 docstring.interpd.update(Figure=martist.kwdoc(Figure))
+
+
 

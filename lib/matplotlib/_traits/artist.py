@@ -770,4 +770,3 @@ class Artist(HasTraits, b_artist.Artist):
 #monkey patching
 b_artist.Artist = Artist
 # print('after b_artist.Artist: ', b_artist.Artist) #matplotlib._traits.artist.Artist
-

@@ -9,6 +9,7 @@ Traits/MPL interface
 #start of the install_traits() function
 # def install_traits():
 #     import matplotlib.lines
+
 #     matplotlib.lines.Line2D  = Line2DWithTra"""
 # Traits/MPL interface
 """
@@ -22,3 +23,6 @@ Traits/MPL interface
 #     import matplotlib.lines
 #     matplotlib.lines.Line2D  = Line2DWithTraitsit
 """
+
+#     matplotlib.lines.Line2D  = Line2DWithTraits
+

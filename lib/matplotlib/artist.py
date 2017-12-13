@@ -14,8 +14,20 @@ import numpy as np
 import matplotlib
 from . import cbook, docstring, rcParams
 from .path import Path
+
 from .transforms import (Bbox, IdentityTransform, Transform, TransformedBbox,
                          TransformedPatchPath, TransformedPath)
+
+from functools import wraps
+from contextlib import contextmanager
+
+# import matplotlib._traits
+# import matplotlib._traits.artist as artist
+# print('_traits.artist: ', artist)
+# import matplotlib._traits.artist
+# from matplotlib._traits.artist import allow_rasterization
+# from matplotlib._traits.artist import *
+
 # Note, matplotlib artists use the doc strings for set and get
 # methods to enable the introspection methods of setp and getp.  Every
 # set_* method should have a docstring containing the line
@@ -1430,3 +1442,8 @@ docstring.interpd.update(Artist=kwdoc(Artist))
 
 _get_axes_msg = """{0} has been deprecated in mpl 1.5, please use the
 axes property.  A removal date has not been set."""
+
+
+a = Artist()
+print('a: ', a)
+# print('isinstance(a,matplotlib._traits.artist.Artist): ', isinstance(a,matplotlib._traits.artist.Artist))
