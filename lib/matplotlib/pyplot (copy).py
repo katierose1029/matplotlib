@@ -21,9 +21,9 @@ from __future__ import (absolute_import, division, print_function,
 import six
 
 import sys
+import warnings
 import time
 import types
-import warnings
 
 from cycler import cycler
 import matplotlib
@@ -35,7 +35,7 @@ from matplotlib.cbook import _string_to_bool
 from matplotlib.cbook import deprecated
 from matplotlib import docstring
 from matplotlib.backend_bases import FigureCanvasBase
-from matplotlib._traits.figure import Figure, figaspect
+from matplotlib.figure import Figure, figaspect
 from matplotlib.gridspec import GridSpec
 from matplotlib.image import imread as _imread
 from matplotlib.image import imsave as _imsave
@@ -389,38 +389,28 @@ def xkcd(scale=1, length=100, randomness=2):
             "xkcd mode is not compatible with text.usetex = True")
 
     from matplotlib import patheffects
-    xkcd_ctx = rc_context({
-        'font.family': ['xkcd', 'Humor Sans', 'Comic Sans MS'],
-        'font.size': 14.0,
-        'path.sketch': (scale, length, randomness),
-        'path.effects': [patheffects.withStroke(linewidth=4, foreground="w")],
-        'axes.linewidth': 1.5,
-        'lines.linewidth': 2.0,
-        'figure.facecolor': 'white',
-        'grid.linewidth': 0.0,
-        'axes.grid': False,
-        'axes.unicode_minus': False,
-        'axes.edgecolor': 'black',
-        'xtick.major.size': 8,
-        'xtick.major.width': 3,
-        'ytick.major.size': 8,
-        'ytick.major.width': 3,
-    })
-    xkcd_ctx.__enter__()
-
-    # In order to make the call to `xkcd` that does not use a context manager
-    # (cm) work, we need to enter into the cm ourselves, and return a dummy
-    # cm that does nothing on entry and cleans up the xkcd context on exit.
-    # Additionally, we need to keep a reference to the dummy cm because it
-    # would otherwise be exited when GC'd.
-
-    class dummy_ctx(object):
-        def __enter__(self):
-            pass
-
-        __exit__ = xkcd_ctx.__exit__
-
-    return dummy_ctx()
+    context = rc_context()
+    try:
+        rcParams['font.family'] = ['xkcd', 'Humor Sans', 'Comic Sans MS']
+        rcParams['font.size'] = 14.0
+        rcParams['path.sketch'] = (scale, length, randomness)
+        rcParams['path.effects'] = [
+            patheffects.withStroke(linewidth=4, foreground="w")]
+        rcParams['axes.linewidth'] = 1.5
+        rcParams['lines.linewidth'] = 2.0
+        rcParams['figure.facecolor'] = 'white'
+        rcParams['grid.linewidth'] = 0.0
+        rcParams['axes.grid'] = False
+        rcParams['axes.unicode_minus'] = False
+        rcParams['axes.edgecolor'] = 'black'
+        rcParams['xtick.major.size'] = 8
+        rcParams['xtick.major.width'] = 3
+        rcParams['ytick.major.size'] = 8
+        rcParams['ytick.major.width'] = 3
+    except:
+        context.__exit__(*sys.exc_info())
+        raise
+    return context
 
 
 ## Figures ##
@@ -974,22 +964,28 @@ def gca(**kwargs):
 
 def subplot(*args, **kwargs):
     """
-    Return a subplot axes at the given grid position.
+    Return a subplot axes positioned by the given grid definition.
 
-    Call signature::
+    Typical call signature::
 
-       subplot(nrows, ncols, index, **kwargs)
+      subplot(nrows, ncols, plot_number)
 
-    In the current figure, create and return an `~.Axes`, at position *index*
-    of a (virtual) grid of *nrows* by *ncols* axes.  Indexes go from 1 to
-    ``nrows * ncols``, incrementing in row-major order.
+    Where *nrows* and *ncols* are used to notionally split the figure
+    into ``nrows * ncols`` sub-axes, and *plot_number* is used to identify
+    the particular subplot that this function is to create within the notional
+    grid. *plot_number* starts at 1, increments across rows first and has a
+    maximum of ``nrows * ncols``.
 
-    If *nrows*, *ncols* and *index* are all less than 10, they can also be
-    given as a single, concatenated, three-digit number.
+    In the case when *nrows*, *ncols* and *plot_number* are all less than 10,
+    a convenience exists, such that the a 3 digit number can be given instead,
+    where the hundreds represent *nrows*, the tens represent *ncols* and the
+    units represent *plot_number*. For instance::
 
-    For example, ``subplot(2, 3, 3)`` and ``subplot(233)`` both create an
-    `~.Axes` at the top right corner of the current figure, occupying half of
-    the figure height and a third of the figure width.
+      subplot(211)
+
+    produces a subaxes in a figure which represents the top plot (i.e. the
+    first) in a 2 row by 1 column notional grid (no grid actually exists,
+    but conceptually this is how the returned subplot has been positioned).
 
     .. note::
 
@@ -1190,42 +1186,18 @@ def subplots(nrows=1, ncols=1, sharex=False, sharey=False, squeeze=True,
 
 def subplot2grid(shape, loc, rowspan=1, colspan=1, fig=None, **kwargs):
     """
-    Create an axis at specific location inside a regular grid.
+    Create a subplot in a grid.  The grid is specified by *shape*, at
+    location of *loc*, spanning *rowspan*, *colspan* cells in each
+    direction.  The index for loc is 0-based.  The current figure will
+    be used unless *fig* is specified. ::
 
-    Parameters
-    ----------
-    shape : sequence of 2 ints
-        Shape of grid in which to place axis.
-        First entry is number of rows, second entry is number of columns.
-
-    loc : sequence of 2 ints
-        Location to place axis within grid.
-        First entry is row number, second entry is column number.
-
-    rowspan : int
-        Number of rows for the axis to span to the right.
-
-    colspan : int
-        Number of columns for the axis to span downwards.
-
-    fig : `Figure`, optional
-        Figure to place axis in. Defaults to current figure.
-
-    **kwargs
-        Additional keyword arguments are handed to `add_subplot`.
-
-
-    Notes
-    -----
-    The following call ::
-
-        subplot2grid(shape, loc, rowspan=1, colspan=1)
+      subplot2grid(shape, loc, rowspan=1, colspan=1)
 
     is identical to ::
 
-        gridspec=GridSpec(shape[0], shape[1])
-        subplotspec=gridspec.new_subplotspec(loc, rowspan, colspan)
-        subplot(subplotspec)
+      gridspec=GridSpec(shape[0], shape[1])
+      subplotspec=gridspec.new_subplotspec(loc, rowspan, colspan)
+      subplot(subplotspec)
     """
 
     if fig is None:
