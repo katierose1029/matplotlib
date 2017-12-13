@@ -75,7 +75,7 @@ class AxesStack(Stack):
 		return [a for i, a in ia_list]
 	
 	def get(self, key):
-		item = dict(self.elements).get(key)
+		item = dict(self._elements).get(key)
 		if item is None:
 			return None
 		cbook.warn_deprecated(
@@ -138,7 +138,7 @@ class AxesStack(Stack):
 		return self.current_key_axes()[1]
 	
 	def __contains__(self, a):
-		return a in self_as_list()
+		return a in self.as_list()
 	
 class SubplotParams(object):
 	def __init__(self, left=None, bottom=None, right=None, top=None, wspace=None, hspace=None):
@@ -187,11 +187,27 @@ class SubplotParams(object):
 		setattr(self, s, val)
 	
 class Figure(Artist, HasTraits):
+	_trait_values = {}
+	def __init__(self,
+                 figsize=None,  # defaults to rc figure.figsize
+                 dpi=None,  # defaults to rc figure.dpi
+                 facecolor=None,  # defaults to rc figure.facecolor
+                 edgecolor=None,  # defaults to rc figure.edgecolor
+                 linewidth=0.0,  # the default linewidth of the frame
+                 frameon=None,  # whether or not to draw the figure frame
+                 subplotpars=None,  # default to rc
+                 tight_layout=None,  # default to rc figure.autolayout
+                 ):
+		Artist.__init__(self)
+		self.figsize = rcParams['figure.figsize']
+		self.figsize = figsize
+		self.clf()
+		self.set_tight_layout(tight_layout)
 
 	def __str__(self):
 		return "Figure(%gx%g)" % tuple(self.bbox.size)
     	
-	def set_tight_layout(tight):
+	def set_tight_layout(self, tight):
 		"""
 		Set whether :meth:`tight_layout` is used upon drawing.
 		If None, the rcParams['figure.autolayout'] value will be set.
@@ -204,9 +220,9 @@ class Figure(Artist, HasTraits):
 		"""
 		if tight is None:
 			tight = rcParams['figure.autolayout']
-			_tight = bool(tight)
-			_tight_parameters = tight if isinstance(tight, dict) else {}
-			stale = True
+		self._tight = bool(tight)
+		self._tight_parameters = tight if isinstance(tight, dict) else {}
+		self.stale = True
 
 	def clf(self, keep_observers=False):
 		"""
@@ -238,7 +254,7 @@ class Figure(Artist, HasTraits):
 		self.stale = True
 
 	# Intialization
-	# Artist.__init__(self)
+	# Artist.__init__()
 	# remove the non-figure artist _axes property
 	# as it makes no sense for a figure to be _in_ an axes
 	# this is used by the property methods in the artist base class
@@ -248,7 +264,9 @@ class Figure(Artist, HasTraits):
 	# Attributes
 	figsize = rcParams['figure.figsize']
 	# dpi = Instance("matplotlib.figure.dpi", default_value= rcParams['figure.dpi'], allow_none = True)
+
 	dpi = rcParams['figure.dpi']
+	_dpi = rcParams['figure.dpi']
 	# facecolor = Instance("matplotlib.figure.facecolor", default_value=rcParams['figure.facecolor'], allow_none = True)
 	facecolor = rcParams['figure.facecolor']
 	# edgecolor = Instance("matplotlib.figure.edgecolor", default_value=rcParams['figure.edgecolor'], allow_none = True)
@@ -274,8 +292,14 @@ class Figure(Artist, HasTraits):
 	bbox_inches = Bbox.from_bounds(0, 0, *figsize)
 	dpi_scale_trans = Affine2D().scale(dpi, dpi)
 	bbox = TransformedBbox(bbox_inches, dpi_scale_trans)
-	set_tight_layout(tight_layout)
 	axstack = AxesStack()
+	_axobservers = []
+	_axstack = AxesStack()
+	patches = []
+	lines = []
+	texts = []
+	images = []
+	legends = []
 	# clf() #clear figure
 	cachedRenderer = None
 	''' 
@@ -374,9 +398,9 @@ class Figure(Artist, HasTraits):
 		Set the dots-per-inch of the figure
 		ACCEPTS: float
 		"""
-		self.dpi = proposal.value
+		self.dpi = proposal
 		self.stale = True
-		return proposal.value
+		return proposal
 
 	@observe("dpi")
 	def _dpi_observe(self, change):
@@ -484,6 +508,14 @@ class Figure(Artist, HasTraits):
 		print(change)
 
 	# TODO: getter and misc functions from original figure.py. Should I keep all of these?
+	def sca(self, a):
+		self._axstack.bubble(a)
+		for func in self._axobservers:
+			func(self)
+		return a
+	
+	def set_canvas(self, canvas):
+		self.canvas = canvas
 	def _get_axes(self):
 		return self._axstack.as_list()
 
@@ -544,7 +576,7 @@ class Figure(Artist, HasTraits):
 		w, h = self.get_size_inches()
 		self.set_size_inches(w, h, forward=forward)
 		self.callbacks.process('dpi_changed', self)
-		self._dpi_validate(dpi)
+		#self._dpi_validate(dpi)
 
 	axes = property(fget=_get_axes, doc="Read-only: list of axes in Figure")
 	dpi = property(_get_dpi, _set_dpi)
@@ -1614,7 +1646,7 @@ class Figure(Artist, HasTraits):
 					'with requested projection.', stacklevel=2)
 
 			# no axes found, so create one which spans the figure
-			return self.add_subplot(1, 1, 1, **kwargs)
+		return self.add_subplot(1, 1, 1, **kwargs)
 
 	def _gci(self):
 		"""
@@ -1762,13 +1794,14 @@ class Figure(Artist, HasTraits):
 		# Store the value of gca so that we can set it back later on.
 		current_ax = self.gca()
         #TODO: i commented this out. need to fix it so it works
-		#        if cax is None:
-		#            if use_gridspec and isinstance(ax, SubplotBase):
-		#                cax, kw = cbar.make_axes_gridspec(ax, **kw)
-		#            else:
-		#                cax, kw = cbar.make_axes(ax, **kw)
-		#        cax._hold = True
-		#        cb = cbar.colorbar_factory(cax, mappable, **kw)
+		if cax is None:
+			if use_gridspec and isinstance(ax, SubplotBase):
+				cax, kw = cbar.make_axes_gridspec(ax, **kw)
+			else:
+				cax, kw = cbar.make_axes(ax, **kw)
+		ax._hold = True
+		cax._hold = True
+		cb = cbar.colorbar_factory(cax, mappable, **kw)
 
 		self.sca(current_ax)
 		self.stale = True
