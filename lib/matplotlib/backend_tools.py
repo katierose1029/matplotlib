@@ -19,11 +19,12 @@ from weakref import WeakKeyDictionary
 import six
 import time
 import warnings
+import numpy as np
 
 
 class Cursors(object):
     """Simple namespace for cursor reference"""
-    HAND, POINTER, SELECT_REGION, MOVE = list(range(4))
+    HAND, POINTER, SELECT_REGION, MOVE, WAIT = list(range(5))
 cursors = Cursors()
 
 # Views positions tool
@@ -731,7 +732,7 @@ class ToolHome(ViewsPositionsBase):
 class ToolBack(ViewsPositionsBase):
     """Move back up the view lim stack"""
 
-    description = 'Back to  previous view'
+    description = 'Back to previous view'
     image = 'back.png'
     default_keymap = rcParams['keymap.back']
     _on_trigger = 'back'

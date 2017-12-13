@@ -9,6 +9,7 @@ from six.moves import zip
 
 import math
 import warnings
+import weakref
 
 import contextlib
 
@@ -23,7 +24,7 @@ from matplotlib.artist import Artist
 # from matplotlib._traits.artist import Artist
 
 from matplotlib.cbook import maxdict
-from matplotlib import docstring
+from matplotlib import docstring, verbose
 from matplotlib.font_manager import FontProperties
 from matplotlib.patches import FancyBboxPatch
 from matplotlib.patches import FancyArrowPatch, Rectangle
@@ -34,7 +35,6 @@ from matplotlib.lines import Line2D
 from matplotlib.path import Path
 from matplotlib.artist import allow_rasterization
 
-from matplotlib.backend_bases import RendererBase
 from matplotlib.textpath import TextPath
 
 
@@ -184,7 +184,6 @@ class Text(Artist):
     Handle storing and drawing of text in window or data coordinates.
     """
     zorder = 3
-
     _cached = maxdict(50)
 
     def __repr__(self):
@@ -243,10 +242,12 @@ class Text(Artist):
         """
         Update properties from a dictionary.
         """
-        bbox = kwargs.pop('bbox', None)
+        # Update bbox last, as it depends on font properties.
+        sentinel = object()  # bbox can be None, so use another sentinel.
+        bbox = kwargs.pop("bbox", sentinel)
         super(Text, self).update(kwargs)
-        if bbox:
-            self.set_bbox(bbox)  # depends on font properties
+        if bbox is not sentinel:
+            self.set_bbox(bbox)
 
     def __getstate__(self):
         d = super(Text, self).__getstate__()
@@ -762,9 +763,12 @@ class Text(Artist):
             # position in Text, and dash position in TextWithDash:
             posx = float(textobj.convert_xunits(textobj._x))
             posy = float(textobj.convert_yunits(textobj._y))
-            if not np.isfinite(posx) or not np.isfinite(posy):
-                raise ValueError("posx and posy should be finite values")
             posx, posy = trans.transform_point((posx, posy))
+            if not np.isfinite(posx) or not np.isfinite(posy):
+                verbose.report("x and y are not finite values for text "
+                              "string '{}'.  Not rendering "
+                              "text.".format(self.get_text()), 'helpful')
+                return
             canvasw, canvash = renderer.get_canvas_width_height()
 
             # draw the FancyBboxPatch
@@ -916,7 +920,7 @@ class Text(Artist):
                 self._verticalalignment, self._horizontalalignment,
                 hash(self._fontproperties),
                 self._rotation, self._rotation_mode,
-                self.figure.dpi, id(renderer), getattr(renderer, '_uid', 0),
+                self.figure.dpi, weakref.ref(renderer),
                 self._linespacing
                 )
 

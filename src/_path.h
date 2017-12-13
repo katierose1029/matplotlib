@@ -393,7 +393,7 @@ void get_path_collection_extents(agg::trans_affine &master_transform,
                                  extent_limits &extent)
 {
     if (offsets.size() != 0 && offsets.dim(1) != 2) {
-        throw "Offsets array must be Nx2";
+        throw std::runtime_error("Offsets array must be Nx2");
     }
 
     size_t Npaths = paths.size();
@@ -728,7 +728,7 @@ template <class VerticesArray, class ResultArray>
 void affine_transform_2d(VerticesArray &vertices, agg::trans_affine &trans, ResultArray &result)
 {
     if (vertices.size() != 0 && vertices.dim(1) != 2) {
-        throw "Invalid vertices array.";
+        throw std::runtime_error("Invalid vertices array.");
     }
 
     size_t n = vertices.size();
@@ -758,7 +758,7 @@ template <class VerticesArray, class ResultArray>
 void affine_transform_1d(VerticesArray &vertices, agg::trans_affine &trans, ResultArray &result)
 {
     if (vertices.dim(0) != 2) {
-        throw "Invalid vertices array.";
+        throw std::runtime_error("Invalid vertices array.");
     }
 
     double x;
@@ -904,8 +904,6 @@ bool path_intersects_rectangle(PathIterator &path,
 
     double cx = (rect_x1 + rect_x2) * 0.5, cy = (rect_y1 + rect_y2) * 0.5;
     double w = fabs(rect_x1 - rect_x2), h = fabs(rect_y1 - rect_y2);
-    double xmin = std::min(rect_x1, rect_x2), xmax = std::max(rect_x1, rect_x2);
-    double ymin = std::min(rect_x1, rect_x2), ymax = std::max(rect_x1, rect_x2);
 
     double x1, y1, x2, y2;
 

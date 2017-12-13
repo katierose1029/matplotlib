@@ -2,19 +2,22 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import six
-from collections import OrderedDict, namedtuple
 
+from collections import OrderedDict, namedtuple
+from functools import wraps
+import inspect
 import re
 import warnings
-import inspect
+
 import numpy as np
+
 import matplotlib
-import matplotlib.cbook as cbook
-from matplotlib.cbook import mplDeprecation
-from matplotlib import docstring, rcParams
-from .transforms import (Bbox, IdentityTransform, TransformedBbox,
-                         TransformedPatchPath, TransformedPath, Transform)
+from . import cbook, docstring, rcParams
 from .path import Path
+
+from .transforms import (Bbox, IdentityTransform, Transform, TransformedBbox,
+                         TransformedPatchPath, TransformedPath)
+
 from functools import wraps
 from contextlib import contextmanager
 
@@ -51,29 +54,22 @@ def allow_rasterization(draw):
     other setup function calls, such as starting and flushing a mixed-mode
     renderer.
     """
-    @contextmanager
-    def with_rasterized(artist, renderer):
-
-        if artist.get_rasterized():
-            renderer.start_rasterizing()
-
-        if artist.get_agg_filter() is not None:
-            renderer.start_filter()
-
-        try:
-            yield
-        finally:
-            if artist.get_agg_filter() is not None:
-                renderer.stop_filter(artist.get_agg_filter())
-
-            if artist.get_rasterized():
-                renderer.stop_rasterizing()
 
     # the axes class has a second argument inframe for its draw method.
     @wraps(draw)
     def draw_wrapper(artist, renderer, *args, **kwargs):
-        with with_rasterized(artist, renderer):
+        try:
+            if artist.get_rasterized():
+                renderer.start_rasterizing()
+            if artist.get_agg_filter() is not None:
+                renderer.start_filter()
+
             return draw(artist, renderer, *args, **kwargs)
+        finally:
+            if artist.get_agg_filter() is not None:
+                renderer.stop_filter(artist.get_agg_filter())
+            if artist.get_rasterized():
+                renderer.stop_rasterizing()
 
     draw_wrapper._supports_rasterization = True
     return draw_wrapper
@@ -215,32 +211,6 @@ class Artist(object):
             return y
         return ax.yaxis.convert_units(y)
 
-    def set_axes(self, axes):
-        """
-        Set the :class:`~matplotlib.axes.Axes` instance in which the
-        artist resides, if any.
-
-        This has been deprecated in mpl 1.5, please use the
-        axes property.  Will be removed in 1.7 or 2.0.
-
-        ACCEPTS: an :class:`~matplotlib.axes.Axes` instance
-        """
-        warnings.warn(_get_axes_msg.format('set_axes'), mplDeprecation,
-                      stacklevel=1)
-        self.axes = axes
-
-    def get_axes(self):
-        """
-        Return the :class:`~matplotlib.axes.Axes` instance the artist
-        resides in, or *None*.
-
-        This has been deprecated in mpl 1.5, please use the
-        axes property.  Will be removed in 1.7 or 2.0.
-        """
-        warnings.warn(_get_axes_msg.format('get_axes'), mplDeprecation,
-                      stacklevel=1)
-        return self.axes
-
     @property
     def axes(self):
         """
@@ -251,18 +221,14 @@ class Artist(object):
 
     @axes.setter
     def axes(self, new_axes):
-
-        if (new_axes is not None and
-                (self._axes is not None and new_axes != self._axes)):
-            raise ValueError("Can not reset the axes.  You are "
-                             "probably trying to re-use an artist "
-                             "in more than one Axes which is not "
-                             "supported")
-
+        if (new_axes is not None and self._axes is not None
+                and new_axes != self._axes):
+            raise ValueError("Can not reset the axes.  You are probably "
+                             "trying to re-use an artist in more than one "
+                             "Axes which is not supported")
         self._axes = new_axes
         if new_axes is not None and new_axes is not self:
             self.stale_callback = _stale_axes_callback
-
         return new_axes
 
     @property
@@ -676,18 +642,16 @@ class Artist(object):
         """
         Set the artist's clip path, which may be:
 
-          * a :class:`~matplotlib.patches.Patch` (or subclass) instance
+        - a :class:`~matplotlib.patches.Patch` (or subclass) instance; or
+        - a :class:`~matplotlib.path.Path` instance, in which case a
+          :class:`~matplotlib.transforms.Transform` instance, which will be
+          applied to the path before using it for clipping, must be provided;
+          or
+        - ``None``, to remove a previously set clipping path.
 
-          * a :class:`~matplotlib.path.Path` instance, in which case
-             an optional :class:`~matplotlib.transforms.Transform`
-             instance may be provided, which will be applied to the
-             path before using it for clipping.
-
-          * *None*, to remove the clipping path
-
-        For efficiency, if the path happens to be an axis-aligned
-        rectangle, this method will set the clipping box to the
-        corresponding rectangle and set the clipping path to *None*.
+        For efficiency, if the path happens to be an axis-aligned rectangle,
+        this method will set the clipping box to the corresponding rectangle
+        and set the clipping path to ``None``.
 
         ACCEPTS: [ (:class:`~matplotlib.path.Path`,
         :class:`~matplotlib.transforms.Transform`) |
@@ -722,10 +686,11 @@ class Artist(object):
             success = True
 
         if not success:
-            print(type(path), type(transform))
-            raise TypeError("Invalid arguments to set_clip_path")
-        # this may result in the callbacks being hit twice, but grantees they
-        # will be hit at least once
+            raise TypeError(
+                "Invalid arguments to set_clip_path, of type {} and {}"
+                .format(type(path).__name__, type(transform).__name__))
+        # This may result in the callbacks being hit twice, but guarantees they
+        # will be hit at least once.
         self.pchanged()
         self.stale = True
 

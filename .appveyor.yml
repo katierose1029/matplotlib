@@ -4,6 +4,9 @@
 # https://github.com/rmcgibbo/python-appveyor-conda-example
 
 # Backslashes in quotes need to be escaped: \ -> "\\"
+branches:
+  except:
+    - /auto-backport-.*/
 
 environment:
 
@@ -14,22 +17,20 @@ environment:
     CMD_IN_ENV: cmd /E:ON /V:ON /C obvci_appveyor_python_build_env.cmd
     # Workaround for https://github.com/conda/conda-build/issues/636
     PYTHONIOENCODING: UTF-8
-    PYTEST_ARGS: -rawR --timeout=300 --durations=25 -n %NUMBER_OF_PROCESSORS% --cov-report= --cov=lib -m "not network"
-    PYTHONHASHSEED: 0  # Workaround for pytest-xdist flaky collection order
-                       # https://github.com/pytest-dev/pytest/issues/920
-                       # https://github.com/pytest-dev/pytest/issues/1075
+    PYTEST_ARGS: -rawR --numprocesses=auto --timeout=300 --durations=25
+                 --cov-report= --cov=lib -m "not network"
 
   matrix:
     # for testing purpose: numpy 1.8 on py2.7, for the rest use 1.10/latest
     # theoretically the CONDA_INSTALL_LOCN could be only two: one for 32bit,
     # one for 64bit because we construct envs anyway. But using one for the
     # right python version is hopefully making it fast due to package caching.
-    #    - TARGET_ARCH: "x64"
-    #      CONDA_PY: "27"
-    #      CONDA_NPY: "18"
-    #      PYTHON_VERSION: "2.7"
-    #      TEST_ALL: "no"
-    #      CONDA_INSTALL_LOCN: "C:\\Miniconda-x64"
+    - TARGET_ARCH: "x64"
+      CONDA_PY: "27"
+      CONDA_NPY: "18"
+      PYTHON_VERSION: "2.7"
+      TEST_ALL: "no"
+      CONDA_INSTALL_LOCN: "C:\\Miniconda-x64"
     - TARGET_ARCH: "x64"
       CONDA_PY: "35"
       CONDA_NPY: "110"
@@ -62,7 +63,9 @@ install:
   - set PATH=%CONDA_INSTALL_LOCN%;%CONDA_INSTALL_LOCN%\scripts;%PATH%;
   - set PYTHONUNBUFFERED=1
   # for obvci_appveyor_python_build_env.cmd
-  - conda install -c conda-forge --yes --quiet obvious-ci
+  - conda update --all --yes
+  - conda install anaconda-client=1.6.3 --yes
+  - conda install -c conda-forge --yes obvious-ci
   # for msinttypes and newer stuff
   - conda config --prepend channels conda-forge
   - conda config --set show_channel_urls yes
@@ -89,6 +92,12 @@ install:
   - if %PYTHON_VERSION% == 2.7 conda install -q backports.functools_lru_cache
   # pytest-cov>=2.3.1 due to https://github.com/pytest-dev/pytest-cov/issues/124
   - pip install -q pytest "pytest-cov>=2.3.1" pytest-rerunfailures pytest-timeout pytest-xdist
+
+  # Apply patch to `subprocess` on Python versions > 2 and < 3.6.3
+  # https://github.com/matplotlib/matplotlib/issues/9176
+  - python -c "import sys; sys.exit(not (3,) < sys.version_info < (3,6,3))" && (
+    curl -sL https://github.com/python/cpython/pull/1224.patch |
+    patch -fsup 1 -d %CONDA_PREFIX% ) || ( set errorlevel= )
 
   # Let the install prefer the static builds of the libs
   - set LIBRARY_LIB=%CONDA_PREFIX%\Library\lib

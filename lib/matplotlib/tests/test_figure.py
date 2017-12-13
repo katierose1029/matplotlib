@@ -298,3 +298,31 @@ def test_invalid_figure_size():
 
     with pytest.raises(ValueError):
         fig.add_axes((.1, .1, .5, np.nan))
+
+
+def test_subplots_shareax_loglabels():
+    fig, ax_arr = plt.subplots(2, 2, sharex=True, sharey=True, squeeze=False)
+    for ax in ax_arr.flatten():
+        ax.plot([10, 20, 30], [10, 20, 30])
+
+    ax.set_yscale("log")
+    ax.set_xscale("log")
+
+    for ax in ax_arr[0, :]:
+        assert 0 == len(ax.xaxis.get_ticklabels(which='both'))
+
+    for ax in ax_arr[1, :]:
+        assert 0 < len(ax.xaxis.get_ticklabels(which='both'))
+
+    for ax in ax_arr[:, 1]:
+        assert 0 == len(ax.yaxis.get_ticklabels(which='both'))
+
+    for ax in ax_arr[:, 0]:
+        assert 0 < len(ax.yaxis.get_ticklabels(which='both'))
+
+
+def test_savefig():
+    fig, ax = plt.subplots()
+    msg = "savefig() takes 2 positional arguments but 3 were given"
+    with pytest.raises(TypeError, message=msg):
+        fig.savefig("fname1.png", "fname2.png")

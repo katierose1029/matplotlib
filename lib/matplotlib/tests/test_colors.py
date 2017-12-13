@@ -287,8 +287,7 @@ def test_cmap_and_norm_from_levels_and_colors():
     plt.colorbar(m)
 
     # Hide the axes labels (but not the colorbar ones, as they are useful)
-    for lab in ax.get_xticklabels() + ax.get_yticklabels():
-        lab.set_visible(False)
+    ax.tick_params(labelleft=False, labelbottom=False)
 
 
 def test_cmap_and_norm_from_levels_and_colors2():
@@ -618,7 +617,7 @@ def test_pandas_iterable():
     assert_array_equal(cm1.colors, cm2.colors)
 
 
-@pytest.mark.parametrize('name', cm.cmap_d)
+@pytest.mark.parametrize('name', sorted(cm.cmap_d))
 def test_colormap_reversing(name):
     """Check the generated _lut data of a colormap and corresponding
     reversed colormap if they are almost the same."""

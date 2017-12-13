@@ -31,7 +31,7 @@ def test_simple():
 #    pickle.dump(ax, BytesIO(), pickle.HIGHEST_PROTOCOL)
 
     plt.figure()
-    plt.bar(left=np.arange(10), height=np.arange(10))
+    plt.bar(x=np.arange(10), height=np.arange(10))
     pickle.dump(plt.gca(), BytesIO(), pickle.HIGHEST_PROTOCOL)
 
     fig = plt.figure()
@@ -42,7 +42,8 @@ def test_simple():
 
 
 @image_comparison(baseline_images=['multi_pickle'],
-                  extensions=['png'], remove_text=True)
+                  extensions=['png'], remove_text=True,
+                  style='mpl20')
 def test_complete():
     fig = plt.figure('Figure with a label?', figsize=(10, 6))
 

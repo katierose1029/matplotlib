@@ -109,7 +109,7 @@ def test_alpha_rcparam():
     ax.plot(range(10), lw=5)
     with mpl.rc_context(rc={'legend.framealpha': .75}):
         leg = plt.legend(['Longlabel that will go away'], loc=10)
-        # this alpha is going to be over-ridden by the rcparam whith
+        # this alpha is going to be over-ridden by the rcparam with
         # sets the alpha of the patch to be non-None which causes the alpha
         # value of the face color to be discarded.  This behavior may not be
         # ideal, but it is what it is and we should keep track of it changing
@@ -359,3 +359,12 @@ def test_handler_numpoints():
     fig, ax = plt.subplots()
     ax.plot(range(5), label='test')
     ax.legend(numpoints=0.5)
+
+
+def test_shadow_framealpha():
+    # Test if framealpha is activated when shadow is True
+    # and framealpha is not explicitly passed'''
+    fig, ax = plt.subplots()
+    ax.plot(range(100), label="test")
+    leg = ax.legend(shadow=True, facecolor='w')
+    assert leg.get_frame().get_alpha() == 1

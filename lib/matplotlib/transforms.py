@@ -1095,6 +1095,131 @@ class TransformedBbox(BboxBase):
             return points
 
 
+class LockableBbox(BboxBase):
+    """
+    A :class:`Bbox` where some elements may be locked at certain values.
+
+    When the child bounding box changes, the bounds of this bbox will update
+    accordingly with the exception of the locked elements.
+    """
+    def __init__(self, bbox, x0=None, y0=None, x1=None, y1=None, **kwargs):
+        """
+        Parameters
+        ----------
+        bbox : Bbox
+            The child bounding box to wrap.
+
+        x0 : float or None
+            The locked value for x0, or None to leave unlocked.
+
+        y0 : float or None
+            The locked value for y0, or None to leave unlocked.
+
+        x1 : float or None
+            The locked value for x1, or None to leave unlocked.
+
+        y1 : float or None
+            The locked value for y1, or None to leave unlocked.
+
+        """
+        if not bbox.is_bbox:
+            raise ValueError("'bbox' is not a bbox")
+
+        BboxBase.__init__(self, **kwargs)
+        self._bbox = bbox
+        self.set_children(bbox)
+        self._points = None
+        fp = [x0, y0, x1, y1]
+        mask = [val is None for val in fp]
+        self._locked_points = np.ma.array(fp, np.float_,
+                                          mask=mask).reshape((2, 2))
+
+    def __repr__(self):
+        return "LockableBbox(%r, %r)" % (self._bbox, self._locked_points)
+
+    def get_points(self):
+        if self._invalid:
+            points = self._bbox.get_points()
+            self._points = np.where(self._locked_points.mask,
+                                    points,
+                                    self._locked_points)
+            self._invalid = 0
+        return self._points
+    get_points.__doc__ = Bbox.get_points.__doc__
+
+    if DEBUG:
+        _get_points = get_points
+
+        def get_points(self):
+            points = self._get_points()
+            self._check(points)
+            return points
+
+    @property
+    def locked_x0(self):
+        """
+        float or None: The value used for the locked x0.
+        """
+        if self._locked_points.mask[0, 0]:
+            return None
+        else:
+            return self._locked_points[0, 0]
+
+    @locked_x0.setter
+    def locked_x0(self, x0):
+        self._locked_points.mask[0, 0] = x0 is None
+        self._locked_points.data[0, 0] = x0
+        self.invalidate()
+
+    @property
+    def locked_y0(self):
+        """
+        float or None: The value used for the locked y0.
+        """
+        if self._locked_points.mask[0, 1]:
+            return None
+        else:
+            return self._locked_points[0, 1]
+
+    @locked_y0.setter
+    def locked_y0(self, y0):
+        self._locked_points.mask[0, 1] = y0 is None
+        self._locked_points.data[0, 1] = y0
+        self.invalidate()
+
+    @property
+    def locked_x1(self):
+        """
+        float or None: The value used for the locked x1.
+        """
+        if self._locked_points.mask[1, 0]:
+            return None
+        else:
+            return self._locked_points[1, 0]
+
+    @locked_x1.setter
+    def locked_x1(self, x1):
+        self._locked_points.mask[1, 0] = x1 is None
+        self._locked_points.data[1, 0] = x1
+        self.invalidate()
+
+    @property
+    def locked_y1(self):
+        """
+        float or None: The value used for the locked y1.
+        """
+        if self._locked_points.mask[1, 1]:
+            return None
+        else:
+            return self._locked_points[1, 1]
+
+    @locked_y1.setter
+    def locked_y1(self, y1):
+        self._locked_points.mask[1, 1] = y1 is None
+        self._locked_points.data[1, 1] = y1
+        self.invalidate()
+
+
 class Transform(TransformNode):
     """
     The base class of all :class:`TransformNode` instances that
@@ -1908,6 +2033,8 @@ class Affine2D(Affine2DBase):
         calls to :meth:`rotate`, :meth:`rotate_deg`, :meth:`translate`
         and :meth:`scale`.
         """
+        # Cast to float to avoid wraparound issues with uint8's
+        x, y = float(x), float(y)
         return self.translate(-x, -y).rotate_deg(degrees).translate(x, y)
 
     def translate(self, tx, ty):
@@ -2739,31 +2866,33 @@ class TransformedPatchPath(TransformedPath):
 
 
 def nonsingular(vmin, vmax, expander=0.001, tiny=1e-15, increasing=True):
-    '''
+    """
     Modify the endpoints of a range as needed to avoid singularities.
 
-    *vmin*, *vmax*
-        the initial endpoints.
-
-    *tiny*
-        threshold for the ratio of the interval to the maximum absolute
+    Parameters
+    ----------
+    vmin, vmax : float
+        The initial endpoints.
+    expander : float, optional, default: 0.001
+        Fractional amount by which *vmin* and *vmax* are expanded if
+        the original interval is too small, based on *tiny*.
+    tiny : float, optional, default: 1e-15
+        Threshold for the ratio of the interval to the maximum absolute
         value of its endpoints.  If the interval is smaller than
         this, it will be expanded.  This value should be around
         1e-15 or larger; otherwise the interval will be approaching
         the double precision resolution limit.
+    increasing : bool, optional, default: True
+        If True, swap *vmin*, *vmax* if *vmin* > *vmax*.
 
-    *expander*
-        fractional amount by which *vmin* and *vmax* are expanded if
-        the original interval is too small, based on *tiny*.
+    Returns
+    -------
+    vmin, vmax : float
+        Endpoints, expanded and/or swapped if necessary.
+        If either input is inf or NaN, or if both inputs are 0 or very
+        close to zero, it returns -*expander*, *expander*.
+    """
 
-    *increasing*: [True | False]
-        If True (default), swap *vmin*, *vmax* if *vmin* > *vmax*
-
-    Returns *vmin*, *vmax*, expanded and/or swapped if necessary.
-
-    If either input is inf or NaN, or if both inputs are 0 or very
-    close to zero, it returns -*expander*, *expander*.
-    '''
     if (not np.isfinite(vmin)) or (not np.isfinite(vmax)):
         return -expander, expander
 
@@ -2791,25 +2920,65 @@ def nonsingular(vmin, vmax, expander=0.001, tiny=1e-15, increasing=True):
 
 
 def interval_contains(interval, val):
+    """
+    Check, inclusively, whether an interval includes a given value.
+
+    Parameters
+    ----------
+    interval : sequence of scalar
+        A 2-length sequence, endpoints that define the interval.
+    val : scalar
+        Value to check is within interval.
+
+    Returns
+    -------
+    bool
+        Returns true if given val is within the interval.
+    """
     a, b = interval
     return a <= val <= b or a >= val >= b
 
 
 def interval_contains_open(interval, val):
+    """
+    Check, excluding endpoints, whether an interval includes a given value.
+
+    Parameters
+    ----------
+    interval : sequence of scalar
+        A 2-length sequence, endpoints that define the interval.
+    val : scalar
+        Value to check is within interval.
+
+    Returns
+    -------
+    bool
+        Returns true if given val is within the interval.
+    """
     a, b = interval
     return a < val < b or a > val > b
 
 
 def offset_copy(trans, fig=None, x=0.0, y=0.0, units='inches'):
-    '''
+    """
     Return a new transform with an added offset.
-      args:
-        trans is any transform
-      kwargs:
-        fig is the current figure; it can be None if units are 'dots'
-        x, y give the offset
-        units is 'inches', 'points' or 'dots'
-    '''
+
+    Parameters
+    ----------
+    trans : :class:`Transform` instance
+        Any transform, to which offset will be applied.
+    fig : :class:`~matplotlib.figure.Figure`, optional, default: None
+        Current figure. It can be None if *units* are 'dots'.
+    x, y : float, optional, default: 0.0
+        Specifies the offset to apply.
+    units : {'inches', 'points', 'dots'}, optional
+        Units of the offset.
+
+    Returns
+    -------
+    trans : :class:`Transform` instance
+        Transform with applied offset.
+    """
     if units == 'dots':
         return trans + Affine2D().translate(x, y)
     if fig is None:

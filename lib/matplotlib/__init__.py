@@ -103,21 +103,22 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import six
-import sys
-import distutils.version
-from itertools import chain
 
 from collections import MutableMapping
+import contextlib
+import distutils.version
+import distutils.sysconfig
+import functools
 import io
 import inspect
+import itertools
 import locale
 import os
 import re
+import sys
 import tempfile
 import warnings
-import contextlib
-import distutils.sysconfig
-import functools
+
 # cbook must import matplotlib only within function
 # definitions, so it is safe to import from it here.
 from . import cbook
@@ -217,28 +218,7 @@ def _is_writable_dir(p):
     p is a string pointing to a putative writable dir -- return True p
     is such a string, else False
     """
-    try:
-        p + ''  # test is string like
-    except TypeError:
-        return False
-
-    # Test whether the operating system thinks it's a writable directory.
-    # Note that this check is necessary on Google App Engine, because the
-    # subsequent check will succeed even though p may not be writable.
-    if not os.access(p, os.W_OK) or not os.path.isdir(p):
-        return False
-
-    # Also test that it is actually possible to write to a file here.
-    try:
-        t = tempfile.TemporaryFile(dir=p)
-        try:
-            t.write(b'1')
-        finally:
-            t.close()
-    except:
-        return False
-
-    return True
+    return os.access(p, os.W_OK) and os.path.isdir(p)
 
 
 class Verbose(object):
@@ -514,17 +494,12 @@ def _get_home():
     :see:
         http://mail.python.org/pipermail/python-list/2005-February/325395.html
     """
-    try:
-        if six.PY2 and sys.platform == 'win32':
-            path = os.path.expanduser(b"~").decode(sys.getfilesystemencoding())
-        else:
-            path = os.path.expanduser("~")
-    except ImportError:
-        # This happens on Google App Engine (pwd module is not present).
-        pass
+    if six.PY2 and sys.platform == 'win32':
+        path = os.path.expanduser(b"~").decode(sys.getfilesystemencoding())
     else:
-        if os.path.isdir(path):
-            return path
+        path = os.path.expanduser("~")
+    if os.path.isdir(path):
+        return path
     for evar in ('HOME', 'USERPROFILE', 'TMP'):
         path = os.environ.get(evar)
         if path is not None and os.path.isdir(path):
@@ -536,17 +511,9 @@ def _create_tmp_config_dir():
     """
     If the config directory can not be created, create a temporary
     directory.
-
-    Returns None if a writable temporary directory could not be created.
     """
-    try:
-        tempdir = tempfile.gettempdir()
-    except NotImplementedError:
-        # Some restricted platforms (such as Google App Engine) do not provide
-        # gettempdir.
-        return None
     configdir = os.environ['MPLCONFIGDIR'] = (
-        tempfile.mkdtemp(prefix='matplotlib-', dir=tempdir))
+        tempfile.mkdtemp(prefix='matplotlib-'))
     return configdir
 
 
@@ -803,9 +770,8 @@ _obsolete_set = {'text.dvipnghack', 'legend.isaxes'}
 # The following may use a value of None to suppress the warning.
 _deprecated_set = {'axes.hold'}  # do NOT include in _all_deprecated
 
-_all_deprecated = set(chain(_deprecated_ignore_map,
-                            _deprecated_map,
-                            _obsolete_set))
+_all_deprecated = set(itertools.chain(
+    _deprecated_ignore_map, _deprecated_map, _obsolete_set))
 
 
 class RcParams(MutableMapping, dict):
@@ -917,7 +883,6 @@ class RcParams(MutableMapping, dict):
             the parent RcParams dictionary.
 
         """
-        import re
         pattern_re = re.compile(pattern)
         return RcParams((key, value)
                         for key, value in self.items()
@@ -1228,7 +1193,8 @@ def rc_file(fname):
     rcParams.update(rc_params_from_file(fname))
 
 
-class rc_context(object):
+@contextlib.contextmanager
+def rc_context(rc=None, fname=None):
     """
     Return a context manager for managing rc settings.
 
@@ -1261,26 +1227,16 @@ class rc_context(object):
 
     """
 
-    def __init__(self, rc=None, fname=None):
-        self.rcdict = rc
-        self.fname = fname
-        self._rcparams = rcParams.copy()
-        try:
-            if self.fname:
-                rc_file(self.fname)
-            if self.rcdict:
-                rcParams.update(self.rcdict)
-        except:
-            # if anything goes wrong, revert rc parameters and re-raise
-            rcParams.clear()
-            rcParams.update(self._rcparams)
-            raise
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type, value, tb):
-        rcParams.update(self._rcparams)
+    orig = rcParams.copy()
+    try:
+        if fname:
+            rc_file(fname)
+        if rc:
+            rcParams.update(rc)
+        yield
+    finally:
+        # No need to revalidate the original values.
+        dict.update(rcParams, orig)
 
 
 _use_error_msg = """
@@ -1387,16 +1343,6 @@ def tk_window_focus():
     return rcParams['tk.window_focus']
 
 
-# Jupyter extension paths
-def _jupyter_nbextension_paths():
-    return [{
-        'section': 'notebook',
-        'src': 'backends/web_backend/js',
-        'dest': 'matplotlib',
-        'require': 'matplotlib/extension'
-    }]
-
-
 default_test_modules = [
     'matplotlib.tests',
     'matplotlib.sphinxext.tests',
@@ -1410,7 +1356,14 @@ def _init_tests():
     except ImportError:
         pass
     else:
-        faulthandler.enable()
+        # CPython's faulthandler since v3.6 handles exceptions on Windows
+        # https://bugs.python.org/issue23848 but until v3.6.4 it was
+        # printing non-fatal exceptions https://bugs.python.org/issue30557
+        import platform
+        if not (sys.platform == 'win32' and
+                (3, 6) < sys.version_info < (3, 6, 4) and
+                platform.python_implementation() == 'CPython'):
+            faulthandler.enable()
 
     # The version of FreeType to install locally for running the
     # tests.  This must match the value in `setupext.py`
@@ -1521,7 +1474,7 @@ _DATA_DOC_APPENDIX = """
 
 
 def _preprocess_data(replace_names=None, replace_all_args=False,
-                        label_namer=None, positional_parameter_names=None):
+                     label_namer=None, positional_parameter_names=None):
     """
     A decorator to add a 'data' kwarg to any a function.  The signature
     of the input function must include the ax argument at the first position ::
@@ -1758,7 +1711,6 @@ def _preprocess_data(replace_names=None, replace_all_args=False,
                 elif label_namer in kwargs:
                     kwargs['label'] = get_label(kwargs[label_namer], label)
                 else:
-                    import warnings
                     msg = ("Tried to set a label via parameter '%s' in "
                            "func '%s' but couldn't find such an argument. \n"
                            "(This is a programming error, please report to "
@@ -1778,7 +1730,7 @@ def _preprocess_data(replace_names=None, replace_all_args=False,
             if len(replace_names) != 0:
                 _repl = "* All arguments with the following names: '{names}'."
             if replace_all_args:
-                _repl += "\n* All positional arguments."
+                _repl += "\n    * All positional arguments."
             _repl = _repl.format(names="', '".join(sorted(replace_names)))
         inner.__doc__ = (pre_doc +
                          _DATA_DOC_APPENDIX.format(replaced=_repl))

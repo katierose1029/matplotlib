@@ -18,8 +18,9 @@ import warnings
 import numpy as np
 
 import matplotlib as mpl
-from matplotlib.backend_bases import RendererBase, GraphicsContextBase,\
-    FigureManagerBase, FigureCanvasBase
+from matplotlib.backend_bases import (
+    _Backend, FigureCanvasBase, FigureManagerBase, GraphicsContextBase,
+    RendererBase)
 from matplotlib.backends.backend_mixed import MixedModeRenderer
 from matplotlib.figure import Figure
 from matplotlib.text import Text
@@ -55,7 +56,7 @@ else:
 def get_texcommand():
     """Get chosen TeX system from rc."""
     texsystem_options = ["xelatex", "lualatex", "pdflatex"]
-    texsystem = rcParams.get("pgf.texsystem", "xelatex")
+    texsystem = rcParams["pgf.texsystem"]
     return texsystem if texsystem in texsystem_options else "xelatex"
 
 
@@ -67,7 +68,7 @@ def get_fontspec():
     if texcommand != "pdflatex":
         latex_fontspec.append("\\usepackage{fontspec}")
 
-    if texcommand != "pdflatex" and rcParams.get("pgf.rcfonts", True):
+    if texcommand != "pdflatex" and rcParams["pgf.rcfonts"]:
         # try to find fonts from rc parameters
         families = ["serif", "sans-serif", "monospace"]
         fontspecs = [r"\setmainfont{%s}", r"\setsansfont{%s}",
@@ -85,10 +86,7 @@ def get_fontspec():
 
 def get_preamble():
     """Get LaTeX preamble from rc."""
-    latex_preamble = rcParams.get("pgf.preamble", "")
-    if type(latex_preamble) == list:
-        latex_preamble = "\n".join(latex_preamble)
-    return latex_preamble
+    return "\n".join(rcParams["pgf.preamble"])
 
 ###############################################################################
 
@@ -136,7 +134,7 @@ def common_texification(text):
 
 
 def writeln(fh, line):
-    # every line of a file included with \input must be terminated with %
+    # every line of a file included with \\input must be terminated with %
     # if not, latex will create additional vertical spaces for some reason
     fh.write(line)
     fh.write("%\n")
@@ -222,13 +220,14 @@ class LatexManagerFactory(object):
         latex_header = LatexManager._build_latex_header()
         prev = LatexManagerFactory.previous_instance
 
-        # check if the previous instance of LatexManager can be reused
-        if prev and prev.latex_header == latex_header and prev.texcommand == texcommand:
-            if rcParams.get("pgf.debug", False):
+        # Check if the previous instance of LatexManager can be reused.
+        if (prev and prev.latex_header == latex_header
+                and prev.texcommand == texcommand):
+            if rcParams["pgf.debug"]:
                 print("reusing LatexManager")
             return prev
         else:
-            if rcParams.get("pgf.debug", False):
+            if rcParams["pgf.debug"]:
                 print("creating LatexManager")
             new_inst = LatexManager()
             LatexManagerFactory.previous_instance = new_inst
@@ -288,7 +287,7 @@ class LatexManager(object):
         # store references for __del__
         self._os_path = os.path
         self._shutil = shutil
-        self._debug = rcParams.get("pgf.debug", False)
+        self._debug = rcParams["pgf.debug"]
 
         # create a tmp directory for running latex, remember to cleanup
         self.tmpdir = tempfile.mkdtemp(prefix="mpl_pgf_lm_")
@@ -743,32 +742,6 @@ class GraphicsContextPgf(GraphicsContextBase):
 ########################################################################
 
 
-def draw_if_interactive():
-    pass
-
-
-def new_figure_manager(num, *args, **kwargs):
-    """
-    Create a new figure manager instance
-    """
-    # if a main-level app must be created, this is the usual place to
-    # do it -- see backend_wx, backend_wxagg and backend_tkagg for
-    # examples.  Not all GUIs require explicit instantiation of a
-    # main-level app (egg backend_gtk, backend_gtkagg) for pylab
-    FigureClass = kwargs.pop('FigureClass', Figure)
-    thisFig = FigureClass(*args, **kwargs)
-    return new_figure_manager_given_figure(num, thisFig)
-
-
-def new_figure_manager_given_figure(num, figure):
-    """
-    Create a new figure manager instance for the given figure.
-    """
-    canvas = FigureCanvasPgf(figure)
-    manager = FigureManagerPgf(canvas, num)
-    return manager
-
-
 class TmpDirCleaner(object):
     remaining_tmpdirs = set()
 
@@ -807,7 +780,7 @@ class FigureCanvasPgf(FigureCanvasBase):
 %% Make sure the required packages are loaded in your preamble
 %%   \\usepackage{pgf}
 %%
-%% Figures using additional raster images can only be included by \input if
+%% Figures using additional raster images can only be included by \\input if
 %% they are in the same directory as the main LaTeX file. For loading figures
 %% from other directories you can use the `import` package
 %%   \\usepackage{import}
@@ -976,8 +949,10 @@ class FigureManagerPgf(FigureManagerBase):
         FigureManagerBase.__init__(self, *args)
 
 
-FigureCanvas = FigureCanvasPgf
-FigureManager = FigureManagerPgf
+@_Backend.export
+class _BackendPgf(_Backend):
+    FigureCanvas = FigureCanvasPgf
+    FigureManager = FigureManagerPgf
 
 
 def _cleanup_all():

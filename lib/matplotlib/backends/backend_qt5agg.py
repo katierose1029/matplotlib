@@ -10,31 +10,13 @@ import ctypes
 import traceback
 
 from matplotlib import cbook
-from matplotlib.figure import Figure
 from matplotlib.transforms import Bbox
 
 from .backend_agg import FigureCanvasAgg
 from .backend_qt5 import (
-    QtCore, QtGui, FigureCanvasQT, FigureManagerQT, NavigationToolbar2QT,
-    backend_version, draw_if_interactive, show)
+    QtCore, QtGui, QtWidgets, _BackendQT5, FigureCanvasQT, FigureManagerQT,
+    NavigationToolbar2QT, backend_version)
 from .qt_compat import QT_API
-
-
-def new_figure_manager(num, *args, **kwargs):
-    """
-    Create a new figure manager instance
-    """
-    FigureClass = kwargs.pop('FigureClass', Figure)
-    thisFig = FigureClass(*args, **kwargs)
-    return new_figure_manager_given_figure(num, thisFig)
-
-
-def new_figure_manager_given_figure(num, figure):
-    """
-    Create a new figure manager instance for the given figure.
-    """
-    canvas = FigureCanvasQTAgg(figure)
-    return FigureManagerQT(canvas, num)
 
 
 class FigureCanvasQTAggBase(FigureCanvasAgg):
@@ -74,6 +56,28 @@ class FigureCanvasQTAggBase(FigureCanvasAgg):
         In Qt, all drawing should be done inside of here when a widget is
         shown onscreen.
         """
+        # if there is a pending draw, run it now as we need the updated render
+        # to paint the widget
+        if self._agg_draw_pending:
+            self.__draw_idle_agg()
+        # As described in __init__ above, we need to be careful in cases with
+        # mixed resolution displays if dpi_ratio is changing between painting
+        # events.
+        if self._dpi_ratio != self._dpi_ratio_prev:
+            # We need to update the figure DPI
+            self._update_figure_dpi()
+            self._dpi_ratio_prev = self._dpi_ratio
+            # The easiest way to resize the canvas is to emit a resizeEvent
+            # since we implement all the logic for resizing the canvas for
+            # that event.
+            event = QtGui.QResizeEvent(self.size(), self.size())
+            # We use self.resizeEvent here instead of QApplication.postEvent
+            # since the latter doesn't guarantee that the event will be emitted
+            # straight away, and this causes visual delays in the changes.
+            self.resizeEvent(event)
+            # resizeEvent triggers a paintEvent itself, so we exit this one.
+            return
+
         # if the canvas does not have a renderer, then give up and wait for
         # FigureCanvasAgg.draw(self) to be called
         if not hasattr(self, 'renderer'):
@@ -136,6 +140,8 @@ class FigureCanvasQTAggBase(FigureCanvasAgg):
             QtCore.QTimer.singleShot(0, self.__draw_idle_agg)
 
     def __draw_idle_agg(self, *args):
+        if not self._agg_draw_pending:
+            return
         if self.height() < 0 or self.width() < 0:
             self._agg_draw_pending = False
             return
@@ -181,14 +187,7 @@ class FigureCanvasQTAgg(FigureCanvasQTAggBase, FigureCanvasQT):
 
     """
 
-    def __init__(self, figure):
-        super(FigureCanvasQTAgg, self).__init__(figure=figure)
-        # We don't want to scale up the figure DPI more than once.
-        # Note, we don't handle a signal for changing DPI yet.
-        if not hasattr(self.figure, '_original_dpi'):
-            self.figure._original_dpi = self.figure.dpi
-        self.figure.dpi = self._dpi_ratio * self.figure._original_dpi
 
-
-FigureCanvas = FigureCanvasQTAgg
-FigureManager = FigureManagerQT
+@_BackendQT5.export
+class _BackendQT5Agg(_BackendQT5):
+    FigureCanvas = FigureCanvasQTAgg

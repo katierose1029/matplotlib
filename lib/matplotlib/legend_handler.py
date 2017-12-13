@@ -2,7 +2,7 @@
 This module defines default legend handlers.
 
 It is strongly encouraged to have read the :ref:`legend guide
-<sphx_glr_tutorials_02_intermediate_legend_guide.py>` before this documentation.
+<sphx_glr_tutorials_intermediate_legend_guide.py>` before this documentation.
 
 Legend handlers are expected to be a callable object with a following
 signature. ::
@@ -10,7 +10,7 @@ signature. ::
     legend_handler(legend, orig_handle, fontsize, handlebox)
 
 Where *legend* is the legend itself, *orig_handle* is the original
-plot, *fontsize* is the fontsize in pixles, and *handlebox* is a
+plot, *fontsize* is the fontsize in pixels, and *handlebox* is a
 OffsetBox instance. Within the call, you should create relevant
 artists (using relevant properties from the *legend* and/or
 *orig_handle*) and add them into the handlebox. The artists needs to

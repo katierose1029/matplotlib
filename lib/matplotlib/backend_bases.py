@@ -39,9 +39,9 @@ import six
 from six.moves import xrange
 
 from contextlib import contextmanager
+from functools import partial
 import importlib
 import io
-import itertools
 import os
 import sys
 import time
@@ -55,8 +55,8 @@ import matplotlib.widgets as widgets
 from matplotlib import rcParams
 from matplotlib import is_interactive
 from matplotlib import get_backend
-from matplotlib._pylab_helpers import Gcf
 from matplotlib import lines
+from matplotlib._pylab_helpers import Gcf
 
 from matplotlib.transforms import Bbox, TransformedBbox, Affine2D
 
@@ -100,12 +100,6 @@ _default_backends = {
 }
 
 
-# Used to ensure that caching based on renderer id() is unique without being as
-# expensive as a real UUID. 0 is used for renderers that don't derive from
-# here, so start at 1.
-_unique_renderer_id = itertools.count(1)
-
-
 def register_backend(format, backend, description=None):
     """
     Register a backend for saving to a given file format.
@@ -141,60 +135,118 @@ def get_registered_canvas_class(format):
     return backend_class
 
 
-class ShowBase(object):
+class _Backend(object):
+    # A backend can be defined by using the following pattern:
+    #
+    # @_Backend.export
+    # class FooBackend(_Backend):
+    #     # override the attributes and methods documented below.
+
+    # The following attributes and methods must be overridden by subclasses.
+
+    # The `FigureCanvas` and `FigureManager` classes must be defined.
+    FigureCanvas = None
+    FigureManager = None
+
+    # The following methods must be left as None for non-interactive backends.
+    # For interactive backends, `trigger_manager_draw` should be a function
+    # taking a manager as argument and triggering a canvas draw, and `mainloop`
+    # should be a function taking no argument and starting the backend main
+    # loop.
+    trigger_manager_draw = None
+    mainloop = None
+
+    # The following methods will be automatically defined and exported, but
+    # can be overridden.
+
+    @classmethod
+    def new_figure_manager(cls, num, *args, **kwargs):
+        """Create a new figure manager instance.
+        """
+        # This import needs to happen here due to circular imports.
+        from matplotlib.figure import Figure
+        fig_cls = kwargs.pop('FigureClass', Figure)
+        fig = fig_cls(*args, **kwargs)
+        return cls.new_figure_manager_given_figure(num, fig)
+
+    @classmethod
+    def new_figure_manager_given_figure(cls, num, figure):
+        """Create a new figure manager instance for the given figure.
+        """
+        canvas = cls.FigureCanvas(figure)
+        manager = cls.FigureManager(canvas, num)
+        return manager
+
+    @classmethod
+    def draw_if_interactive(cls):
+        if cls.trigger_manager_draw is not None and is_interactive():
+            manager = Gcf.get_active()
+            if manager:
+                cls.trigger_manager_draw(manager)
+
+    @classmethod
+    def show(cls, block=None):
+        """Show all figures.
+
+        `show` blocks by calling `mainloop` if *block* is ``True``, or if it
+        is ``None`` and we are neither in IPython's ``%pylab`` mode, nor in
+        `interactive` mode.
+        """
+        if cls.mainloop is None:
+            return
+        managers = Gcf.get_all_fig_managers()
+        if not managers:
+            return
+        for manager in managers:
+            manager.show()
+        if block is None:
+            # Hack: Are we in IPython's pylab mode?
+            from matplotlib import pyplot
+            try:
+                # IPython versions >= 0.10 tack the _needmain attribute onto
+                # pyplot.show, and always set it to False, when in %pylab mode.
+                ipython_pylab = not pyplot.show._needmain
+            except AttributeError:
+                ipython_pylab = False
+            block = not ipython_pylab and not is_interactive()
+            # TODO: The above is a hack to get the WebAgg backend working with
+            # ipython's `%pylab` mode until proper integration is implemented.
+            if get_backend() == "WebAgg":
+                block = True
+        if block:
+            cls.mainloop()
+
+    # This method is the one actually exporting the required methods.
+
+    @staticmethod
+    def export(cls):
+        for name in ["FigureCanvas",
+                     "FigureManager",
+                     "new_figure_manager",
+                     "new_figure_manager_given_figure",
+                     "draw_if_interactive",
+                     "show"]:
+            setattr(sys.modules[cls.__module__], name, getattr(cls, name))
+
+        # For back-compatibility, generate a shim `Show` class.
+
+        class Show(ShowBase):
+            def mainloop(self):
+                return cls.mainloop()
+
+        setattr(sys.modules[cls.__module__], "Show", Show)
+        return cls
+
+
+class ShowBase(_Backend):
     """
     Simple base class to generate a show() callable in backends.
 
     Subclass must override mainloop() method.
     """
+
     def __call__(self, block=None):
-        """
-        Show all figures.  If *block* is not None, then
-        it is a boolean that overrides all other factors
-        determining whether show blocks by calling mainloop().
-        The other factors are:
-        it does not block if run inside ipython's "%pylab" mode
-        it does not block in interactive mode.
-        """
-        managers = Gcf.get_all_fig_managers()
-        if not managers:
-            return
-
-        for manager in managers:
-            manager.show()
-
-        if block is not None:
-            if block:
-                self.mainloop()
-                return
-            else:
-                return
-
-        # Hack: determine at runtime whether we are
-        # inside ipython in pylab mode.
-        from matplotlib import pyplot
-        try:
-            ipython_pylab = not pyplot.show._needmain
-            # IPython versions >= 0.10 tack the _needmain
-            # attribute onto pyplot.show, and always set
-            # it to False, when in %pylab mode.
-            ipython_pylab = ipython_pylab and get_backend() != 'WebAgg'
-            # TODO: The above is a hack to get the WebAgg backend
-            # working with ipython's `%pylab` mode until proper
-            # integration is implemented.
-        except AttributeError:
-            ipython_pylab = False
-
-        # Leave the following as a separate step in case we
-        # want to control this behavior with an rcParam.
-        if ipython_pylab:
-            return
-
-        if not is_interactive() or get_backend() == 'WebAgg':
-            self.mainloop()
-
-    def mainloop(self):
-        pass
+        return self.show(block=block)
 
 
 class RendererBase(object):
@@ -218,12 +270,7 @@ class RendererBase(object):
 
     """
     def __init__(self):
-        # A lightweight id for unique-ification purposes. Along with id(self),
-        # the combination should be unique enough to use as part of a cache key.
-        self._uid = next(_unique_renderer_id)
-
         self._texmanager = None
-
         self._text2path = textpath.TextToPath()
 
     def open_group(self, s, gid=None):
@@ -1798,6 +1845,7 @@ class FigureCanvasBase(object):
         s = 'resize_event'
         event = ResizeEvent(s, self)
         self.callbacks.process(s, event)
+        self.draw_idle()
 
     def close_event(self, guiEvent=None):
         """Pass a `CloseEvent` to all functions connected to ``close_event``.
@@ -2129,8 +2177,7 @@ class FigureCanvasBase(object):
         origfacecolor = self.figure.get_facecolor()
         origedgecolor = self.figure.get_edgecolor()
 
-        if dpi != 'figure':
-            self.figure.dpi = dpi
+        self.figure.dpi = dpi
         self.figure.set_facecolor(facecolor)
         self.figure.set_edgecolor(edgecolor)
 
@@ -2257,7 +2304,7 @@ class FigureCanvasBase(object):
         default_filetype = self.get_default_filetype()
         default_filename = default_basename + '.' + default_filetype
 
-        save_dir = os.path.expanduser(rcParams.get('savefig.directory', ''))
+        save_dir = os.path.expanduser(rcParams['savefig.directory'])
 
         # ensure non-existing filename in save dir
         i = 1
@@ -2368,55 +2415,27 @@ class FigureCanvasBase(object):
         return TimerBase(*args, **kwargs)
 
     def flush_events(self):
-        """
-        Flush the GUI events for the figure. Implemented only for
-        backends with GUIs.
-        """
-        raise NotImplementedError
+        """Flush the GUI events for the figure.
 
-    def start_event_loop(self, timeout):
+        Interactive backends need to reimplement this method.
         """
-        Start an event loop.  This is used to start a blocking event
-        loop so that interactive functions, such as ginput and
-        waitforbuttonpress, can wait for events.  This should not be
-        confused with the main GUI event loop, which is always running
-        and has nothing to do with this.
 
-        This is implemented only for backends with GUIs.
+    def start_event_loop(self, timeout=0):
+        """Start a blocking event loop.
+
+        Such an event loop is used by interactive functions, such as `ginput`
+        and `waitforbuttonpress`, to wait for events.
+
+        The event loop blocks until a callback function triggers
+        `stop_event_loop`, or *timeout* is reached.
+
+        If *timeout* is negative, never timeout.
+
+        Only interactive backends need to reimplement this method and it relies
+        on `flush_events` being properly implemented.
+
+        Interactive backends should implement this in a more native way.
         """
-        raise NotImplementedError
-
-    def stop_event_loop(self):
-        """
-        Stop an event loop.  This is used to stop a blocking event
-        loop so that interactive functions, such as ginput and
-        waitforbuttonpress, can wait for events.
-
-        This is implemented only for backends with GUIs.
-        """
-        raise NotImplementedError
-
-    def start_event_loop_default(self, timeout=0):
-        """
-        Start an event loop.  This is used to start a blocking event
-        loop so that interactive functions, such as ginput and
-        waitforbuttonpress, can wait for events.  This should not be
-        confused with the main GUI event loop, which is always running
-        and has nothing to do with this.
-
-        This function provides default event loop functionality based
-        on time.sleep that is meant to be used until event loop
-        functions for each of the GUI backends can be written.  As
-        such, it throws a deprecated warning.
-
-        This call blocks until a callback function triggers
-        stop_event_loop() or *timeout* is reached.  If *timeout* is
-        <=0, never timeout.
-        """
-        str = "Using default event loop until function specific"
-        str += " to this GUI is implemented"
-        warnings.warn(str, mplDeprecation)
-
         if timeout <= 0:
             timeout = np.inf
         timestep = 0.01
@@ -2427,14 +2446,18 @@ class FigureCanvasBase(object):
             time.sleep(timestep)
             counter += 1
 
-    def stop_event_loop_default(self):
-        """
-        Stop an event loop.  This is used to stop a blocking event
-        loop so that interactive functions, such as ginput and
-        waitforbuttonpress, can wait for events.
+    def stop_event_loop(self):
+        """Stop the current blocking event loop.
 
+        Interactive backends need to reimplement this to match
+        `start_event_loop`
         """
         self._looping = False
+
+    start_event_loop_default = cbook.deprecated(
+        "2.1", name="start_event_loop_default")(start_event_loop)
+    stop_event_loop_default = cbook.deprecated(
+        "2.1", name="stop_event_loop_default")(stop_event_loop)
 
 
 def key_press_handler(event, canvas, toolbar=None):
@@ -2583,7 +2606,7 @@ def key_press_handler(event, canvas, toolbar=None):
         elif scalex == 'linear':
             try:
                 ax.set_xscale('log')
-            except ValueError:
+            except ValueError as exc:
                 warnings.warn(str(exc))
                 ax.set_xscale('linear')
             ax.figure.canvas.draw_idle()
@@ -2627,12 +2650,7 @@ class FigureManagerBase(object):
         canvas.manager = self  # store a pointer to parent
         self.num = num
 
-        if rcParams['toolbar'] != 'toolmanager':
-            self.key_press_handler_id = self.canvas.mpl_connect(
-                                                'key_press_event',
-                                                self.key_press)
-        else:
-            self.key_press_handler_id = None
+        self.key_press_handler_id = None
         """
         The returned id from connecting the default key handler via
         :meth:`FigureCanvasBase.mpl_connect`.
@@ -2643,6 +2661,10 @@ class FigureManagerBase(object):
             canvas.mpl_disconnect(manager.key_press_handler_id)
 
         """
+        if rcParams['toolbar'] != 'toolmanager':
+            self.key_press_handler_id = self.canvas.mpl_connect(
+                'key_press_event',
+                self.key_press)
 
     def show(self):
         """
@@ -2761,7 +2783,8 @@ class NavigationToolbar2(object):
         self._idPress = None
         self._idRelease = None
         self._active = None
-        self._lastCursor = None
+        # This cursor will be set after the initial draw.
+        self._lastCursor = cursors.POINTER
         self._init_toolbar()
         self._idDrag = self.canvas.mpl_connect(
             'motion_notify_event', self.mouse_move)
@@ -2774,6 +2797,13 @@ class NavigationToolbar2(object):
 
         self.mode = ''  # a mode string for the status bar
         self.set_history_buttons()
+
+        @partial(canvas.mpl_connect, 'draw_event')
+        def define_home(event):
+            self.push_current()
+            # The decorator sets `define_home` to the callback cid, so we can
+            # disconnect it after the first use.
+            canvas.mpl_disconnect(define_home)
 
     def set_message(self, s):
         """Display a message on toolbar or in status bar."""
@@ -2840,14 +2870,13 @@ class NavigationToolbar2(object):
                 self.set_cursor(cursors.POINTER)
                 self._lastCursor = cursors.POINTER
         else:
-            if self._active == 'ZOOM':
-                if self._lastCursor != cursors.SELECT_REGION:
-                    self.set_cursor(cursors.SELECT_REGION)
-                    self._lastCursor = cursors.SELECT_REGION
+            if (self._active == 'ZOOM'
+                    and self._lastCursor != cursors.SELECT_REGION):
+                self.set_cursor(cursors.SELECT_REGION)
+                self._lastCursor = cursors.SELECT_REGION
             elif (self._active == 'PAN' and
                   self._lastCursor != cursors.MOVE):
                 self.set_cursor(cursors.MOVE)
-
                 self._lastCursor = cursors.MOVE
 
     def mouse_move(self, event):
@@ -2924,11 +2953,6 @@ class NavigationToolbar2(object):
             return
 
         x, y = event.x, event.y
-
-        # push the current view to define home if stack is empty
-        if self._views.empty():
-            self.push_current()
-
         self._xypress = []
         for i, a in enumerate(self.canvas.figure.get_axes()):
             if (x is not None and y is not None and a.in_axes(event) and
@@ -2964,11 +2988,6 @@ class NavigationToolbar2(object):
             return
 
         x, y = event.x, event.y
-
-        # push the current view to define home if stack is empty
-        if self._views.empty():
-            self.push_current()
-
         self._xypress = []
         for i, a in enumerate(self.canvas.figure.get_axes()):
             if (x is not None and y is not None and a.in_axes(event) and
@@ -3147,6 +3166,11 @@ class NavigationToolbar2(object):
 
     def set_cursor(self, cursor):
         """Set the current cursor to one of the :class:`Cursors` enums values.
+
+        If required by the backend, this method should trigger an update in
+        the backend event loop after the cursor is set, as this method may be
+        called e.g. before a long-running task during which the GUI is not
+        updated.
         """
 
     def update(self):

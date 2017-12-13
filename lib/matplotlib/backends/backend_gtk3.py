@@ -28,10 +28,9 @@ except ImportError:
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.backend_bases import (
-    FigureCanvasBase, FigureManagerBase, GraphicsContextBase,
+    _Backend, FigureCanvasBase, FigureManagerBase, GraphicsContextBase,
     NavigationToolbar2, RendererBase, TimerBase, cursors)
-from matplotlib.backend_bases import (
-    ShowBase, ToolContainerBase, StatusbarBase)
+from matplotlib.backend_bases import ToolContainerBase, StatusbarBase
 from matplotlib.backend_managers import ToolManager
 from matplotlib.cbook import is_writable_file_like
 from matplotlib.figure import Figure
@@ -52,23 +51,8 @@ cursord = {
     cursors.HAND          : Gdk.Cursor.new(Gdk.CursorType.HAND2),
     cursors.POINTER       : Gdk.Cursor.new(Gdk.CursorType.LEFT_PTR),
     cursors.SELECT_REGION : Gdk.Cursor.new(Gdk.CursorType.TCROSS),
+    cursors.WAIT          : Gdk.Cursor.new(Gdk.CursorType.WATCH),
     }
-
-def draw_if_interactive():
-    """
-    Is called after every pylab drawing command
-    """
-    if matplotlib.is_interactive():
-        figManager =  Gcf.get_active()
-        if figManager is not None:
-            figManager.canvas.draw_idle()
-
-class Show(ShowBase):
-    def mainloop(self):
-        if Gtk.main_level() == 0:
-            Gtk.main()
-
-show = Show()
 
 
 class TimerGTK3(TimerBase):
@@ -349,14 +333,6 @@ class FigureCanvasGTK3(Gtk.DrawingArea, FigureCanvasBase):
         Gdk.flush()
         Gdk.threads_leave()
 
-    def start_event_loop(self,timeout):
-        FigureCanvasBase.start_event_loop_default(self,timeout)
-    start_event_loop.__doc__=FigureCanvasBase.start_event_loop_default.__doc__
-
-    def stop_event_loop(self):
-        FigureCanvasBase.stop_event_loop_default(self)
-    stop_event_loop.__doc__=FigureCanvasBase.stop_event_loop_default.__doc__
-
 
 class FigureManagerGTK3(FigureManagerBase):
     """
@@ -516,7 +492,7 @@ class NavigationToolbar2GTK3(NavigationToolbar2, Gtk.Toolbar):
 
     def set_cursor(self, cursor):
         self.canvas.get_property("window").set_cursor(cursord[cursor])
-        #self.canvas.set_cursor(cursord[cursor])
+        Gtk.main_iteration()
 
     def release(self, event):
         try: del self._pixmapBack
@@ -577,7 +553,7 @@ class NavigationToolbar2GTK3(NavigationToolbar2, Gtk.Toolbar):
         fc = FileChooserDialog(
             title='Save the figure',
             parent=self.win,
-            path=os.path.expanduser(rcParams.get('savefig.directory', '')),
+            path=os.path.expanduser(rcParams['savefig.directory']),
             filetypes=self.canvas.get_supported_filetypes(),
             default_filetype=self.canvas.get_default_filetype())
         fc.set_current_name(self.canvas.get_default_filename())
@@ -588,15 +564,13 @@ class NavigationToolbar2GTK3(NavigationToolbar2, Gtk.Toolbar):
         fname, format = chooser.get_filename_from_user()
         chooser.destroy()
         if fname:
-            startpath = os.path.expanduser(rcParams.get('savefig.directory', ''))
-            if startpath == '':
-                # explicitly missing key or empty str signals to use cwd
-                rcParams['savefig.directory'] = startpath
-            else:
-                # save dir for next time
-                rcParams['savefig.directory'] = os.path.dirname(six.text_type(fname))
+            startpath = os.path.expanduser(rcParams['savefig.directory'])
+            # Save dir for next time, unless empty str (i.e., use cwd).
+            if startpath != "":
+                rcParams['savefig.directory'] = (
+                    os.path.dirname(six.text_type(fname)))
             try:
-                self.canvas.print_figure(fname, format=format)
+                self.canvas.figure.savefig(fname, format=format)
             except Exception as e:
                 error_msg_gtk(str(e), parent=self)
 
@@ -830,7 +804,7 @@ class SaveFigureGTK3(backend_tools.SaveFigureBase):
         fc = FileChooserDialog(
             title='Save the figure',
             parent=self.figure.canvas.manager.window,
-            path=os.path.expanduser(rcParams.get('savefig.directory', '')),
+            path=os.path.expanduser(rcParams['savefig.directory']),
             filetypes=self.figure.canvas.get_supported_filetypes(),
             default_filetype=self.figure.canvas.get_default_filetype())
         fc.set_current_name(self.figure.canvas.get_default_filename())
@@ -841,8 +815,7 @@ class SaveFigureGTK3(backend_tools.SaveFigureBase):
         fname, format_ = chooser.get_filename_from_user()
         chooser.destroy()
         if fname:
-            startpath = os.path.expanduser(
-                rcParams.get('savefig.directory', ''))
+            startpath = os.path.expanduser(rcParams['savefig.directory'])
             if startpath == '':
                 # explicitly missing key or empty str signals to use cwd
                 rcParams['savefig.directory'] = startpath
@@ -947,5 +920,18 @@ backend_tools.ToolSetCursor = SetCursorGTK3
 backend_tools.ToolRubberband = RubberbandGTK3
 
 Toolbar = ToolbarGTK3
-FigureCanvas = FigureCanvasGTK3
-FigureManager = FigureManagerGTK3
+
+
+@_Backend.export
+class _BackendGTK3(_Backend):
+    FigureCanvas = FigureCanvasGTK3
+    FigureManager = FigureManagerGTK3
+
+    @staticmethod
+    def trigger_manager_draw(manager):
+        manager.canvas.draw_idle()
+
+    @staticmethod
+    def mainloop():
+        if Gtk.main_level() == 0:
+            Gtk.main()

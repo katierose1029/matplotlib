@@ -16,11 +16,10 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 import matplotlib.backends.windowing as windowing
 
 import matplotlib
-from matplotlib.backend_bases import RendererBase, GraphicsContextBase
-from matplotlib.backend_bases import FigureManagerBase, FigureCanvasBase
-from matplotlib.backend_bases import NavigationToolbar2, cursors, TimerBase
-from matplotlib.backend_bases import (ShowBase, ToolContainerBase,
-                                      StatusbarBase)
+from matplotlib.backend_bases import (
+    _Backend, FigureCanvasBase, FigureManagerBase, GraphicsContextBase,
+    NavigationToolbar2, RendererBase, StatusbarBase, TimerBase,
+    ToolContainerBase, cursors)
 from matplotlib.backend_managers import ToolManager
 from matplotlib import backend_tools
 from matplotlib._pylab_helpers import Gcf
@@ -46,6 +45,7 @@ cursord = {
     cursors.HAND: "hand2",
     cursors.POINTER: "arrow",
     cursors.SELECT_REGION: "tcross",
+    cursors.WAIT: "watch",
     }
 
 
@@ -58,58 +58,6 @@ def raise_msg_to_str(msg):
 def error_msg_tkpaint(msg, parent=None):
     from six.moves import tkinter_messagebox as tkMessageBox
     tkMessageBox.showerror("matplotlib", msg)
-
-def draw_if_interactive():
-    if matplotlib.is_interactive():
-        figManager =  Gcf.get_active()
-        if figManager is not None:
-            figManager.show()
-
-class Show(ShowBase):
-    def mainloop(self):
-        Tk.mainloop()
-
-show = Show()
-
-def new_figure_manager(num, *args, **kwargs):
-    """
-    Create a new figure manager instance
-    """
-    FigureClass = kwargs.pop('FigureClass', Figure)
-    figure = FigureClass(*args, **kwargs)
-    return new_figure_manager_given_figure(num, figure)
-
-
-def new_figure_manager_given_figure(num, figure):
-    """
-    Create a new figure manager instance for the given figure.
-    """
-    _focus = windowing.FocusManager()
-    window = Tk.Tk(className="matplotlib")
-    window.withdraw()
-
-    if Tk.TkVersion >= 8.5:
-        # put a mpl icon on the window rather than the default tk icon. Tkinter
-        # doesn't allow colour icons on linux systems, but tk >=8.5 has a iconphoto
-        # command which we call directly. Source:
-        # http://mail.python.org/pipermail/tkinter-discuss/2006-November/000954.html
-        icon_fname = os.path.join(rcParams['datapath'], 'images', 'matplotlib.ppm')
-        icon_img = Tk.PhotoImage(file=icon_fname)
-        try:
-            window.tk.call('wm', 'iconphoto', window._w, icon_img)
-        except (SystemExit, KeyboardInterrupt):
-            # re-raise exit type Exceptions
-            raise
-        except:
-            # log the failure, but carry on
-            verbose.report('Could not load matplotlib icon: %s' % sys.exc_info()[1])
-
-    canvas = FigureCanvasTkAgg(figure, master=window)
-    figManager = FigureManagerTkAgg(canvas, num, window)
-    if matplotlib.is_interactive():
-        figManager.show()
-        canvas.draw_idle()
-    return figManager
 
 
 class TimerTk(TimerBase):
@@ -147,8 +95,10 @@ class TimerTk(TimerBase):
         TimerBase._on_timer(self)
 
         # Tk after() is only a single shot, so we need to add code here to
-        # reset the timer if we're not operating in single shot mode.
-        if not self._single and len(self.callbacks) > 0:
+        # reset the timer if we're not operating in single shot mode.  However,
+        # if _timer is None, this means that _timer_stop has been called; so
+        # don't recreate the timer in that case.
+        if not self._single and self._timer:
             self._timer = self.parent.after(self._interval, self._on_timer)
         else:
             self._timer = None
@@ -514,14 +464,6 @@ class FigureCanvasTkAgg(FigureCanvasAgg):
     def flush_events(self):
         self._master.update()
 
-    def start_event_loop(self,timeout):
-        FigureCanvasBase.start_event_loop_default(self,timeout)
-    start_event_loop.__doc__=FigureCanvasBase.start_event_loop_default.__doc__
-
-    def stop_event_loop(self):
-        FigureCanvasBase.stop_event_loop_default(self)
-    stop_event_loop.__doc__=FigureCanvasBase.stop_event_loop_default.__doc__
-
 
 class FigureManagerTkAgg(FigureManagerBase):
     """
@@ -748,6 +690,7 @@ class NavigationToolbar2TkAgg(NavigationToolbar2, Tk.Frame):
 
     def set_cursor(self, cursor):
         self.window.configure(cursor=cursord[cursor])
+        self.window.update_idletasks()
 
     def _Button(self, text, file, command, extension='.gif'):
         img_file = os.path.join(
@@ -817,8 +760,7 @@ class NavigationToolbar2TkAgg(NavigationToolbar2, Tk.Frame):
         # work - JDH!
         #defaultextension = self.canvas.get_default_filetype()
         defaultextension = ''
-        initialdir = rcParams.get('savefig.directory', '')
-        initialdir = os.path.expanduser(initialdir)
+        initialdir = os.path.expanduser(rcParams['savefig.directory'])
         initialfile = self.canvas.get_default_filename()
         fname = tkinter_tkfiledialog.asksaveasfilename(
             master=self.window,
@@ -829,20 +771,17 @@ class NavigationToolbar2TkAgg(NavigationToolbar2, Tk.Frame):
             initialfile=initialfile,
             )
 
-        if fname == "" or fname == ():
+        if fname in ["", ()]:
             return
-        else:
-            if initialdir == '':
-                # explicitly missing key or empty str signals to use cwd
-                rcParams['savefig.directory'] = initialdir
-            else:
-                # save dir for next time
-                rcParams['savefig.directory'] = os.path.dirname(six.text_type(fname))
-            try:
-                # This method will handle the delegation to the correct type
-                self.canvas.print_figure(fname)
-            except Exception as e:
-                tkinter_messagebox.showerror("Error saving file", str(e))
+        # Save dir for next time, unless empty str (i.e., use cwd).
+        if initialdir != "":
+            rcParams['savefig.directory'] = (
+                os.path.dirname(six.text_type(fname)))
+        try:
+            # This method will handle the delegation to the correct type
+            self.canvas.figure.savefig(fname)
+        except Exception as e:
+            tkinter_messagebox.showerror("Error saving file", str(e))
 
     def set_active(self, ind):
         self._ind = ind
@@ -1033,8 +972,7 @@ class SaveFigureTk(backend_tools.SaveFigureBase):
         # work - JDH!
         # defaultextension = self.figure.canvas.get_default_filetype()
         defaultextension = ''
-        initialdir = rcParams.get('savefig.directory', '')
-        initialdir = os.path.expanduser(initialdir)
+        initialdir = os.path.expanduser(rcParams['savefig.directory'])
         initialfile = self.figure.canvas.get_default_filename()
         fname = tkinter_tkfiledialog.asksaveasfilename(
             master=self.figure.canvas.manager.window,
@@ -1057,7 +995,7 @@ class SaveFigureTk(backend_tools.SaveFigureBase):
                     six.text_type(fname))
             try:
                 # This method will handle the delegation to the correct type
-                self.figure.canvas.print_figure(fname)
+                self.figure.savefig(fname)
             except Exception as e:
                 tkinter_messagebox.showerror("Error saving file", str(e))
 
@@ -1095,5 +1033,46 @@ backend_tools.ToolConfigureSubplots = ConfigureSubplotsTk
 backend_tools.ToolSetCursor = SetCursorTk
 backend_tools.ToolRubberband = RubberbandTk
 Toolbar = ToolbarTk
-FigureCanvas = FigureCanvasTkAgg
-FigureManager = FigureManagerTkAgg
+
+
+@_Backend.export
+class _BackendTkAgg(_Backend):
+    FigureCanvas = FigureCanvasTkAgg
+    FigureManager = FigureManagerTkAgg
+
+    @staticmethod
+    def new_figure_manager_given_figure(num, figure):
+        """
+        Create a new figure manager instance for the given figure.
+        """
+        _focus = windowing.FocusManager()
+        window = Tk.Tk(className="matplotlib")
+        window.withdraw()
+
+        # Put a mpl icon on the window rather than the default tk icon.
+        # Tkinter doesn't allow colour icons on linux systems, but tk>=8.5 has
+        # a iconphoto command which we call directly. Source:
+        # http://mail.python.org/pipermail/tkinter-discuss/2006-November/000954.html
+        icon_fname = os.path.join(
+            rcParams['datapath'], 'images', 'matplotlib.ppm')
+        icon_img = Tk.PhotoImage(file=icon_fname)
+        try:
+            window.tk.call('wm', 'foobar', window._w, icon_img)
+        except Exception as exc:
+            # log the failure (due e.g. to Tk version), but carry on
+            verbose.report('Could not load matplotlib icon: %s' % exc)
+
+        canvas = FigureCanvasTkAgg(figure, master=window)
+        manager = FigureManagerTkAgg(canvas, num, window)
+        if matplotlib.is_interactive():
+            manager.show()
+            canvas.draw_idle()
+        return manager
+
+    @staticmethod
+    def trigger_manager_draw(manager):
+        manager.show()
+
+    @staticmethod
+    def mainloop():
+        Tk.mainloop()

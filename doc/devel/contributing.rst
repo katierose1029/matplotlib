@@ -14,7 +14,7 @@ Submitting a bug report
 
 If you find a bug in the code or documentation, do not hesitate to submit a
 ticket to the
-`Bug Tracker <https://github.com/matplotlib/matplotlib/issues>`_. You are also 
+`Bug Tracker <https://github.com/matplotlib/matplotlib/issues>`_. You are also
 welcome to post feature requests or pull requests.
 
 If you are reporting a bug, please do your best to include the following:
@@ -23,7 +23,7 @@ If you are reporting a bug, please do your best to include the following:
     sentences.
 
  2. A short, self-contained code snippet to reproduce the bug, ideally allowing
-    a simple copy and paste to reproduce. Please do your best to reduce the code 
+    a simple copy and paste to reproduce. Please do your best to reduce the code
     snippet to the minimum required.
 
  3. The actual outcome of the code snippet
@@ -42,8 +42,10 @@ If you are reporting a bug, please do your best to include the following:
 
 We have preloaded the issue creation page with a Markdown template that you can
 use to organize this information.
-        
+
 Thank you for your help in keeping bug reports complete, targeted and descriptive.
+
+.. _installing_for_devs:
 
 Retrieving and installing the latest version of the code
 ========================================================
@@ -79,44 +81,54 @@ You can check out the latest sources with the command (see
 
     git clone https://github.com:matplotlib/matplotlib.git
 
-and navigate to the :file:`matplotlib` directory. If you have the proper privileges, 
-you can use ``git@`` instead of  ``https://``, which works through the ssh protocol 
+and navigate to the :file:`matplotlib` directory. If you have the proper privileges,
+you can use ``git@`` instead of  ``https://``, which works through the ssh protocol
 and might be easier to use if you are using 2-factor authentication.
 
 
-To make sure the tests run locally you must build against the correct version
-of freetype.  To configure the build system to fetch and build it either export
-the env ``MPLLOCALFREETYPE`` as::
+Building Matplotlib for image comparison tests
+----------------------------------------------
 
-  export MPLLOCALFREETYPE=1
+Matplotlib's test suite makes heavy use of image comparison tests,
+meaning the result of a plot is compared against a known good result.
+Unfortunately, different versions of FreeType produce differently
+formed characters, causing these image comparisons to fail.  To make
+them reproducible, Matplotlib can be built with a special local copy
+of FreeType.  This is recommended for all Matplotlib developers.
 
-or copy :file:`setup.cfg.template` to :file:`setup.cfg` and edit it to contain ::
+Copy :file:`setup.cfg.template` to :file:`setup.cfg` and edit it to contain::
 
   [test]
   local_freetype = True
+  tests = True
 
+or set the ``MPLLOCALFREETYPE`` environmental variable to any true
+value.
+
+
+Installing Matplotlib in developer mode
+---------------------------------------
 
 To install Matplotlib (and compile the c-extensions) run the following
 command from the top-level directory ::
 
-    pip install -v -e ./
+   python -mpip install -ve .
 
 This installs Matplotlib in 'editable/develop mode', i.e., builds
 everything and places the correct link entries in the install
 directory so that python will be able to import Matplotlib from the
 source directory.  Thus, any changes to the ``*.py`` files will be
 reflected the next time you import the library.  If you change the
-c-extension source (which might happen if you change branches) you
-will need to run::
+C-extension source (which might happen if you change branches) you
+will need to run ::
 
    python setup.py build
 
-or re-run ``pip install -v -e ./``.
-
+or re-run ``python -mpip install -ve .``.
 
 Alternatively, if you do ::
 
-  pip install -v ./
+   python -mpip install -v .
 
 all of the files will be copied to the installation directory however,
 you will have to rerun this command every time the source is changed.
@@ -131,7 +143,6 @@ In either case you can then run the tests to check your work
 environment is set up properly::
 
   python tests.py
-
 
 .. _pytest: http://doc.pytest.org/en/latest/
 .. _pep8: https://pep8.readthedocs.io/en/latest/
@@ -157,7 +168,12 @@ How to contribute
 
 The preferred way to contribute to Matplotlib is to fork the `main
 repository <https://github.com/matplotlib/matplotlib/>`__ on GitHub,
-then submit a "pull request" (PR):
+then submit a "pull request" (PR).
+
+The best practices for using GitHub to make PRs to Matplotlib are
+documented in the :ref:`development-workflow` section. 
+
+A brief overview is:
 
  1. `Create an account <https://github.com/join>`_ on
     GitHub if you do not already have one.
@@ -254,12 +270,12 @@ tools:
     * Code with a good unittest coverage (at least 70%, better 100%), check
       with::
 
-        pip install coverage
+        python -mpip install coverage
         python tests.py --with-coverage
 
     * No pyflakes warnings, check with::
 
-        pip install pyflakes
+        python -mpip install pyflakes
         pyflakes path/to/module.py
 
 .. note::
@@ -427,7 +443,7 @@ Developing a new backend
 ------------------------
 
 If you are working on a custom backend, the *backend* setting in
-:file:`matplotlibrc` (:ref:`sphx_glr_tutorials_01_introductory_customizing.py`) supports an
+:file:`matplotlibrc` (:ref:`sphx_glr_tutorials_introductory_customizing.py`) supports an
 external backend via the ``module`` directive.  If
 :file:`my_backend.py` is a Matplotlib backend in your
 :envvar:`PYTHONPATH`, you can set it on one of several ways

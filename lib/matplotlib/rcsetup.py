@@ -353,7 +353,7 @@ def validate_color_for_prop_cycle(s):
         if match is not None:
             raise ValueError('Can not put cycle reference ({cn!r}) in '
                              'prop_cycler'.format(cn=s))
-    elif isinstance(s, six.text_type):
+    elif isinstance(s, six.string_types):
         match = re.match('^C[0-9]$', s)
         if match is not None:
             raise ValueError('Can not put cycle reference ({cn!r}) in '
@@ -385,8 +385,8 @@ def validate_color(s):
         # get rid of grouping symbols
         stmp = ''.join([c for c in s if c.isdigit() or c == '.' or c == ','])
         vals = stmp.split(',')
-        if len(vals) != 3:
-            msg = '\nColor tuples must be length 3'
+        if len(vals) not in [3, 4]:
+            msg = '\nColor tuples must be of length 3 or 4'
         else:
             try:
                 colorarg = [float(val) for val in vals]
@@ -602,7 +602,8 @@ validate_movie_writer = ValidateInStrings('animation.writer',
     ['ffmpeg', 'ffmpeg_file',
      'avconv', 'avconv_file',
      'mencoder', 'mencoder_file',
-     'imagemagick', 'imagemagick_file'])
+     'imagemagick', 'imagemagick_file',
+     'html'])
 
 validate_movie_frame_fmt = ValidateInStrings('animation.frame_format',
     ['png', 'jpeg', 'tiff', 'raw', 'rgba'])
@@ -610,7 +611,7 @@ validate_movie_frame_fmt = ValidateInStrings('animation.frame_format',
 validate_axis_locator = ValidateInStrings('major', ['minor', 'both', 'major'])
 
 validate_movie_html_fmt = ValidateInStrings('animation.html',
-    ['html5', 'none'])
+    ['html5', 'jshtml', 'none'])
 
 def validate_bbox(s):
     if isinstance(s, six.string_types):
@@ -855,7 +856,7 @@ def validate_cycler(s):
 
 
 def validate_hist_bins(s):
-    if isinstance(s, six.text_type) and s == 'auto':
+    if isinstance(s, six.string_types) and s == 'auto':
         return s
     try:
         return int(s)
@@ -874,7 +875,7 @@ def validate_animation_writer_path(p):
     # Make sure it's a string and then figure out if the animations
     # are already loaded and reset the writers (which will validate
     # the path on next call)
-    if not isinstance(p, six.text_type):
+    if not isinstance(p, six.string_types):
         raise ValueError("path must be a (unicode) string")
     from sys import modules
     # set dirty, so that the next call to the registry will re-evaluate
@@ -1379,11 +1380,16 @@ defaultParams = {
 
     # Animation settings
     'animation.html':         ['none', validate_movie_html_fmt],
+    # Limit, in MB, of size of base64 encoded animation in HTML
+    # (i.e. IPython notebook)
+    'animation.embed_limit':  [20, validate_float],
     'animation.writer':       ['ffmpeg', validate_movie_writer],
     'animation.codec':        ['h264', six.text_type],
     'animation.bitrate':      [-1, validate_int],
     # Controls image format when frames are written to disk
     'animation.frame_format': ['png', validate_movie_frame_fmt],
+    # Additional arguments for HTML writer
+    'animation.html_args':    [[], validate_stringlist],
     # Path to FFMPEG binary. If just binary name, subprocess uses $PATH.
     'animation.ffmpeg_path':  ['ffmpeg', validate_animation_writer_path],
 
