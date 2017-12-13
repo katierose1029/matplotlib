@@ -38,7 +38,7 @@ from matplotlib.cbook import Stack, iterable
 from matplotlib import image as mimage
 from matplotlib.image import FigureImage
 
-#import matplotlib.colorbar as cbar
+import matplotlib.colorbar as cbar
 
 from matplotlib.axes import Axes, SubplotBase, subplot_class_factory
 from matplotlib.blocking_input import BlockingMouseInput, BlockingKeyMouseInput
@@ -2016,6 +2016,8 @@ def figaspect(arg):
     # the min/max dimensions (we don't want figures 10 feet tall!)
     newsize = np.clip(newsize, figsize_min, figsize_max)
     return newsize
+
+b_figure.Figure = Figure
 
 docstring.interpd.update(Figure=martist.kwdoc(Figure))
 
