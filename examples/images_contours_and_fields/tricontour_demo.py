@@ -8,8 +8,8 @@ Contour plots of unstructured triangular grids.
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 import numpy as np
+import math
 
-###############################################################################
 # Creating a Triangulation without specifying the triangles results in the
 # Delaunay triangulation of the points.
 
@@ -19,25 +19,24 @@ n_radii = 8
 min_radius = 0.25
 radii = np.linspace(min_radius, 0.95, n_radii)
 
-angles = np.linspace(0, 2 * np.pi, n_angles, endpoint=False)
+angles = np.linspace(0, 2 * math.pi, n_angles, endpoint=False)
 angles = np.repeat(angles[..., np.newaxis], n_radii, axis=1)
-angles[:, 1::2] += np.pi / n_angles
+angles[:, 1::2] += math.pi / n_angles
 
 x = (radii * np.cos(angles)).flatten()
 y = (radii * np.sin(angles)).flatten()
-z = (np.cos(radii) * np.cos(3 * angles)).flatten()
+z = (np.cos(radii) * np.cos(angles * 3.0)).flatten()
 
 # Create the Triangulation; no triangles so Delaunay triangulation created.
 triang = tri.Triangulation(x, y)
 
 # Mask off unwanted triangles.
-triang.set_mask(np.hypot(x[triang.triangles].mean(axis=1),
-                         y[triang.triangles].mean(axis=1))
-                < min_radius)
+xmid = x[triang.triangles].mean(axis=1)
+ymid = y[triang.triangles].mean(axis=1)
+mask = np.where(xmid * xmid + ymid * ymid < min_radius * min_radius, 1, 0)
+triang.set_mask(mask)
 
-###############################################################################
 # pcolor plot.
-
 plt.figure()
 plt.gca().set_aspect('equal')
 plt.tricontourf(triang, z)
@@ -45,7 +44,6 @@ plt.colorbar()
 plt.tricontour(triang, z, colors='k')
 plt.title('Contour plot of Delaunay triangulation')
 
-###############################################################################
 # You can specify your own triangulation rather than perform a Delaunay
 # triangulation of the points, where each triangle is given by the indices of
 # the three points that make up the triangle, ordered in either a clockwise or
@@ -95,12 +93,10 @@ triangles = np.asarray([
     [42, 41, 40], [72, 33, 31], [32, 31, 33], [39, 38, 72], [33, 72, 38],
     [33, 38, 34], [37, 35, 38], [34, 38, 35], [35, 37, 36]])
 
-###############################################################################
 # Rather than create a Triangulation object, can simply pass x, y and triangles
 # arrays to tripcolor directly.  It would be better to use a Triangulation
 # object if the same triangulation was to be used more than once to save
 # duplicated calculations.
-
 plt.figure()
 plt.gca().set_aspect('equal')
 plt.tricontourf(x, y, triangles, z)

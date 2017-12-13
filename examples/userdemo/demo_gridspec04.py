@@ -11,7 +11,8 @@ import matplotlib.gridspec as gridspec
 def make_ticklabels_invisible(fig):
     for i, ax in enumerate(fig.axes):
         ax.text(0.5, 0.5, "ax%d" % (i+1), va="center", ha="center")
-        ax.tick_params(labelbottom=False, labelleft=False)
+        for tl in ax.get_xticklabels() + ax.get_yticklabels():
+            tl.set_visible(False)
 
 
 # gridspec inside gridspec

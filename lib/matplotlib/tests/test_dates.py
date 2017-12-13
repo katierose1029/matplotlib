@@ -128,14 +128,6 @@ def test_RRuleLocator():
     fig.autofmt_xdate()
 
 
-def test_RRuleLocator_dayrange():
-    loc = mdates.DayLocator()
-    x1 = datetime.datetime(year=1, month=1, day=1, tzinfo=pytz.UTC)
-    y1 = datetime.datetime(year=1, month=1, day=16, tzinfo=pytz.UTC)
-    loc.tick_values(x1, y1)
-    # On success, no overflow error shall be thrown
-
-
 @image_comparison(baseline_images=['DateFormatter_fractionalSeconds'],
                   extensions=['png'])
 def test_DateFormatter():
@@ -465,12 +457,3 @@ def test_DayLocator():
 def test_tz_utc():
     dt = datetime.datetime(1970, 1, 1, tzinfo=mdates.UTC)
     dt.tzname()
-
-
-@pytest.mark.parametrize("x, tdelta",
-                         [(1, datetime.timedelta(days=1)),
-                          ([1, 1.5], [datetime.timedelta(days=1),
-                                      datetime.timedelta(days=1.5)])])
-def test_num2timedelta(x, tdelta):
-    dt = mdates.num2timedelta(x)
-    assert dt == tdelta

@@ -116,10 +116,7 @@ class UnitDbl(object):
       = RETURN VALUE
       - Returns true if the value is non-zero.
       """
-      if six.PY3:
-          return self._value.__bool__()
-      else:
-          return self._value.__nonzero__()
+      return self._value.__nonzero__()
 
    if six.PY3:
       __bool__ = __nonzero__

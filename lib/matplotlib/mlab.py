@@ -2236,8 +2236,8 @@ def binary_repr(number, max_length=1025):
     """
 
 #   assert number < 2L << max_length
-    shifts = map(operator.rshift, max_length * [number],
-                 range(max_length - 1, -1, -1))
+    shifts = list(map(operator.rshift, max_length * [number],
+                  range(max_length - 1, -1, -1)))
     digits = list(map(operator.mod, shifts, max_length * [2]))
     if not digits.count(1):
         return 0
@@ -3136,17 +3136,17 @@ def rec2txt(r, header=None, padding=3, precision=3, fields=None):
     def get_justify(colname, column, precision):
         ntype = column.dtype
 
-        if np.issubdtype(ntype, np.character):
+        if np.issubdtype(ntype, str) or np.issubdtype(ntype, bytes):
             fixed_width = int(ntype.str[2:])
             length = max(len(colname), fixed_width)
             return 0, length+padding, "%s"  # left justify
 
-        if np.issubdtype(ntype, np.integer):
+        if np.issubdtype(ntype, np.int):
             length = max(len(colname),
                          np.max(list(map(len, list(map(str, column))))))
             return 1, length+padding, "%d"  # right justify
 
-        if np.issubdtype(ntype, np.floating):
+        if np.issubdtype(ntype, np.float):
             fmt = "%." + str(precision) + "f"
             length = max(
                 len(colname),
@@ -3751,7 +3751,7 @@ def inside_poly(points, verts):
     # Make a closed polygon path
     poly = Path(verts)
 
-    # Check to see which points are contained within the Path
+    # Check to see which points are contained withing the Path
     return [idx for idx, p in enumerate(points) if poly.contains_point(p)]
 
 

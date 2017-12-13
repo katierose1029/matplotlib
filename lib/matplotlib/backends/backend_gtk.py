@@ -28,14 +28,15 @@ _new_tooltip_api =  (gtk.pygtk_version[1] >= 12)
 
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
-from matplotlib.backend_bases import (
-    _Backend, FigureCanvasBase, FigureManagerBase, NavigationToolbar2,
-    TimerBase, cursors)
+from matplotlib.backend_bases import RendererBase, GraphicsContextBase, \
+     FigureManagerBase, FigureCanvasBase, NavigationToolbar2, cursors, TimerBase
+from matplotlib.backend_bases import ShowBase
 
 from matplotlib.backends.backend_gdk import RendererGDK, FigureCanvasGDK
-from matplotlib.cbook import is_writable_file_like, warn_deprecated
+from matplotlib.cbook import is_writable_file_like
 from matplotlib.figure import Figure
 from matplotlib.widgets import SubplotTool
+from matplotlib.cbook import warn_deprecated
 
 from matplotlib import (
     cbook, colors as mcolors, lines, markers, rcParams, verbose)
@@ -54,13 +55,47 @@ cursord = {
     cursors.HAND          : gdk.Cursor(gdk.HAND2),
     cursors.POINTER       : gdk.Cursor(gdk.LEFT_PTR),
     cursors.SELECT_REGION : gdk.Cursor(gdk.TCROSS),
-    cursors.WAIT          : gdk.Cursor(gdk.WATCH),
     }
 
 # ref gtk+/gtk/gtkwidget.h
 def GTK_WIDGET_DRAWABLE(w):
     flags = w.flags();
     return flags & gtk.VISIBLE != 0 and flags & gtk.MAPPED != 0
+
+
+def draw_if_interactive():
+    """
+    Is called after every pylab drawing command
+    """
+    if matplotlib.is_interactive():
+        figManager =  Gcf.get_active()
+        if figManager is not None:
+            figManager.canvas.draw_idle()
+
+
+class Show(ShowBase):
+    def mainloop(self):
+        if gtk.main_level() == 0:
+            gtk.main()
+
+show = Show()
+
+def new_figure_manager(num, *args, **kwargs):
+    """
+    Create a new figure manager instance
+    """
+    FigureClass = kwargs.pop('FigureClass', Figure)
+    thisFig = FigureClass(*args, **kwargs)
+    return new_figure_manager_given_figure(num, thisFig)
+
+
+def new_figure_manager_given_figure(num, figure):
+    """
+    Create a new figure manager instance for the given figure.
+    """
+    canvas = FigureCanvasGTK(figure)
+    manager = FigureManagerGTK(canvas, num)
+    return manager
 
 
 class TimerGTK(TimerBase):
@@ -387,20 +422,16 @@ class FigureCanvasGTK (gtk.DrawingArea, FigureCanvasBase):
     def expose_event(self, widget, event):
         """Expose_event for all GTK backends. Should not be overridden.
         """
-        toolbar = self.toolbar
-        if toolbar:
-            toolbar.set_cursor(cursors.WAIT)
         if GTK_WIDGET_DRAWABLE(self):
             if self._need_redraw:
                 x, y, w, h = self.allocation
                 self._pixmap_prepare (w, h)
                 self._render_figure(self._pixmap, w, h)
                 self._need_redraw = False
+
             x, y, w, h = event.area
             self.window.draw_drawable (self.style.fg_gc[self.state],
                                        self._pixmap, x, y, x, y, w, h)
-        if toolbar:
-            toolbar.set_cursor(toolbar._lastCursor)
         return False  # finish event propagation?
 
     filetypes = FigureCanvasBase.filetypes.copy()
@@ -434,9 +465,11 @@ class FigureCanvasGTK (gtk.DrawingArea, FigureCanvasBase):
 
         # set the default quality, if we are writing a JPEG.
         # http://www.pygtk.org/docs/pygtk/class-gdkpixbuf.html#method-gdkpixbuf--save
-        options = {k: kwargs[k] for k in ['quality'] if k in kwargs}
-        if format in ['jpg', 'jpeg']:
-            options.setdefault('quality', rcParams['savefig.jpeg_quality'])
+        options = cbook.restrict_dict(kwargs, ['quality'])
+        if format in ['jpg','jpeg']:
+            if 'quality' not in options:
+                options['quality'] = rcParams['savefig.jpeg_quality']
+
             options['quality'] = str(options['quality'])
 
         if isinstance(filename, six.string_types):
@@ -480,7 +513,13 @@ class FigureCanvasGTK (gtk.DrawingArea, FigureCanvasBase):
         gtk.gdk.flush()
         gtk.gdk.threads_leave()
 
+    def start_event_loop(self,timeout):
+        FigureCanvasBase.start_event_loop_default(self,timeout)
+    start_event_loop.__doc__=FigureCanvasBase.start_event_loop_default.__doc__
 
+    def stop_event_loop(self):
+        FigureCanvasBase.stop_event_loop_default(self)
+    stop_event_loop.__doc__=FigureCanvasBase.stop_event_loop_default.__doc__
 
 class FigureManagerGTK(FigureManagerBase):
     """
@@ -617,7 +656,6 @@ class NavigationToolbar2GTK(NavigationToolbar2, gtk.Toolbar):
 
     def set_cursor(self, cursor):
         self.canvas.window.set_cursor(cursord[cursor])
-        gtk.main_iteration()
 
     def release(self, event):
         try: del self._pixmapBack
@@ -700,7 +738,7 @@ class NavigationToolbar2GTK(NavigationToolbar2, gtk.Toolbar):
         fc = FileChooserDialog(
             title='Save the figure',
             parent=self.win,
-            path=os.path.expanduser(rcParams['savefig.directory']),
+            path=os.path.expanduser(rcParams.get('savefig.directory', '')),
             filetypes=self.canvas.get_supported_filetypes(),
             default_filetype=self.canvas.get_default_filetype())
         fc.set_current_name(self.canvas.get_default_filename())
@@ -711,13 +749,15 @@ class NavigationToolbar2GTK(NavigationToolbar2, gtk.Toolbar):
         fname, format = chooser.get_filename_from_user()
         chooser.destroy()
         if fname:
-            startpath = os.path.expanduser(rcParams['savefig.directory'])
-            # Save dir for next time, unless empty str (i.e., use cwd).
-            if startpath != "":
-                rcParams['savefig.directory'] = (
-                    os.path.dirname(six.text_type(fname)))
+            startpath = os.path.expanduser(rcParams.get('savefig.directory', ''))
+            if startpath == '':
+                # explicitly missing key or empty str signals to use cwd
+                rcParams['savefig.directory'] = startpath
+            else:
+                # save dir for next time
+                rcParams['savefig.directory'] = os.path.dirname(six.text_type(fname))
             try:
-                self.canvas.figure.savefig(fname, format=format)
+                self.canvas.print_figure(fname, format=format)
             except Exception as e:
                 error_msg_gtk(str(e), parent=self)
 
@@ -825,7 +865,6 @@ class FileChooserDialog(gtk.FileChooserDialog):
             break
 
         return filename, self.ext
-
 
 class DialogLineprops(object):
     """
@@ -1017,16 +1056,5 @@ def error_msg_gtk(msg, parent=None):
     dialog.destroy()
 
 
-@_Backend.export
-class _BackendGTK(_Backend):
-    FigureCanvas = FigureCanvasGTK
-    FigureManager = FigureManagerGTK
-
-    @staticmethod
-    def trigger_manager_draw(manager):
-        manager.canvas.draw_idle()
-
-    @staticmethod
-    def mainloop():
-        if gtk.main_level() == 0:
-            gtk.main()
+FigureCanvas = FigureCanvasGTK
+FigureManager = FigureManagerGTK

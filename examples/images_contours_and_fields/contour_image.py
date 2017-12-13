@@ -103,5 +103,4 @@ plt.setp(plt.gca(), ylim=ylim[::-1])
 plt.title("Origin from rc, reversed y-axis")
 plt.colorbar(im)
 
-plt.tight_layout()
 plt.show()

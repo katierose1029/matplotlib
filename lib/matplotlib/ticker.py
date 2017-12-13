@@ -163,7 +163,7 @@ following methods::
   ax.yaxis.set_major_formatter( ymajorFormatter )
   ax.yaxis.set_minor_formatter( yminorFormatter )
 
-See :ref:`sphx_glr_gallery_ticks_and_spines_major_minor_demo.py` for an
+See :ref:`sphx_glr_gallery_pylab_examples_major_minor_demo.py` for an
 example of setting major and minor ticks. See the :mod:`matplotlib.dates`
 module for more information and examples of using date locators and formatters.
 """
@@ -173,6 +173,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import six
 
+import decimal
 import itertools
 import locale
 import math
@@ -983,6 +984,7 @@ class LogFormatter(Formatter):
         if x == 0.0:  # Symlog
             return '0'
 
+        sign = np.sign(x)
         x = abs(x)
         b = self._base
         # only label the decades
@@ -1182,8 +1184,15 @@ class EngFormatter(Formatter):
     """
     Formats axis values using engineering prefixes to represent powers
     of 1000, plus a specified unit, e.g., 10 MHz instead of 1e7.
-    """
 
+    `unit` is a string containing the abbreviated name of the unit,
+    suitable for use with single-letter representations of powers of
+    1000. For example, 'Hz' or 'm'.
+
+    `places` is the precision with which to display the number,
+    specified in digits after the decimal point (there will be between
+    one and three digits before the decimal point).
+    """
     # The SI engineering prefixes
     ENG_PREFIXES = {
         -24: "y",
@@ -1205,42 +1214,12 @@ class EngFormatter(Formatter):
          24: "Y"
     }
 
-    def __init__(self, unit="", places=None, sep=" "):
-        """
-        Parameters
-        ----------
-        unit : str (default: "")
-            Unit symbol to use, suitable for use with single-letter
-            representations of powers of 1000. For example, 'Hz' or 'm'.
-
-        places : int (default: None)
-            Precision with which to display the number, specified in
-            digits after the decimal point (there will be between one
-            and three digits before the decimal point). If it is None,
-            the formatting falls back to the floating point format '%g',
-            which displays up to 6 *significant* digits, i.e. the equivalent
-            value for *places* varies between 0 and 5 (inclusive).
-
-        sep : str (default: " ")
-            Separator used between the value and the prefix/unit. For
-            example, one get '3.14 mV' if ``sep`` is " " (default) and
-            '3.14mV' if ``sep`` is "". Besides the default behavior, some
-            other useful options may be:
-
-            * ``sep=""`` to append directly the prefix/unit to the value;
-            * ``sep="\\N{THIN SPACE}"`` (``U+2009``);
-            * ``sep="\\N{NARROW NO-BREAK SPACE}"`` (``U+202F``);
-            * ``sep="\\N{NO-BREAK SPACE}"`` (``U+00A0``).
-        """
+    def __init__(self, unit="", places=None):
         self.unit = unit
         self.places = places
-        self.sep = sep
 
     def __call__(self, x, pos=None):
         s = "%s%s" % (self.format_eng(x), self.unit)
-        # Remove the trailing separator when there is neither prefix nor unit
-        if len(self.sep) > 0 and s.endswith(self.sep):
-            s = s[:-len(self.sep)]
         return self.fix_minus(s)
 
     def format_eng(self, num):
@@ -1259,47 +1238,40 @@ class EngFormatter(Formatter):
         u'-1.00 \N{GREEK SMALL LETTER MU}'
 
         `num` may be a numeric value or a string that can be converted
-        to a numeric value with ``float(num)``.
+        to a numeric value with the `decimal.Decimal` constructor.
         """
-        if isinstance(num, six.string_types):
-            warnings.warn(
-                "Passing a string as *num* argument is deprecated since"
-                "Matplotlib 2.1, and is expected to be removed in 2.3.",
-                mplDeprecation)
+        dnum = decimal.Decimal(str(num))
 
-        dnum = float(num)
         sign = 1
-        fmt = "g" if self.places is None else ".{:d}f".format(self.places)
 
         if dnum < 0:
             sign = -1
             dnum = -dnum
 
         if dnum != 0:
-            pow10 = int(math.floor(math.log10(dnum) / 3) * 3)
+            pow10 = decimal.Decimal(int(math.floor(dnum.log10() / 3) * 3))
         else:
-            pow10 = 0
-            # Force dnum to zero, to avoid inconsistencies like
-            # format_eng(-0) = "0" and format_eng(0.0) = "0"
-            # but format_eng(-0.0) = "-0.0"
-            dnum = 0.0
+            pow10 = decimal.Decimal(0)
 
-        pow10 = np.clip(pow10, min(self.ENG_PREFIXES), max(self.ENG_PREFIXES))
-
-        mant = sign * dnum / (10.0 ** pow10)
-        # Taking care of the cases like 999.9..., which
-        # may be rounded to 1000 instead of 1 k.  Beware
-        # of the corner case of values that are beyond
-        # the range of SI prefixes (i.e. > 'Y').
-        _fmant = float("{mant:{fmt}}".format(mant=mant, fmt=fmt))
-        if _fmant >= 1000 and pow10 != max(self.ENG_PREFIXES):
-            mant /= 1000
-            pow10 += 3
+        pow10 = pow10.min(max(self.ENG_PREFIXES))
+        pow10 = pow10.max(min(self.ENG_PREFIXES))
 
         prefix = self.ENG_PREFIXES[int(pow10)]
 
-        formatted = "{mant:{fmt}}{sep}{prefix}".format(
-            mant=mant, sep=self.sep, prefix=prefix, fmt=fmt)
+        mant = sign * dnum / (10 ** pow10)
+
+        if self.places is None:
+            format_str = "%g %s"
+        elif self.places == 0:
+            format_str = "%i %s"
+        elif self.places > 0:
+            format_str = ("%%.%if %%s" % self.places)
+
+        formatted = format_str % (mant, prefix)
+
+        formatted = formatted.strip()
+        if (self.unit != "") and (prefix == self.ENG_PREFIXES[0]):
+            formatted = formatted + " "
 
         return formatted
 
@@ -1409,7 +1381,7 @@ class PercentFormatter(Formatter):
         return symbol
 
     @symbol.setter
-    def symbol(self, symbol):
+    def symbol(self):
         self._symbol = symbol
 
 
@@ -2524,14 +2496,18 @@ class AutoMinorLocator(Locator):
             # TODO: Figure out a way to still be able to display minor
             # ticks without two major ticks visible. For now, just display
             # no ticks at all.
-            return []
+            majorstep = 0
 
         if self.ndivs is None:
-            x = int(np.round(10 ** (np.log10(majorstep) % 1)))
-            if x in [1, 5, 10]:
-                ndivs = 5
+            if majorstep == 0:
+                # TODO: Need a better way to figure out ndivs
+                ndivs = 1
             else:
-                ndivs = 4
+                x = int(np.round(10 ** (np.log10(majorstep) % 1)))
+                if x in [1, 5, 10]:
+                    ndivs = 5
+                else:
+                    ndivs = 4
         else:
             ndivs = self.ndivs
 
@@ -2541,12 +2517,15 @@ class AutoMinorLocator(Locator):
         if vmin > vmax:
             vmin, vmax = vmax, vmin
 
-        t0 = majorlocs[0]
-        tmin = ((vmin - t0) // minorstep + 1) * minorstep
-        tmax = ((vmax - t0) // minorstep + 1) * minorstep
-        locs = np.arange(tmin, tmax, minorstep) + t0
-        cond = np.abs((locs - t0) % majorstep) > minorstep / 10.0
-        locs = locs.compress(cond)
+        if len(majorlocs) > 0:
+            t0 = majorlocs[0]
+            tmin = ((vmin - t0) // minorstep + 1) * minorstep
+            tmax = ((vmax - t0) // minorstep + 1) * minorstep
+            locs = np.arange(tmin, tmax, minorstep) + t0
+            cond = np.abs((locs - t0) % majorstep) > minorstep / 10.0
+            locs = locs.compress(cond)
+        else:
+            locs = []
 
         return self.raise_if_exceeds(np.array(locs))
 

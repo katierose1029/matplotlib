@@ -8,8 +8,6 @@
    :backlinks: entry
 
 .. automodule:: matplotlib.axis
-   :no-members:
-   :no-undoc-members:
 
 Inheritance
 ===========
@@ -22,17 +20,9 @@ Inheritance
 ================
 
 .. autoclass:: Axis
-   :no-members:
-   :no-undoc-members:
 .. autoclass:: XAxis
-   :no-members:
-   :no-undoc-members:
 .. autoclass:: YAxis
-   :no-members:
-   :no-undoc-members:
 .. autoclass:: Ticker
-   :no-members:
-   :no-undoc-members:
 
 
 .. autosummary::
@@ -109,8 +99,8 @@ Ticks, tick labels and Offset text
    Axis.axis_date
 
 
-Data and view intervals
------------------------
+Data and view internvals
+------------------------
 
 .. autosummary::
    :toctree: _as_gen
@@ -245,14 +235,8 @@ not used together may de-couple your tick labels from your data.
 ================
 
 .. autoclass:: Tick
-   :no-members:
-   :no-undoc-members:
 .. autoclass:: XTick
-   :no-members:
-   :no-undoc-members:
 .. autoclass:: YTick
-   :no-members:
-   :no-undoc-members:
 
 
 .. autosummary::
@@ -481,6 +465,7 @@ Ticks
    Tick.get_agg_filter
    Tick.get_alpha
    Tick.get_animated
+   Tick.get_axes
    Tick.get_children
    Tick.get_clip_box
    Tick.get_clip_on
@@ -516,6 +501,7 @@ Ticks
    Tick.set_agg_filter
    Tick.set_alpha
    Tick.set_animated
+   Tick.set_axes
    Tick.set_clip_box
    Tick.set_clip_on
    Tick.set_clip_path
@@ -549,6 +535,7 @@ Ticks
    XTick.get_agg_filter
    XTick.get_alpha
    XTick.get_animated
+   XTick.get_axes
    XTick.get_children
    XTick.get_clip_box
    XTick.get_clip_on
@@ -584,6 +571,7 @@ Ticks
    XTick.set_agg_filter
    XTick.set_alpha
    XTick.set_animated
+   XTick.set_axes
    XTick.set_clip_box
    XTick.set_clip_on
    XTick.set_clip_path
@@ -617,6 +605,7 @@ Ticks
    YTick.get_agg_filter
    YTick.get_alpha
    YTick.get_animated
+   YTick.get_axes
    YTick.get_children
    YTick.get_clip_box
    YTick.get_clip_on
@@ -652,6 +641,7 @@ Ticks
    YTick.set_agg_filter
    YTick.set_alpha
    YTick.set_animated
+   YTick.set_axes
    YTick.set_clip_box
    YTick.set_clip_on
    YTick.set_clip_path
@@ -695,6 +685,7 @@ Axis
    Axis.get_agg_filter
    Axis.get_alpha
    Axis.get_animated
+   Axis.get_axes
    Axis.get_children
    Axis.get_clip_box
    Axis.get_clip_on
@@ -730,6 +721,7 @@ Axis
    Axis.set_agg_filter
    Axis.set_alpha
    Axis.set_animated
+   Axis.set_axes
    Axis.set_clip_box
    Axis.set_clip_on
    Axis.set_clip_path
@@ -763,6 +755,7 @@ Axis
    XAxis.get_agg_filter
    XAxis.get_alpha
    XAxis.get_animated
+   XAxis.get_axes
    XAxis.get_children
    XAxis.get_clip_box
    XAxis.get_clip_on
@@ -798,6 +791,7 @@ Axis
    XAxis.set_agg_filter
    XAxis.set_alpha
    XAxis.set_animated
+   XAxis.set_axes
    XAxis.set_clip_box
    XAxis.set_clip_on
    XAxis.set_clip_path
@@ -831,6 +825,7 @@ Axis
    YAxis.get_agg_filter
    YAxis.get_alpha
    YAxis.get_animated
+   YAxis.get_axes
    YAxis.get_children
    YAxis.get_clip_box
    YAxis.get_clip_on
@@ -866,6 +861,7 @@ Axis
    YAxis.set_agg_filter
    YAxis.set_alpha
    YAxis.set_animated
+   YAxis.set_axes
    YAxis.set_clip_box
    YAxis.set_clip_on
    YAxis.set_clip_path

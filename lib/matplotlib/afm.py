@@ -189,9 +189,7 @@ def _parse_char_metrics(fh):
     ascii_d = {}
     name_d = {}
     for line in fh:
-        # We are defensively letting values be utf8. The spec requires
-        # ascii, but there are non-compliant fonts in circulation
-        line = _to_str(line.rstrip())  # Convert from byte-literal
+        line = line.rstrip().decode('ascii')  # Convert from byte-literal
         if line.startswith('EndCharMetrics'):
             return ascii_d, name_d
         # Split the metric line into a dictionary, keyed by metric identifiers
@@ -394,7 +392,7 @@ class AFM(object):
         maxy = 0
         left = 0
         if not isinstance(s, six.text_type):
-            s = _to_str(s)
+            s = s.decode('ascii')
         for c in s:
             if c == '\n':
                 continue

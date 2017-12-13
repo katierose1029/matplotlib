@@ -8,25 +8,68 @@ import re
 import signal
 import sys
 
+import matplotlib
+
+from matplotlib.backend_bases import FigureManagerBase
+from matplotlib.backend_bases import FigureCanvasBase
+from matplotlib.backend_bases import NavigationToolbar2
+
+from matplotlib.backend_bases import cursors
+from matplotlib.backend_bases import TimerBase
+from matplotlib.backend_bases import ShowBase
+
 from matplotlib._pylab_helpers import Gcf
-from matplotlib.backend_bases import (
-    FigureCanvasBase, FigureManagerBase, NavigationToolbar2, TimerBase,
-    cursors)
 from matplotlib.figure import Figure
+
 from matplotlib.widgets import SubplotTool
 
 from .qt_compat import QtCore, QtWidgets, _getSaveFileName, __version__
 
 from .backend_qt5 import (
     backend_version, SPECIAL_KEYS, SUPER, ALT, CTRL, SHIFT, MODIFIER_KEYS,
-    cursord, _create_qApp, _BackendQT5, TimerQT, MainWindow, FigureManagerQT,
-    NavigationToolbar2QT, SubplotToolQt, error_msg_qt, exception_handler)
+    cursord, draw_if_interactive, _create_qApp, show, TimerQT, MainWindow,
+    FigureManagerQT, NavigationToolbar2QT, SubplotToolQt, error_msg_qt,
+    exception_handler)
 from .backend_qt5 import FigureCanvasQT as FigureCanvasQT5
 
 DEBUG = False
 
 
+def new_figure_manager(num, *args, **kwargs):
+    """
+    Create a new figure manager instance
+    """
+    thisFig = Figure(*args, **kwargs)
+    return new_figure_manager_given_figure(num, thisFig)
+
+
+def new_figure_manager_given_figure(num, figure):
+    """
+    Create a new figure manager instance for the given figure.
+    """
+    canvas = FigureCanvasQT(figure)
+    manager = FigureManagerQT(canvas, num)
+    return manager
+
+
 class FigureCanvasQT(FigureCanvasQT5):
+
+    def __init__(self, figure):
+        if DEBUG:
+            print('FigureCanvasQt qt4: ', figure)
+        _create_qApp()
+
+        # Note different super-calling style to backend_qt5
+        QtWidgets.QWidget.__init__(self)
+        FigureCanvasBase.__init__(self, figure)
+        self.figure = figure
+        self.setMouseTracking(True)
+        self._idle = True
+        w, h = self.get_width_height()
+        self.resize(w, h)
+
+        # Key auto-repeat enabled by default
+        self._keyautorepeat = True
 
     def wheelEvent(self, event):
         x = event.x()
@@ -41,6 +84,5 @@ class FigureCanvasQT(FigureCanvasQT5):
                       'steps = %i ' % (event.delta(), steps))
 
 
-@_BackendQT5.export
-class _BackendQT4(_BackendQT5):
-    FigureCanvas = FigureCanvasQT
+FigureCanvas = FigureCanvasQT
+FigureManager = FigureManagerQT

@@ -33,7 +33,6 @@ import matplotlib.text as mtext
 import matplotlib.image as mimage
 from matplotlib.offsetbox import OffsetBox
 from matplotlib.artist import allow_rasterization
-from matplotlib.legend import Legend
 
 from matplotlib.rcsetup import cycler
 from matplotlib.rcsetup import validate_axisbelow
@@ -415,8 +414,7 @@ class _AxesBase(martist.Artist):
     _shared_y_axes = cbook.Grouper()
 
     def __str__(self):
-        return "{0}({1[0]:g},{1[1]:g};{1[2]:g}x{1[3]:g})".format(
-            type(self).__name__, self._position.bounds)
+        return "Axes(%g,%g;%gx%g)" % tuple(self._position.bounds)
 
     def __init__(self, fig, rect,
                  facecolor=None,  # defaults to rc axes.facecolor
@@ -557,12 +555,12 @@ class _AxesBase(martist.Artist):
             self.update(kwargs)
 
         if self.xaxis is not None:
-            self._xcid = self.xaxis.callbacks.connect(
-                'units finalize', lambda: self._on_units_changed(scalex=True))
+            self._xcid = self.xaxis.callbacks.connect('units finalize',
+                                                      self.relim)
 
         if self.yaxis is not None:
-            self._ycid = self.yaxis.callbacks.connect(
-                'units finalize', lambda: self._on_units_changed(scaley=True))
+            self._ycid = self.yaxis.callbacks.connect('units finalize',
+                                                      self.relim)
 
         self.tick_params(
             top=rcParams['xtick.top'] and rcParams['xtick.minor.top'],
@@ -1097,7 +1095,6 @@ class _AxesBase(martist.Artist):
 
         self.stale = True
 
-    @property
     @cbook.deprecated("2.1", alternative="Axes.patch")
     def axesPatch(self):
         return self.patch
@@ -1833,6 +1830,9 @@ class _AxesBase(martist.Artist):
         if p.get_clip_path() is None:
             p.set_clip_path(self.patch)
         self._update_patch_limits(p)
+        if self.name != 'rectilinear':
+            path = p.get_path()
+            path._interpolation_steps = max(path._interpolation_steps, 100)
         self.patches.append(p)
         p._remove_method = lambda h: self.patches.remove(h)
         return p
@@ -1889,15 +1889,6 @@ class _AxesBase(martist.Artist):
         self.containers.append(container)
         container.set_remove_method(lambda h: self.containers.remove(h))
         return container
-
-    def _on_units_changed(self, scalex=False, scaley=False):
-        """
-        Callback for processing changes to axis units.
-
-        Currently forces updates of data limits and view limits.
-        """
-        self.relim()
-        self.autoscale_view(scalex=scalex, scaley=scaley)
 
     def relim(self, visible_only=False):
         """
@@ -1995,7 +1986,6 @@ class _AxesBase(martist.Artist):
                 # we need to update.
                 if ydata is not None:
                     self.yaxis.update_units(ydata)
-        return kwargs
 
     def in_axes(self, mouseevent):
         """
@@ -2076,10 +2066,10 @@ class _AxesBase(martist.Artist):
         *m* times the data interval will be added to each
         end of that interval before it is used in autoscaling.
 
-        accepts: float greater than -0.5
+        accepts: float in range 0 to 1
         """
-        if m <= -0.5:
-            raise ValueError("margin must be greater than -0.5")
+        if m < 0 or m > 1:
+            raise ValueError("margin must be in range 0 to 1")
         self._xmargin = m
         self.stale = True
 
@@ -2090,10 +2080,10 @@ class _AxesBase(martist.Artist):
         *m* times the data interval will be added to each
         end of that interval before it is used in autoscaling.
 
-        accepts: float greater than -0.5
+        accepts: float in range 0 to 1
         """
-        if m <= -0.5:
-            raise ValueError("margin must be greater than -0.5")
+        if m < 0 or m > 1:
+            raise ValueError("margin must be in range 0 to 1")
         self._ymargin = m
         self.stale = True
 
@@ -2992,14 +2982,7 @@ class _AxesBase(martist.Artist):
         """
         Set the x ticks with list of *ticks*
 
-        Parameters
-        ----------
-        ticks : list
-            List of x-axis tick locations
-
-        minor : bool, optional
-            If ``False`` sets major ticks, if ``True`` sets minor ticks.
-            Default is ``False``.
+        ACCEPTS: sequence of floats
         """
         ret = self.xaxis.set_ticks(ticks, minor=minor)
         self.stale = True
@@ -3007,24 +2990,16 @@ class _AxesBase(martist.Artist):
 
     def get_xmajorticklabels(self):
         """
-        Get the xtick major labels
-
-        Returns
-        -------
-        labels : list
-            List of :class:`~matplotlib.text.Text` instances
+        Get the xtick labels as a list of :class:`~matplotlib.text.Text`
+        instances.
         """
         return cbook.silent_list('Text xticklabel',
                                  self.xaxis.get_majorticklabels())
 
     def get_xminorticklabels(self):
         """
-        Get the x minor tick labels
-
-        Returns
-        -------
-        labels : list
-            List of :class:`~matplotlib.text.Text` instances
+        Get the x minor tick labels as a list of
+        :class:`matplotlib.text.Text` instances.
         """
         return cbook.silent_list('Text xticklabel',
                                  self.xaxis.get_minorticklabels())
@@ -3074,7 +3049,7 @@ class _AxesBase(martist.Artist):
 
         minor : bool, optional
             If True select the minor ticklabels,
-            else select the major ticklabels
+            else select the minor ticklabels
 
         Returns
         -------
@@ -3313,38 +3288,28 @@ class _AxesBase(martist.Artist):
         """
         Set the y ticks with list of *ticks*
 
-        Parameters
-        ----------
-        ticks : sequence
-            List of y-axis tick locations
+        ACCEPTS: sequence of floats
 
-        minor : bool, optional
-            If ``False`` sets major ticks, if ``True`` sets minor ticks.
-            Default is ``False``.
+        Keyword arguments:
+
+          *minor*: [ *False* | *True* ]
+            Sets the minor ticks if *True*
         """
         ret = self.yaxis.set_ticks(ticks, minor=minor)
         return ret
 
     def get_ymajorticklabels(self):
         """
-        Get the major y tick labels
-
-        Returns
-        -------
-        labels : list
-            List of :class:`~matplotlib.text.Text` instances
+        Get the major y tick labels as a list of
+        :class:`~matplotlib.text.Text` instances.
         """
         return cbook.silent_list('Text yticklabel',
                                  self.yaxis.get_majorticklabels())
 
     def get_yminorticklabels(self):
         """
-        Get the minor y tick labels
-
-        Returns
-        -------
-        labels : list
-            List of :class:`~matplotlib.text.Text` instances
+        Get the minor y tick labels as a list of
+        :class:`~matplotlib.text.Text` instances.
         """
         return cbook.silent_list('Text yticklabel',
                                  self.yaxis.get_minorticklabels())
@@ -3394,7 +3359,7 @@ class _AxesBase(martist.Artist):
 
         minor : bool, optional
             If True select the minor ticklabels,
-            else select the major ticklabels
+            else select the minor ticklabels
 
         Returns
         -------
@@ -3413,10 +3378,8 @@ class _AxesBase(martist.Artist):
         """
         Sets up x-axis ticks and labels that treat the x data as dates.
 
-        Parameters
-        ----------
-        tz : string or :class:`tzinfo` instance, optional
-            Timezone string or timezone. Defaults to rc value.
+        *tz* is a timezone string or :class:`tzinfo` instance.
+        Defaults to rc value.
         """
         # should be enough to inform the unit conversion interface
         # dates are coming in
@@ -3426,10 +3389,8 @@ class _AxesBase(martist.Artist):
         """
         Sets up y-axis ticks and labels that treat the y data as dates.
 
-        Parameters
-        ----------
-        tz : string or :class:`tzinfo` instance, optional
-            Timezone string or timezone. Defaults to rc value.
+        *tz* is a timezone string or :class:`tzinfo` instance.
+        Defaults to rc value.
         """
         self.yaxis.axis_date(tz)
 
@@ -3640,9 +3601,8 @@ class _AxesBase(martist.Artist):
                     xzc + xwidth/2./scl, yzc + ywidth/2./scl]
         elif len(bbox) != 4:
             # should be len 3 or 4 but nothing else
-            warnings.warn(
-                "Warning in _set_view_from_bbox: bounding box is not a tuple "
-                "of length 3 or 4. Ignoring the view change.")
+            warnings.warn('Warning in _set_view_from_bbox: bounding box is not a\
+                  tuple of length 3 or 4. Ignoring the view change...')
             return
 
         # Just grab bounding box
@@ -3805,7 +3765,7 @@ class _AxesBase(martist.Artist):
                     dy = dy / abs(dy) * abs(dx)
                 else:
                     dx = dx / abs(dx) * abs(dy)
-            return dx, dy
+            return (dx, dy)
 
         p = self._pan_start
         dx = x - p.x
@@ -3814,30 +3774,29 @@ class _AxesBase(martist.Artist):
             return
         if button == 1:
             dx, dy = format_deltas(key, dx, dy)
-            result = p.bbox.translated(-dx, -dy).transformed(p.trans_inverse)
+            result = p.bbox.translated(-dx, -dy) \
+                .transformed(p.trans_inverse)
         elif button == 3:
             try:
-                dx = -dx / self.bbox.width
-                dy = -dy / self.bbox.height
+                dx = -dx / float(self.bbox.width)
+                dy = -dy / float(self.bbox.height)
                 dx, dy = format_deltas(key, dx, dy)
                 if self.get_aspect() != 'auto':
-                    dx = dy = 0.5 * (dx + dy)
+                    dx = 0.5 * (dx + dy)
+                    dy = dx
+
                 alpha = np.power(10.0, (dx, dy))
                 start = np.array([p.x, p.y])
                 oldpoints = p.lim.transformed(p.trans)
                 newpoints = start + alpha * (oldpoints - start)
-                result = (mtransforms.Bbox(newpoints)
-                          .transformed(p.trans_inverse))
+                result = mtransforms.Bbox(newpoints) \
+                    .transformed(p.trans_inverse)
             except OverflowError:
                 warnings.warn('Overflow while panning')
                 return
 
-        valid = np.isfinite(result.transformed(p.trans))
-        points = result.get_points().astype(object)
-        # Just ignore invalid limits (typically, underflow in log-scale).
-        points[~valid] = None
-        self.set_xlim(points[:, 0])
-        self.set_ylim(points[:, 1])
+        self.set_xlim(*result.intervalx)
+        self.set_ylim(*result.intervaly)
 
     @cbook.deprecated("2.1")
     def get_cursor_props(self):
@@ -3971,8 +3930,6 @@ class _AxesBase(martist.Artist):
         for child in self.get_children():
             if isinstance(child, OffsetBox) and child.get_visible():
                 bb.append(child.get_window_extent(renderer))
-            elif isinstance(child, Legend) and child.get_visible():
-                bb.append(child._legend_box.get_window_extent(renderer))
 
         _bbox = mtransforms.Bbox.union(
             [b for b in bb if b.width != 0 or b.height != 0])

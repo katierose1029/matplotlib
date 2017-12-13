@@ -24,9 +24,8 @@ import matplotlib
 from matplotlib import rcParams
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.backend_bases import (
-    _Backend, FigureCanvasBase, FigureManagerBase, GraphicsContextBase,
-    RendererBase)
-from matplotlib.cbook import warn_deprecated
+    RendererBase, GraphicsContextBase, FigureManagerBase, FigureCanvasBase)
+from matplotlib.cbook import restrict_dict, warn_deprecated
 from matplotlib.figure import Figure
 from matplotlib.mathtext import MathTextParser
 from matplotlib.transforms import Affine2D
@@ -382,6 +381,24 @@ class GraphicsContextGDK(GraphicsContextBase):
             self.gdkGC.line_width = max(1, int(np.round(pixels)))
 
 
+def new_figure_manager(num, *args, **kwargs):
+    """
+    Create a new figure manager instance
+    """
+    FigureClass = kwargs.pop('FigureClass', Figure)
+    thisFig = FigureClass(*args, **kwargs)
+    return new_figure_manager_given_figure(num, thisFig)
+
+
+def new_figure_manager_given_figure(num, figure):
+    """
+    Create a new figure manager instance for the given figure.
+    """
+    canvas  = FigureCanvasGDK(figure)
+    manager = FigureManagerBase(canvas, num)
+    return manager
+
+
 class FigureCanvasGDK (FigureCanvasBase):
     def __init__(self, figure):
         FigureCanvasBase.__init__(self, figure)
@@ -428,15 +445,10 @@ class FigureCanvasGDK (FigureCanvasBase):
 
         # set the default quality, if we are writing a JPEG.
         # http://www.pygtk.org/docs/pygtk/class-gdkpixbuf.html#method-gdkpixbuf--save
-        options = {k: kwargs[k] for k in ['quality'] if k in kwargs}
-        if format in ['jpg', 'jpeg']:
-            options.setdefault('quality', rcParams['savefig.jpeg_quality'])
+        options = restrict_dict(kwargs, ['quality'])
+        if format in ['jpg','jpeg']:
+            if 'quality' not in options:
+                options['quality'] = rcParams['savefig.jpeg_quality']
             options['quality'] = str(options['quality'])
 
         pixbuf.save(filename, format, options=options)
-
-
-@_Backend.export
-class _BackendGDK(_Backend):
-    FigureCanvas = FigureCanvasGDK
-    FigureManager = FigureManagerBase

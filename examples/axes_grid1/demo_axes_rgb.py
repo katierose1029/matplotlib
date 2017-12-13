@@ -3,7 +3,6 @@
 Demo Axes RGB
 =============
 
-RGBAxes to show RGB composite images.
 """
 import numpy as np
 import matplotlib.pyplot as plt

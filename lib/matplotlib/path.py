@@ -23,8 +23,7 @@ from weakref import WeakValueDictionary
 import numpy as np
 
 from . import _path, rcParams
-from .cbook import (_to_unmasked_float_array, simple_linear_interpolation,
-                    maxdict)
+from .cbook import simple_linear_interpolation, maxdict
 
 
 class Path(object):
@@ -70,9 +69,6 @@ class Path(object):
     since many :class:`Path` objects, as an optimization, do not store a
     *codes* at all, but have a default one provided for them by
     :meth:`iter_segments`.
-
-    Some behavior of Path objects can be controlled by rcParams. See
-    the rcParams whose keys contain 'path.'.
 
     .. note::
 
@@ -133,7 +129,11 @@ class Path(object):
             Makes the path behave in an immutable way and sets the vertices
             and codes as read-only arrays.
         """
-        vertices = _to_unmasked_float_array(vertices)
+        if isinstance(vertices, np.ma.MaskedArray):
+            vertices = vertices.astype(float).filled(np.nan)
+        else:
+            vertices = np.asarray(vertices, float)
+
         if (vertices.ndim != 2) or (vertices.shape[1] != 2):
             msg = "'vertices' must be a 2D list or array with shape Nx2"
             raise ValueError(msg)
@@ -185,7 +185,11 @@ class Path(object):
         """
         internals = internals or {}
         pth = cls.__new__(cls)
-        pth._vertices = _to_unmasked_float_array(verts)
+        if isinstance(verts, np.ma.MaskedArray):
+            verts = verts.astype(float).filled(np.nan)
+        else:
+            verts = np.asarray(verts, float)
+        pth._vertices = verts
         pth._codes = codes
         pth._readonly = internals.pop('readonly', False)
         pth.should_simplify = internals.pop('should_simplify', True)
@@ -202,13 +206,12 @@ class Path(object):
         return pth
 
     def _update_values(self):
-        self._simplify_threshold = rcParams['path.simplify_threshold']
         self._should_simplify = (
-            self._simplify_threshold > 0 and
             rcParams['path.simplify'] and
-            len(self._vertices) >= 128 and
-            (self._codes is None or np.all(self._codes <= Path.LINETO))
+            (len(self._vertices) >= 128 and
+             (self._codes is None or np.all(self._codes <= Path.LINETO)))
         )
+        self._simplify_threshold = rcParams['path.simplify_threshold']
         self._has_nonfinite = not np.isfinite(self._vertices).all()
 
     @property
@@ -400,8 +403,7 @@ class Path(object):
             If True, perform simplification, to remove
              vertices that do not affect the appearance of the path.  If
              False, perform no simplification.  If None, use the
-             should_simplify member variable.  See also the rcParams
-             path.simplify and path.simplify_threshold.
+             should_simplify member variable.
         curves : {True, False}, optional
             If True, curve segments will be returned as curve
             segments.  If False, all curves will be converted to line
@@ -755,7 +757,7 @@ class Path(object):
         """
         MAGIC = 0.2652031
         SQRTHALF = np.sqrt(0.5)
-        MAGIC45 = SQRTHALF * MAGIC
+        MAGIC45 = np.sqrt((MAGIC*MAGIC) / 2.0)
 
         vertices = np.array([[0.0, -1.0],
 
@@ -815,7 +817,7 @@ class Path(object):
         if cls._unit_circle_righthalf is None:
             MAGIC = 0.2652031
             SQRTHALF = np.sqrt(0.5)
-            MAGIC45 = SQRTHALF * MAGIC
+            MAGIC45 = np.sqrt((MAGIC*MAGIC) / 2.0)
 
             vertices = np.array(
                 [[0.0, -1.0],
@@ -853,10 +855,6 @@ class Path(object):
         Return an arc on the unit circle from angle
         *theta1* to angle *theta2* (in degrees).
 
-        *theta2* is unwrapped to produce the shortest arc within 360 degrees.
-        That is, if *theta2* > *theta1* + 360, the arc will be from *theta1* to
-        *theta2* - 360 and not a full circle plus some extra overlap.
-
         If *n* is provided, it is the number of spline segments to make.
         If *n* is not provided, the number of spline segments is
         determined based on the delta between *theta1* and *theta2*.
@@ -865,15 +863,14 @@ class Path(object):
            polylines, quadratic or cubic Bezier curves
            <http://www.spaceroots.org/documents/ellipse/index.html>`_.
         """
+        theta1, theta2 = np.deg2rad([theta1, theta2])
+
+        twopi = np.pi * 2.0
         halfpi = np.pi * 0.5
 
-        eta1 = theta1
-        eta2 = theta2 - 360 * np.floor((theta2 - theta1) / 360)
-        # Ensure 2pi range is not flattened to 0 due to floating-point errors,
-        # but don't try to expand existing 0 range.
-        if theta2 != theta1 and eta2 <= eta1:
-            eta2 += 360
-        eta1, eta2 = np.deg2rad([eta1, eta2])
+        eta1 = np.arctan2(np.sin(theta1), np.cos(theta1))
+        eta2 = np.arctan2(np.sin(theta2), np.cos(theta2))
+        eta2 -= twopi * np.floor((eta2 - eta1) / twopi)
 
         # number of curve segments to make
         if n is None:
@@ -931,10 +928,6 @@ class Path(object):
         """
         Return a wedge of the unit circle from angle
         *theta1* to angle *theta2* (in degrees).
-
-        *theta2* is unwrapped to produce the shortest wedge within 360 degrees.
-        That is, if *theta2* > *theta1* + 360, the wedge will be from *theta1*
-        to *theta2* - 360 and not a full circle plus some extra overlap.
 
         If *n* is provided, it is the number of spline segments to make.
         If *n* is not provided, the number of spline segments is

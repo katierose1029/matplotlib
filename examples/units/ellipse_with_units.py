@@ -34,8 +34,6 @@ x, y = np.dot(R, np.array([x, y]))
 x += xcenter
 y += ycenter
 
-###############################################################################
-
 fig = plt.figure()
 ax = fig.add_subplot(211, aspect='auto')
 ax.fill(x, y, alpha=0.2, facecolor='yellow',
@@ -54,8 +52,6 @@ e2 = patches.Ellipse((xcenter, ycenter), width, height,
 
 ax.add_patch(e2)
 fig.savefig('ellipse_compare')
-
-###############################################################################
 
 fig = plt.figure()
 ax = fig.add_subplot(211, aspect='auto')

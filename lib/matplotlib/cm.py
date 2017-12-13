@@ -375,4 +375,3 @@ class ScalarMappable(object):
 
         for key in self.update_dict:
             self.update_dict[key] = True
-        self.stale = True

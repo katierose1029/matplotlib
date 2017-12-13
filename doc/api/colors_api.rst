@@ -2,12 +2,9 @@
 colors
 ******
 
-For a visual representation of the Matplotlib colormaps, see:
+For a visual representation of the matplotlib colormaps, see the
+"Color" section in the gallery.
 
-* The :ref:`color_examples` examples for examples of controlling color with
-  Matplotlib.
-* The :ref:`tutorials-colors` tutorial for an in-depth guide on controlling
-  color.
 
 :mod:`matplotlib.colors`
 ========================
@@ -53,3 +50,4 @@ Functions
    is_color_like
    makeMappingArray
    get_named_colors_mapping
+

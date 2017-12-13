@@ -145,7 +145,7 @@ class Tick(artist.Artist):
             labelsize = rcParams['%s.labelsize' % name]
         self._labelsize = labelsize
 
-        self._set_labelrotation(labelrotation)
+        self._labelrotation = labelrotation
 
         if zorder is None:
             if major:
@@ -171,20 +171,6 @@ class Tick(artist.Artist):
         self.label2On = label2On
 
         self.update_position(loc)
-
-    def _set_labelrotation(self, labelrotation):
-        if isinstance(labelrotation, six.string_types):
-            mode = labelrotation
-            angle = 0
-        elif isinstance(labelrotation, (tuple, list)):
-            mode, angle = labelrotation
-        else:
-            mode = 'default'
-            angle = labelrotation
-        if mode not in ('auto', 'default'):
-            raise ValueError("Label rotation mode must be 'default' or "
-                             "'auto', not '{}'.".format(mode))
-        self._labelrotation = (mode, angle)
 
     def apply_tickdir(self, tickdir):
         """
@@ -350,14 +336,8 @@ class Tick(artist.Artist):
             self.tick2line.set(**tick_kw)
             for k, v in six.iteritems(tick_kw):
                 setattr(self, '_' + k, v)
-
-        if 'labelrotation' in kw:
-            self._set_labelrotation(kw.pop('labelrotation'))
-            self.label1.set(rotation=self._labelrotation[1])
-            self.label2.set(rotation=self._labelrotation[1])
-
         label_list = [k for k in six.iteritems(kw)
-                      if k[0] in ['labelsize', 'labelcolor']]
+                      if k[0] in ['labelsize', 'labelcolor', 'labelrotation']]
         if label_list:
             label_kw = {k[5:]: v for k, v in label_list}
             self.label1.set(**label_kw)
@@ -1061,12 +1041,11 @@ class Axis(artist.Artist):
         for tick, loc, label in tick_tups:
             if tick is None:
                 continue
-            # NB: always update labels and position to avoid issues like #9397
+            if not mtransforms.interval_contains(interval_expanded, loc):
+                continue
             tick.update_position(loc)
             tick.set_label1(label)
             tick.set_label2(label)
-            if not mtransforms.interval_contains(interval_expanded, loc):
-                continue
             ticks_to_draw.append(tick)
 
         return ticks_to_draw
@@ -1671,7 +1650,7 @@ class Axis(artist.Artist):
         """
         raise NotImplementedError('Derived must override')
 
-    def _update_offset_text_position(self, bboxes, bboxes2):
+    def _update_offset_text_postion(self, bboxes, bboxes2):
         """
         Update the label position based on the sequence of bounding
         boxes of all the ticklabels

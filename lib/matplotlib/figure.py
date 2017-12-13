@@ -93,13 +93,6 @@ class AxesStack(Stack):
         item = dict(self._elements).get(key)
         if item is None:
             return None
-        cbook.warn_deprecated(
-            "2.1",
-            "Adding an axes using the same arguments as a previous axes "
-            "currently reuses the earlier instance.  In a future version, "
-            "a new instance will always be created and returned.  Meanwhile, "
-            "this warning can be suppressed, and the future behavior ensured, "
-            "by passing a unique label to each axes instance.")
         return item[1]
 
     def _entry_from_axes(self, e):
@@ -371,7 +364,6 @@ class Figure(Artist):
         self.clf()
         self._cachedRenderer = None
 
-    @property
     @cbook.deprecated("2.1", alternative="Figure.patch")
     def figurePatch(self):
         return self.patch
@@ -428,16 +420,11 @@ class Figure(Artist):
     def _get_dpi(self):
         return self._dpi
 
-    def _set_dpi(self, dpi, forward=True):
-        """
-        The forward kwarg is passed on to set_size_inches
-        """
+    def _set_dpi(self, dpi):
         self._dpi = dpi
         self.dpi_scale_trans.clear().scale(dpi, dpi)
-        w, h = self.get_size_inches()
-        self.set_size_inches(w, h, forward=forward)
+        self.set_size_inches(*self.get_size_inches())
         self.callbacks.process('dpi_changed', self)
-
     dpi = property(_get_dpi, _set_dpi)
 
     def get_tight_layout(self):
@@ -711,14 +698,14 @@ class Figure(Artist):
 
         Usage ::
 
-             fig.set_size_inches(w, h)  # OR
-             fig.set_size_inches((w, h))
+             fig.set_size_inches(w,h)  # OR
+             fig.set_size_inches((w,h))
 
         optional kwarg *forward=True* will cause the canvas size to be
         automatically updated; e.g., you can resize the figure window
         from the shell
 
-        ACCEPTS: a w, h tuple with w, h in inches
+        ACCEPTS: a w,h tuple with w,h in inches
 
         See Also
         --------
@@ -904,8 +891,6 @@ class Figure(Artist):
 
         Examples
         --------
-        A simple example::
-
             rect = l,b,w,h
             fig.add_axes(rect)
             fig.add_axes(rect, frameon=False, facecolor='g')
@@ -913,14 +898,14 @@ class Figure(Artist):
             fig.add_axes(rect, projection='polar')
             fig.add_axes(ax)
 
-        If the figure already has an axes with the same parameters, then it
-        will simply make that axes current and return it.  This behavior
-        has been deprecated as of Matplotlib 2.1.  Meanwhile, if you do
-        not want this behavior (i.e., you want to force the creation of a
-        new Axes), you must use a unique set of args and kwargs.  The axes
-        :attr:`~matplotlib.axes.Axes.label` attribute has been exposed for this
-        purpose: if you want two axes that are otherwise identical to be added
-        to the figure, make sure you give them unique labels::
+        If the figure already has an axes with the same parameters,
+        then it will simply make that axes current and return it.  If
+        you do not want this behavior, e.g., you want to force the
+        creation of a new Axes, you must use a unique set of args and
+        kwargs.  The axes :attr:`~matplotlib.axes.Axes.label`
+        attribute has been exposed for this purpose.  e.g., if you want
+        two axes that are otherwise identical to be added to the
+        figure, make sure you give them unique labels::
 
             fig.add_axes(rect, label='axes1')
             fig.add_axes(rect, label='axes2')
@@ -963,7 +948,7 @@ class Figure(Artist):
             # check that an axes of this type doesn't already exist, if it
             # does, set it as active and return it
             ax = self._axstack.get(key)
-            if isinstance(ax, projection_class):
+            if ax is not None and isinstance(ax, projection_class):
                 self.sca(ax)
                 return ax
 
@@ -1008,14 +993,14 @@ class Figure(Artist):
         -----
         If the figure already has a subplot with key (*args*,
         *kwargs*) then it will simply make that subplot current and
-        return it.  This behavior is deprecated.
+        return it.
 
         Examples
         --------
             fig.add_subplot(111)
 
             # equivalent but more general
-            fig.add_subplot(1, 1, 1)
+            fig.add_subplot(1,1,1)
 
             # add subplot with red background
             fig.add_subplot(212, facecolor='r')
@@ -1034,17 +1019,18 @@ class Figure(Artist):
             return
 
         if len(args) == 1 and isinstance(args[0], int):
-            if not 100 <= args[0] <= 999:
-                raise ValueError("Integer subplot specification must be a "
-                                 "three-digit number, not {}".format(args[0]))
-            args = tuple(map(int, str(args[0])))
+            args = tuple([int(c) for c in str(args[0])])
+            if len(args) != 3:
+                raise ValueError("Integer subplot specification must " +
+                                 "be a three digit number.  " +
+                                 "Not {n:d}".format(n=len(args)))
 
         if isinstance(args[0], SubplotBase):
 
             a = args[0]
             if a.get_figure() is not self:
-                msg = ("The Subplot must have been created in the present "
-                       "figure")
+                msg = ("The Subplot must have been created in the present"
+                       " figure")
                 raise ValueError(msg)
             # make a key for the subplot (which includes the axes object id
             # in the hash)
@@ -1184,14 +1170,14 @@ class Figure(Artist):
         if sharex in ["col", "all"]:
             # turn off all but the bottom row
             for ax in axarr[:-1, :].flat:
-                ax.xaxis.set_tick_params(which='both',
-                                         labelbottom=False, labeltop=False)
+                for label in ax.get_xticklabels():
+                    label.set_visible(False)
                 ax.xaxis.offsetText.set_visible(False)
         if sharey in ["row", "all"]:
             # turn off all but the first column
             for ax in axarr[:, 1:].flat:
-                ax.yaxis.set_tick_params(which='both',
-                                         labelleft=False, labelright=False)
+                for label in ax.get_yticklabels():
+                    label.set_visible(False)
                 ax.yaxis.offsetText.set_visible(False)
 
         if squeeze:
@@ -1461,7 +1447,7 @@ class Figure(Artist):
         Notes
         -----
         Not all kinds of artist are supported by the legend command. See
-        :ref:`sphx_glr_tutorials_intermediate_legend_guide.py` for details.
+        :ref:`sphx_glr_tutorials_02_intermediate_legend_guide.py` for details.
         """
 
         # If no arguments given, collect up all the artists on the figure
@@ -1712,7 +1698,7 @@ class Figure(Artist):
         'whenever the axes state change, ``func(self)`` will be called'
         self._axobservers.append(func)
 
-    def savefig(self, fname, **kwargs):
+    def savefig(self, *args, **kwargs):
         """
         Save the current figure.
 
@@ -1790,6 +1776,7 @@ class Figure(Artist):
             tight bbox is calculated.
 
         """
+
         kwargs.setdefault('dpi', rcParams['savefig.dpi'])
         frameon = kwargs.pop('frameon', rcParams['savefig.frameon'])
         transparent = kwargs.pop('transparent',
@@ -1813,7 +1800,7 @@ class Figure(Artist):
             original_frameon = self.get_frameon()
             self.set_frameon(frameon)
 
-        self.canvas.print_figure(fname, **kwargs)
+        self.canvas.print_figure(*args, **kwargs)
 
         if frameon:
             self.set_frameon(original_frameon)
@@ -1864,10 +1851,12 @@ class Figure(Artist):
         for ax in self.axes:
             if not isinstance(ax, SubplotBase):
                 # Check if sharing a subplots axis
-                if isinstance(ax._sharex, SubplotBase):
+                if (ax._sharex is not None and
+                    isinstance(ax._sharex, SubplotBase)):
                     ax._sharex.update_params()
                     ax.set_position(ax._sharex.figbox)
-                elif isinstance(ax._sharey, SubplotBase):
+                elif (ax._sharey is not None and
+                      isinstance(ax._sharey, SubplotBase)):
                     ax._sharey.update_params()
                     ax.set_position(ax._sharey.figbox)
             else:
@@ -1974,8 +1963,8 @@ class Figure(Artist):
 
         return bbox_inches
 
-    def tight_layout(self, renderer=None, pad=1.08, h_pad=None, w_pad=None,
-                     rect=None):
+    def tight_layout(self, renderer=None, pad=1.08, h_pad=None,
+                     w_pad=None, rect=None):
         """
         Adjust subplot parameters to give specified padding.
 
@@ -1993,20 +1982,23 @@ class Figure(Artist):
             labels) will fit into. Default is (0, 0, 1, 1).
         """
 
-        from .tight_layout import (
-            get_renderer, get_subplotspec_list, get_tight_layout_figure)
+        from .tight_layout import (get_renderer, get_tight_layout_figure,
+                                   get_subplotspec_list)
 
         subplotspec_list = get_subplotspec_list(self.axes)
         if None in subplotspec_list:
-            warnings.warn("This figure includes Axes that are not compatible "
-                          "with tight_layout, so results might be incorrect.")
+            warnings.warn("This figure includes Axes that are not "
+                          "compatible with tight_layout, so its "
+                          "results might be incorrect.")
 
         if renderer is None:
             renderer = get_renderer(self)
 
-        kwargs = get_tight_layout_figure(
-            self, self.axes, subplotspec_list, renderer,
-            pad=pad, h_pad=h_pad, w_pad=w_pad, rect=rect)
+        kwargs = get_tight_layout_figure(self, self.axes, subplotspec_list,
+                                         renderer,
+                                         pad=pad, h_pad=h_pad, w_pad=w_pad,
+                                         rect=rect)
+
         self.subplots_adjust(**kwargs)
 
 
@@ -2044,6 +2036,8 @@ def figaspect(arg):
     # could become rc parameters, for now they're hardwired.
     figsize_min = np.array((4.0, 2.0))  # min length for width/height
     figsize_max = np.array((16.0, 16.0))  # max length for width/height
+    #figsize_min = rcParams['figure.figsize_min']
+    #figsize_max = rcParams['figure.figsize_max']
 
     # Extract the aspect ratio of the array
     if isarray:

@@ -54,7 +54,6 @@ class TriContourSet(ContourSet):
             self._maxs = [tri.x.max(), tri.y.max()]
 
         self.cppContourGenerator = C
-        return kwargs
 
     def _get_allsegs_and_allkinds(self):
         """
@@ -132,8 +131,7 @@ class TriContourSet(ContourSet):
 
           tricontour(..., Z, N)
 
-        contour up to *N+1* automatically chosen contour levels
-        (*N* intervals).
+        contour *N* automatically-chosen levels.
 
         ::
 

@@ -11,16 +11,12 @@
 
 
 .. automodule:: matplotlib.artist
-   :no-members:
-   :no-undoc-members:
 
 
 ``Artist`` class
 ================
 
 .. autoclass:: Artist
-   :no-members:
-   :no-undoc-members:
 
 Interactive
 -----------
@@ -126,6 +122,8 @@ Figure and Axes
    Artist.remove
 
    Artist.axes
+   Artist.get_axes
+   Artist.set_axes
 
    Artist.set_figure
    Artist.get_figure

@@ -220,28 +220,26 @@ def win32InstalledFonts(directory=None, fontext='ttf'):
 
     fontext = get_fontext_synonyms(fontext)
 
-    key, items = None, set()
+    key, items = None, {}
     for fontdir in MSFontDirectories:
         try:
             local = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, fontdir)
         except OSError:
             continue
+
         if not local:
             return list_fonts(directory, fontext)
         try:
             for j in range(winreg.QueryInfoKey(local)[1]):
                 try:
-                    key, direc, tp = winreg.EnumValue(local, j)
+                    key, direc, any = winreg.EnumValue( local, j)
                     if not isinstance(direc, six.string_types):
                         continue
-                    # Work around for https://bugs.python.org/issue25778, which
-                    # is fixed in Py>=3.6.1.
-                    direc = direc.split("\0", 1)[0]
                     if not os.path.dirname(direc):
                         direc = os.path.join(directory, direc)
                     direc = os.path.abspath(direc).lower()
                     if os.path.splitext(direc)[1][1:] in fontext:
-                        items.add(direc)
+                        items[direc] = 1
                 except EnvironmentError:
                     continue
                 except WindowsError:
@@ -552,14 +550,14 @@ def createFontList(fontfiles, fontext='ttf'):
 
     fontlist = []
     #  Add fonts from list of known font files.
-    seen = set()
+    seen = {}
     for fpath in fontfiles:
-        verbose.report('createFontDict: %s' % fpath, 'debug')
+        verbose.report('createFontDict: %s' % (fpath), 'debug')
         fname = os.path.split(fpath)[1]
         if fname in seen:
             continue
         else:
-            seen.add(fname)
+            seen[fname] = 1
         if fontext == 'afm':
             try:
                 fh = open(fpath, 'rb')
@@ -585,6 +583,7 @@ def createFontList(fontfiles, fontext='ttf'):
                 continue
             except UnicodeError:
                 verbose.report("Cannot handle unicode filenames")
+                # print >> sys.stderr, 'Bad file is', fpath
                 continue
             except IOError:
                 verbose.report("IO error - cannot open font file %s" % fpath)

@@ -15,9 +15,8 @@ from hashlib import md5
 import uuid
 
 from matplotlib import verbose, __version__, rcParams
-from matplotlib.backend_bases import (
-     _Backend, FigureCanvasBase, FigureManagerBase, GraphicsContextBase,
-    RendererBase)
+from matplotlib.backend_bases import RendererBase, GraphicsContextBase,\
+     FigureManagerBase, FigureCanvasBase
 from matplotlib.backends.backend_mixed import MixedModeRenderer
 from matplotlib.cbook import is_writable_file_like, maxdict
 from matplotlib.colors import rgb2hex
@@ -1255,6 +1254,21 @@ class FigureManagerSVG(FigureManagerBase):
     pass
 
 
+def new_figure_manager(num, *args, **kwargs):
+    FigureClass = kwargs.pop('FigureClass', Figure)
+    thisFig = FigureClass(*args, **kwargs)
+    return new_figure_manager_given_figure(num, thisFig)
+
+
+def new_figure_manager_given_figure(num, figure):
+    """
+    Create a new figure manager instance for the given figure.
+    """
+    canvas  = FigureCanvasSVG(figure)
+    manager = FigureManagerSVG(canvas, num)
+    return manager
+
+
 svgProlog = """\
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
@@ -1263,7 +1277,5 @@ svgProlog = """\
 """
 
 
-@_Backend.export
-class _BackendSVG(_Backend):
-    FigureCanvas = FigureCanvasSVG
-    FigureManager = FigureManagerSVG
+FigureCanvas = FigureCanvasSVG
+FigureManager = FigureManagerSVG

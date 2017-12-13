@@ -11,8 +11,6 @@ line segemnts)
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import warnings
-
 import six
 from six.moves import zip
 try:
@@ -149,13 +147,10 @@ class Collection(artist.Artist, cm.ScalarMappable):
         self.set_offset_position(offset_position)
         self.set_zorder(zorder)
 
-        self._offsets = np.zeros((1, 2))
         self._uniform_offsets = None
+        self._offsets = np.array([[0, 0]], float)
         if offsets is not None:
             offsets = np.asanyarray(offsets, float)
-            # Broadcast (2,) -> (1, 2) but nothing else.
-            if offsets.shape == (2,):
-                offsets = offsets[None, :]
             if transOffset is not None:
                 self._offsets = offsets
                 self._transOffset = transOffset
@@ -409,7 +404,7 @@ class Collection(artist.Artist, cm.ScalarMappable):
         self.stale = True
 
     def get_hatch(self):
-        """Return the current hatching pattern."""
+        'Return the current hatching pattern'
         return self._hatch
 
     def set_offsets(self, offsets):
@@ -420,9 +415,7 @@ class Collection(artist.Artist, cm.ScalarMappable):
         ACCEPTS: float or sequence of floats
         """
         offsets = np.asanyarray(offsets, float)
-        if offsets.shape == (2,):  # Broadcast (2,) -> (1, 2) but nothing else.
-            offsets = offsets[None, :]
-        # This decision is based on how they are initialized above in __init__.
+        #This decision is based on how they are initialized above
         if self._uniform_offsets is None:
             self._offsets = offsets
         else:
@@ -430,8 +423,10 @@ class Collection(artist.Artist, cm.ScalarMappable):
         self.stale = True
 
     def get_offsets(self):
-        """Return the offsets for the collection."""
-        # This decision is based on how they are initialized above in __init__.
+        """
+        Return the offsets for the collection.
+        """
+        #This decision is based on how they are initialized above in __init__()
         if self._uniform_offsets is None:
             return self._offsets
         else:
@@ -720,7 +715,6 @@ class Collection(artist.Artist, cm.ScalarMappable):
                 float(alpha)
             except TypeError:
                 raise TypeError('alpha must be a float or None')
-        self.update_dict['array'] = True
         artist.Artist.set_alpha(self, alpha)
         self._set_facecolor(self._original_facecolor)
         self._set_edgecolor(self._original_edgecolor)
@@ -1313,7 +1307,7 @@ class EventCollection(LineCollection):
         Examples
         --------
 
-        .. plot:: mpl_examples/lines_bars_and_markers/eventcollection_demo.py
+        .. plot:: mpl_examples/pylab_examples/eventcollection_demo.py
         """
 
         segment = (lineoffset + linelength / 2.,

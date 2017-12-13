@@ -35,46 +35,6 @@ from matplotlib.cbook._backports import broadcast_to
 #       the tests with multiple threads.
 
 
-def test_get_labels():
-    fig, ax = plt.subplots()
-    ax.set_xlabel('x label')
-    ax.set_ylabel('y label')
-    assert ax.get_xlabel() == 'x label'
-    assert ax.get_ylabel() == 'y label'
-
-
-@image_comparison(baseline_images=['acorr'], extensions=['png'], style='mpl20')
-def test_acorr():
-    np.random.seed(19680801)
-    n = 512
-    x = np.random.normal(0, 1, n).cumsum()
-
-    fig, ax = plt.subplots()
-    ax.acorr(x, maxlags=n - 1)
-
-
-@image_comparison(baseline_images=['spy'], extensions=['png'], style='mpl20')
-def test_spy():
-    np.random.seed(19680801)
-    a = np.ones(32 * 32)
-    a[:16 * 32] = 0
-    np.random.shuffle(a)
-    a = np.reshape(a, (32, 32))
-
-    fig, ax = plt.subplots()
-    ax.spy(a)
-
-
-@image_comparison(baseline_images=['matshow'],
-                  extensions=['png'], style='mpl20')
-def test_matshow():
-    np.random.seed(19680801)
-    a = np.random.rand(32, 32)
-
-    fig, ax = plt.subplots()
-    ax.matshow(a)
-
-
 @image_comparison(baseline_images=['formatter_ticker_001',
                                    'formatter_ticker_002',
                                    'formatter_ticker_003',
@@ -389,7 +349,7 @@ def test_annotate_default_arrow():
     assert ann.arrow_patch is not None
 
 
-@image_comparison(baseline_images=['polar_axes'], style='default')
+@image_comparison(baseline_images=['polar_axes'])
 def test_polar_annotations():
     # you can specify the xypoint and the xytext in different
     # positions and coordinate systems, and optionally turn on a
@@ -422,10 +382,8 @@ def test_polar_annotations():
                 verticalalignment='baseline',
                 )
 
-    ax.tick_params(axis='x', tick1On=True, tick2On=True, direction='out')
 
-
-@image_comparison(baseline_images=['polar_coords'], style='default',
+@image_comparison(baseline_images=['polar_coords'],
                   remove_text=True)
 def test_polar_coord_annotations():
     # You can also use polar notation on a catesian axes.  Here the
@@ -600,8 +558,9 @@ def test_const_xy():
     plt.plot(np.ones((10,)), np.ones((10,)), 'o')
 
 
-@image_comparison(baseline_images=['polar_wrap_180', 'polar_wrap_360'],
-                  style='default')
+@image_comparison(baseline_images=['polar_wrap_180',
+                                   'polar_wrap_360',
+                                   ])
 def test_polar_wrap():
     D2R = np.pi / 180.0
 
@@ -622,8 +581,7 @@ def test_polar_wrap():
     plt.rgrids([0.05, 0.1, 0.15, 0.2, 0.25, 0.3])
 
 
-@image_comparison(baseline_images=['polar_units', 'polar_units_2'],
-                  style='default')
+@image_comparison(baseline_images=['polar_units', 'polar_units_2'])
 def test_polar_units():
     import matplotlib.testing.jpl_units as units
     units.register()
@@ -654,7 +612,7 @@ def test_polar_units():
                       units.UnitDblFormatter)
 
 
-@image_comparison(baseline_images=['polar_rmin'], style='default')
+@image_comparison(baseline_images=['polar_rmin'])
 def test_polar_rmin():
     r = np.arange(0, 3.0, 0.01)
     theta = 2*np.pi*r
@@ -666,32 +624,7 @@ def test_polar_rmin():
     ax.set_rmin(0.5)
 
 
-@image_comparison(baseline_images=['polar_negative_rmin'], style='default')
-def test_polar_negative_rmin():
-    r = np.arange(-3.0, 0.0, 0.01)
-    theta = 2*np.pi*r
-
-    fig = plt.figure()
-    ax = fig.add_axes([0.1, 0.1, 0.8, 0.8], polar=True)
-    ax.plot(theta, r)
-    ax.set_rmax(0.0)
-    ax.set_rmin(-3.0)
-
-
-@image_comparison(baseline_images=['polar_rorigin'], style='default')
-def test_polar_rorigin():
-    r = np.arange(0, 3.0, 0.01)
-    theta = 2*np.pi*r
-
-    fig = plt.figure()
-    ax = fig.add_axes([0.1, 0.1, 0.8, 0.8], polar=True)
-    ax.plot(theta, r)
-    ax.set_rmax(2.0)
-    ax.set_rmin(0.5)
-    ax.set_rorigin(0.0)
-
-
-@image_comparison(baseline_images=['polar_theta_position'], style='default')
+@image_comparison(baseline_images=['polar_theta_position'])
 def test_polar_theta_position():
     r = np.arange(0, 3.0, 0.01)
     theta = 2*np.pi*r
@@ -699,45 +632,15 @@ def test_polar_theta_position():
     fig = plt.figure()
     ax = fig.add_axes([0.1, 0.1, 0.8, 0.8], polar=True)
     ax.plot(theta, r)
-    ax.set_theta_zero_location("NW", 30)
+    ax.set_theta_zero_location("NW")
     ax.set_theta_direction('clockwise')
 
 
-@image_comparison(baseline_images=['polar_rlabel_position'], style='default')
+@image_comparison(baseline_images=['polar_rlabel_position'])
 def test_polar_rlabel_position():
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='polar')
     ax.set_rlabel_position(315)
-    ax.tick_params(rotation='auto')
-
-
-@image_comparison(baseline_images=['polar_theta_wedge'], style='default',
-                  tol=0.01 if six.PY2 else 0)
-def test_polar_theta_limits():
-    r = np.arange(0, 3.0, 0.01)
-    theta = 2*np.pi*r
-
-    theta_mins = np.arange(15.0, 361.0, 90.0)
-    theta_maxs = np.arange(50.0, 361.0, 90.0)
-    DIRECTIONS = ('out', 'in', 'inout')
-
-    fig, axes = plt.subplots(len(theta_mins), len(theta_maxs),
-                             subplot_kw={'polar': True},
-                             figsize=(8, 6))
-
-    for i, start in enumerate(theta_mins):
-        for j, end in enumerate(theta_maxs):
-            ax = axes[i, j]
-            if start < end:
-                ax.plot(theta, r)
-                ax.set_thetamin(start)
-                ax.set_thetamax(end)
-                ax.tick_params(tick1On=True, tick2On=True,
-                               direction=DIRECTIONS[i % len(DIRECTIONS)],
-                               rotation='auto')
-                ax.yaxis.set_tick_params(label2On=True, rotation='auto')
-            else:
-                ax.set_visible(False)
 
 
 @image_comparison(baseline_images=['axvspan_epoch'])
@@ -880,7 +783,7 @@ def test_nonfinite_limits():
 
 
 @image_comparison(baseline_images=['imshow', 'imshow'],
-                  remove_text=True, style='mpl20')
+                  remove_text=True)
 def test_imshow():
     # Create a NxN image
     N = 100
@@ -902,7 +805,7 @@ def test_imshow():
     ax.imshow("r", data=data)
 
 
-@image_comparison(baseline_images=['imshow_clip'], style='mpl20')
+@image_comparison(baseline_images=['imshow_clip'])
 def test_imshow_clip():
     # As originally reported by Gellule Xg <gellule.xg@free.fr>
 
@@ -1006,28 +909,6 @@ def test_fill_between_interpolate():
                      interpolate=True)
     ax1.fill_between(x, y1, y2, where=y2 <= y1, facecolor='red',
                      interpolate=True)
-
-
-@image_comparison(baseline_images=['fill_between_interpolate_decreasing'],
-                  style='mpl20', remove_text=True)
-def test_fill_between_interpolate_decreasing():
-    p = np.array([724.3, 700, 655])
-    t = np.array([9.4, 7, 2.2])
-    prof = np.array([7.9, 6.6, 3.8])
-
-    fig = plt.figure(figsize=(9, 9))
-    ax = fig.add_subplot(1, 1, 1)
-
-    ax.plot(t, p, 'tab:red')
-    ax.plot(prof, p, 'k')
-
-    ax.fill_betweenx(p, t, prof, where=prof < t,
-                     facecolor='blue', interpolate=True, alpha=0.4)
-    ax.fill_betweenx(p, t, prof, where=prof > t,
-                     facecolor='red', interpolate=True, alpha=0.4)
-
-    ax.set_xlim(0, 30)
-    ax.set_ylim(800, 600)
 
 
 @image_comparison(baseline_images=['symlog'])
@@ -1377,7 +1258,7 @@ def test_markevery_log_scales():
         plt.plot(x, y, 'o', ls='-', ms=4,  markevery=case)
 
 
-@image_comparison(baseline_images=['markevery_polar'], style='default',
+@image_comparison(baseline_images=['markevery_polar'],
                   remove_text=True)
 def test_markevery_polar():
     cases = [None,
@@ -1531,14 +1412,6 @@ def test_hist_step_filled():
 
     patches = axes[0].patches
     assert all([p.get_facecolor() == p.get_edgecolor() for p in patches])
-
-
-@image_comparison(baseline_images=['hist_density'], extensions=['png'])
-def test_hist_density():
-    np.random.seed(19680801)
-    data = np.random.standard_normal(2000)
-    fig, ax = plt.subplots()
-    ax.hist(data, density=True)
 
 
 @image_comparison(baseline_images=['hist_step_log_bottom'],
@@ -1791,24 +1664,35 @@ def test_stackplot_baseline():
     np.random.seed(0)
 
     def layers(n, m):
+        def bump(a):
+            x = 1 / (.1 + np.random.random())
+            y = 2 * np.random.random() - .5
+            z = 10 / (.1 + np.random.random())
+            for i in range(m):
+                w = (i / float(m) - y) * z
+                a[i] += x * np.exp(-w * w)
         a = np.zeros((m, n))
         for i in range(n):
             for j in range(5):
-                x = 1 / (.1 + np.random.random())
-                y = 2 * np.random.random() - .5
-                z = 10 / (.1 + np.random.random())
-                a[:, i] += x * np.exp(-((np.arange(m) / m - y) * z) ** 2)
+                bump(a[:, i])
         return a
 
     d = layers(3, 100)
     d[50, :] = 0  # test for fixed weighted wiggle (issue #6313)
 
-    fig, axs = plt.subplots(2, 2)
+    fig = plt.figure()
 
-    axs[0, 0].stackplot(range(100), d.T, baseline='zero')
-    axs[0, 1].stackplot(range(100), d.T, baseline='sym')
-    axs[1, 0].stackplot(range(100), d.T, baseline='wiggle')
-    axs[1, 1].stackplot(range(100), d.T, baseline='weighted_wiggle')
+    plt.subplot(2, 2, 1)
+    plt.stackplot(list(xrange(100)), d.T, baseline='zero')
+
+    plt.subplot(2, 2, 2)
+    plt.stackplot(list(xrange(100)), d.T, baseline='sym')
+
+    plt.subplot(2, 2, 3)
+    plt.stackplot(list(xrange(100)), d.T, baseline='wiggle')
+
+    plt.subplot(2, 2, 4)
+    plt.stackplot(list(xrange(100)), d.T, baseline='weighted_wiggle')
 
 
 @image_comparison(baseline_images=['bxp_baseline'],
@@ -2890,27 +2774,6 @@ def test_hist_stacked_normed():
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.hist((d1, d2), stacked=True, normed=True)
-
-
-@image_comparison(baseline_images=['hist_stacked_normed'], extensions=['png'])
-def test_hist_stacked_density():
-    # make some data
-    d1 = np.linspace(1, 3, 20)
-    d2 = np.linspace(0, 10, 50)
-    fig, ax = plt.subplots()
-    ax.hist((d1, d2), stacked=True, density=True)
-
-
-@pytest.mark.parametrize('normed', [False, True])
-@pytest.mark.parametrize('density', [False, True])
-def test_hist_normed_density(normed, density):
-    # Normed and density should not be used simultaneously
-    d1 = np.linspace(1, 3, 20)
-    d2 = np.linspace(0, 10, 50)
-    fig, ax = plt.subplots()
-    # test that kwargs normed and density cannot be set both.
-    with pytest.raises(Exception):
-        ax.hist((d1, d2), stacked=True, normed=normed, density=density)
 
 
 @image_comparison(baseline_images=['hist_step_bottom'], extensions=['png'],
@@ -4569,25 +4432,6 @@ def test_set_get_ticklabels():
     ax[1].set_yticklabels(ax[0].get_yticklabels())
 
 
-def test_tick_label_update():
-    # test issue 9397
-
-    fig, ax = plt.subplots()
-
-    # Set up a dummy formatter
-    def formatter_func(x, pos):
-        return "unit value" if x == 1 else ""
-    ax.xaxis.set_major_formatter(plt.FuncFormatter(formatter_func))
-
-    # Force some of the x-axis ticks to be outside of the drawn range
-    ax.set_xticks([-1, 0, 1, 2, 3])
-    ax.set_xlim(-0.5, 2.5)
-
-    ax.figure.canvas.draw()
-    tick_texts = [tick.get_text() for tick in ax.xaxis.get_ticklabels()]
-    assert tick_texts == ["", "", "unit value", "", ""]
-
-
 @image_comparison(baseline_images=['o_marker_path_snap'], extensions=['png'],
                   savefig_kwarg={'dpi': 72})
 def test_o_marker_path_snap():
@@ -4603,37 +4447,21 @@ def test_o_marker_path_snap():
 def test_margins():
     # test all ways margins can be called
     data = [1, 10]
-    xmin = 0.0
-    xmax = len(data) - 1.0
-    ymin = min(data)
-    ymax = max(data)
 
     fig1, ax1 = plt.subplots(1, 1)
     ax1.plot(data)
     ax1.margins(1)
     assert ax1.margins() == (1, 1)
-    assert ax1.get_xlim() == (xmin - (xmax - xmin) * 1,
-                              xmax + (xmax - xmin) * 1)
-    assert ax1.get_ylim() == (ymin - (ymax - ymin) * 1,
-                              ymax + (ymax - ymin) * 1)
 
     fig2, ax2 = plt.subplots(1, 1)
     ax2.plot(data)
-    ax2.margins(0.5, 2)
-    assert ax2.margins() == (0.5, 2)
-    assert ax2.get_xlim() == (xmin - (xmax - xmin) * 0.5,
-                              xmax + (xmax - xmin) * 0.5)
-    assert ax2.get_ylim() == (ymin - (ymax - ymin) * 2,
-                              ymax + (ymax - ymin) * 2)
+    ax2.margins(1, 0.5)
+    assert ax2.margins() == (1, 0.5)
 
     fig3, ax3 = plt.subplots(1, 1)
     ax3.plot(data)
-    ax3.margins(x=-0.2, y=0.5)
-    assert ax3.margins() == (-0.2, 0.5)
-    assert ax3.get_xlim() == (xmin - (xmax - xmin) * -0.2,
-                              xmax + (xmax - xmin) * -0.2)
-    assert ax3.get_ylim() == (ymin - (ymax - ymin) * 0.5,
-                              ymax + (ymax - ymin) * 0.5)
+    ax3.margins(x=1, y=0.5)
+    assert ax3.margins() == (1, 0.5)
 
 
 def test_length_one_hist():
@@ -5032,17 +4860,6 @@ def test_broken_barh_empty():
     ax.broken_barh([], (.1, .5))
 
 
-def test_pandas_pcolormesh():
-    pd = pytest.importorskip('pandas')
-
-    time = pd.date_range('2000-01-01', periods=10)
-    depth = np.arange(20)
-    data = np.random.rand(20, 10)
-
-    fig, ax = plt.subplots()
-    ax.pcolormesh(time, depth, data)
-
-
 def test_pandas_indexing_dates():
     pd = pytest.importorskip('pandas')
 
@@ -5127,13 +4944,6 @@ def test_none_kwargs():
 def test_ls_ds_conflict():
     with pytest.raises(ValueError):
         plt.plot(range(32), linestyle='steps-pre:', drawstyle='steps-post')
-
-
-def test_bar_uint8():
-    xs = [0, 1, 2, 3]
-    b = plt.bar(np.array(xs, dtype=np.uint8), [2, 3, 4, 5])
-    for (patch, x) in zip(b.patches, xs):
-        assert patch.xy[0] == x
 
 
 @image_comparison(baseline_images=['date_timezone_x'], extensions=['png'])
@@ -5221,22 +5031,6 @@ def test_large_offset():
     fig, ax = plt.subplots()
     ax.plot((1 + np.array([0, 1.e-12])) * 1.e27)
     fig.canvas.draw()
-
-
-def test_barb_units():
-    fig, ax = plt.subplots()
-    dates = [datetime.datetime(2017, 7, 15, 18, i) for i in range(0, 60, 10)]
-    y = np.linspace(0, 5, len(dates))
-    u = v = np.linspace(0, 50, len(dates))
-    ax.barbs(dates, y, u, v)
-
-
-def test_quiver_units():
-    fig, ax = plt.subplots()
-    dates = [datetime.datetime(2017, 7, 15, 18, i) for i in range(0, 60, 10)]
-    y = np.linspace(0, 5, len(dates))
-    u = v = np.linspace(0, 50, len(dates))
-    ax.quiver(dates, y, u, v)
 
 
 def test_bar_color_cycle():
@@ -5334,15 +5128,12 @@ def test_eventplot_legend():
     plt.legend()
 
 
-def test_bar_broadcast_args():
+def test_bar_single_height():
     fig, ax = plt.subplots()
-    # Check that a bar chart with a single height for all bars works.
+    # Check that a bar chart with a single height for all bars works
     ax.bar(range(4), 1)
-    # Check that a horizontal chart with one width works.
+    # Check that a horizontal chart with one width works
     ax.bar(0, 1, bottom=range(4), width=1, orientation='horizontal')
-    # Check that edgecolor gets broadcasted.
-    rect1, rect2 = ax.bar([0, 1], [0, 1], edgecolor=(.1, .2, .3, .4))
-    assert rect1.get_edgecolor() == rect2.get_edgecolor() == (.1, .2, .3, .4)
 
 
 def test_invalid_axis_limits():
@@ -5383,47 +5174,6 @@ def test_twinx_knows_limits():
     assert((xtwin.viewLim.intervalx == ax2.viewLim.intervalx).all())
 
 
-@pytest.mark.style('mpl20')
-@pytest.mark.parametrize('args, kwargs, warning_count',
-                         [((1, 1), {'width': 1, 'bottom': 1}, 0),
-                          ((1, ), {'height': 1, 'bottom': 1}, 0),
-                          ((), {'x': 1, 'height': 1}, 0),
-                          ((), {'left': 1, 'height': 1}, 1)])
-def test_bar_signature(args, kwargs, warning_count):
-    fig, ax = plt.subplots()
-    with warnings.catch_warnings(record=True) as w:
-        r, = ax.bar(*args, **kwargs)
-
-    assert r.get_width() == kwargs.get('width', 0.8)
-    assert r.get_y() == kwargs.get('bottom', 0)
-    assert len(w) == warning_count
-
-
-@pytest.mark.style('mpl20')
-@pytest.mark.parametrize('args, kwargs, warning_count',
-                         [((1, 1), {'height': 1, 'left': 1}, 0),
-                          ((1, ), {'width': 1, 'left': 1}, 0),
-                          ((), {'y': 1, 'width': 1}, 0),
-                          ((), {'bottom': 1, 'width': 1}, 1)])
-def test_barh_signature(args, kwargs, warning_count):
-    fig, ax = plt.subplots()
-    with warnings.catch_warnings(record=True) as w:
-        r, = ax.barh(*args, **kwargs)
-
-    assert r.get_height() == kwargs.get('height', 0.8)
-    assert r.get_x() == kwargs.get('left', 0)
-    assert len(w) == warning_count
-
-
 def test_zero_linewidth():
     # Check that setting a zero linewidth doesn't error
     plt.plot([0, 1], [0, 1], ls='--', lw=0)
-
-
-def test_patch_deprecations():
-    fig, ax = plt.subplots()
-    with warnings.catch_warnings(record=True) as w:
-        assert ax.patch == ax.axesPatch
-        assert fig.patch == fig.figurePatch
-
-    assert len(w) == 2

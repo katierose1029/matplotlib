@@ -3,7 +3,6 @@
 Demo Axes Hbox Divider
 ======================
 
-Hbox Divider to arrange subplots.
 """
 import numpy as np
 import matplotlib.pyplot as plt

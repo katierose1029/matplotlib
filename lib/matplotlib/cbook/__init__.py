@@ -11,6 +11,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import six
 from six.moves import xrange, zip
+from itertools import repeat
 import collections
 import datetime
 import errno
@@ -18,7 +19,6 @@ import functools
 import glob
 import gzip
 import io
-from itertools import repeat
 import locale
 import numbers
 import os
@@ -249,12 +249,9 @@ class _BoundMethodProxy(object):
         return self._hash
 
 
-def _exception_printer(exc):
-    traceback.print_exc()
-
-
 class CallbackRegistry(object):
-    """Handle registering and disconnecting for a set of signals and
+    """
+    Handle registering and disconnecting for a set of signals and
     callbacks:
 
         >>> def oneat(x):
@@ -289,29 +286,8 @@ class CallbackRegistry(object):
     functions).  This technique was shared by Peter Parente on his
     `"Mindtrove" blog
     <http://mindtrove.info/python-weak-references/>`_.
-
-
-    Parameters
-    ----------
-    exception_handler : callable, optional
-       If provided must have signature ::
-
-          def handler(exc: Exception) -> None:
-
-       If not None this function will be called with any `Exception`
-       subclass raised by the callbacks in `CallbackRegistry.process`.
-       The handler may either consume the exception or re-raise.
-
-       The callable must be pickle-able.
-
-       The default handler is ::
-
-          def h(exc):
-              traceback.print_exc()
-
     """
-    def __init__(self, exception_handler=_exception_printer):
-        self.exception_handler = exception_handler
+    def __init__(self):
         self.callbacks = dict()
         self._cid = 0
         self._func_cid_map = {}
@@ -325,10 +301,10 @@ class CallbackRegistry(object):
     # http://bugs.python.org/issue12290).
 
     def __getstate__(self):
-        return {'exception_handler': self.exception_handler}
+        return True
 
     def __setstate__(self, state):
-        self.__init__(**state)
+        self.__init__()
 
     def connect(self, s, func):
         """
@@ -389,13 +365,6 @@ class CallbackRegistry(object):
                     proxy(*args, **kwargs)
                 except ReferenceError:
                     self._remove_proxy(proxy)
-                # this does not capture KeyboardInterrupt, SystemExit,
-                # and GeneratorExit
-                except Exception as exc:
-                    if self.exception_handler is not None:
-                        self.exception_handler(exc)
-                    else:
-                        raise
 
 
 class silent_list(list):
@@ -686,7 +655,7 @@ def flatten(seq, scalarp=is_scalar_or_string):
     and Recipe 1.12 in cookbook
     """
     for item in seq:
-        if scalarp(item) or item is None:
+        if scalarp(item):
             yield item
         else:
             for subitem in flatten(item, scalarp):
@@ -920,7 +889,6 @@ class RingBuffer(object):
         return self.data[i % len(self.data)]
 
 
-@deprecated('2.1')
 def get_split_ind(seq, N):
     """
     *seq* is a list of words.  Return the index into seq such that::
@@ -1037,7 +1005,6 @@ def listFiles(root, patterns='*', recurse=1, return_folders=0):
     return results
 
 
-@deprecated('2.1')
 def get_recursive_filelist(args):
     """
     Recurse all the files and dirs in *args* ignoring symbolic links
@@ -1269,7 +1236,6 @@ def reverse_dict(d):
     return {v: k for k, v in six.iteritems(d)}
 
 
-@deprecated('2.1')
 def restrict_dict(d, keys):
     """
     Return a dictionary that contains those keys that appear in both
@@ -1659,7 +1625,7 @@ def delete_masked_points(*args):
             except:  # Fixme: put in tuple of possible exceptions?
                 pass
     if len(masks):
-        mask = np.logical_and.reduce(masks)
+        mask = functools.reduce(np.logical_and, masks)
         igood = mask.nonzero()[0]
         if len(igood) < nrecs:
             for i, x in enumerate(margs):
@@ -1997,17 +1963,6 @@ def is_math_text(s):
     return even_dollars
 
 
-def _to_unmasked_float_array(x):
-    """
-    Convert a sequence to a float array; if input was a masked array, masked
-    values are converted to nans.
-    """
-    if hasattr(x, 'mask'):
-        return np.ma.asarray(x, float).filled(np.nan)
-    else:
-        return np.asarray(x, float)
-
-
 def _check_1d(x):
     '''
     Converts a sequence of less than 1 dimension, to an array of 1
@@ -2035,7 +1990,7 @@ def _reshape_2D(X, name):
     *name* is used to generate the error message for invalid inputs.
     """
     # Iterate over columns for ndarrays, over rows otherwise.
-    X = np.atleast_1d(X.T if isinstance(X, np.ndarray) else np.asarray(X))
+    X = X.T if isinstance(X, np.ndarray) else np.asarray(X)
     if X.ndim == 1 and X.dtype.type != np.object_:
         # 1D array of scalars: directly return it.
         return [X]
@@ -2294,7 +2249,7 @@ def index_of(y):
     try:
         return y.index.values, y.values
     except AttributeError:
-        y = _check_1d(y)
+        y = np.atleast_1d(y)
         return np.arange(y.shape[0], dtype=float), y
 
 

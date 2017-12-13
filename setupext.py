@@ -578,14 +578,8 @@ class SetupPackage(object):
                         # is dropped. It is available in Python 3.3+
                         _ = check_output(["which", manager],
                                          stderr=subprocess.STDOUT)
-                        if manager == 'port':
-                            pkgconfig = 'pkgconfig'
-                        else:
-                            pkgconfig = 'pkg-config'
-                        return ('Try installing {0} with `{1} install {2}` '
-                                'and pkg-config with `{1} install {3}`'
-                                .format(self.name, manager, pkg_name,
-                                        pkgconfig))
+                        return ('Try installing {0} with `{1} install {2}`'
+                                .format(self.name, manager, pkg_name))
                     except subprocess.CalledProcessError:
                         pass
 
@@ -755,6 +749,7 @@ class Matplotlib(SetupPackage):
                 'backends/web_backend/jquery/css/themes/base/*.min.css',
                 'backends/web_backend/jquery/css/themes/base/images/*',
                 'backends/web_backend/css/*.*',
+                'backends/web_backend/js/*.js',
                 'backends/Matplotlib.nib/*',
                 'mpl-data/stylelib/*.mplstyle',
              ]}
@@ -1173,42 +1168,40 @@ class FreeType(SetupPackage):
                 if not os.path.exists('build'):
                     os.makedirs('build')
 
-                url_fmts = [
+                sourceforge_url = (
                     'https://downloads.sourceforge.net/project/freetype'
-                    '/freetype2/{version}/{tarball}',
-                    'https://download.savannah.gnu.org/releases/freetype'
-                    '/{tarball}'
-                ]
+                    '/freetype2/{0}/'.format(LOCAL_FREETYPE_VERSION)
+                )
+                url_fmts = (
+                    sourceforge_url + '{0}',
+                    'https://download.savannah.gnu.org/releases/freetype/{0}'
+                    )
                 for url_fmt in url_fmts:
-                    tarball_url = url_fmt.format(
-                        version=LOCAL_FREETYPE_VERSION, tarball=tarball)
+                    tarball_url = url_fmt.format(tarball)
 
                     print("Downloading {0}".format(tarball_url))
                     try:
                         urlretrieve(tarball_url, tarball_path)
-                    except IOError:  # URLError (a subclass) on Py3.
+                    except:
                         print("Failed to download {0}".format(tarball_url))
                     else:
-                        if get_file_hash(tarball_path) != LOCAL_FREETYPE_HASH:
-                            print("Invalid hash.")
-                        else:
-                            break
-                else:
-                    raise IOError("Failed to download freetype. "
-                                  "You can download the file by "
-                                  "alternative means and copy it "
-                                  " to '{0}'".format(tarball_path))
-                try:
-                    os.makedirs(tarball_cache_dir)
-                except OSError:
-                    # Don't care if it exists.
-                    pass
-                try:
-                    shutil.copy(tarball_path, tarball_cache_path)
-                    print('Cached tarball at: {}'.format(tarball_cache_path))
-                except OSError:
-                    # If this fails, we can always re-download.
-                    pass
+                        break
+                if not os.path.isfile(tarball_path):
+                    raise IOError("Failed to download freetype")
+                if get_file_hash(tarball_path) == LOCAL_FREETYPE_HASH:
+                    try:
+                        os.makedirs(tarball_cache_dir)
+                    except OSError:
+                        # Don't care if it exists.
+                        pass
+                    try:
+                        shutil.copy(tarball_path, tarball_cache_path)
+                        print('Cached tarball at: {}'
+                              .format(tarball_cache_path))
+                    except OSError:
+                        # again, we do not care if this fails, can
+                        # always re download
+                        pass
 
             if get_file_hash(tarball_path) != LOCAL_FREETYPE_HASH:
                 raise IOError(
@@ -1516,7 +1509,7 @@ class Cycler(SetupPackage):
 class Dateutil(SetupPackage):
     name = "dateutil"
 
-    def __init__(self, version='>=2.0'):
+    def __init__(self, version=None):
         self.version = version
 
     def check(self):

@@ -10,6 +10,10 @@ Note that the filtering effects are only effective if your svg renderer
 support it.
 """
 
+
+import matplotlib
+matplotlib.use("Svg")
+
 import matplotlib.pyplot as plt
 from matplotlib.patches import Shadow
 

@@ -55,7 +55,10 @@ def stackplot(axes, x, *args, **kwargs):
     element in the stacked area plot.
     """
 
-    y = np.row_stack(args)
+    if len(args) == 1:
+        y = np.atleast_2d(*args)
+    elif len(args) > 1:
+        y = np.row_stack(args)
 
     labels = iter(kwargs.pop('labels', []))
 

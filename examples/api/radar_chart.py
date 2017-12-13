@@ -37,10 +37,11 @@ def radar_factory(num_vars, frame='circle'):
     """
     # calculate evenly-spaced axis angles
     theta = np.linspace(0, 2*np.pi, num_vars, endpoint=False)
+    # rotate theta such that the first axis is at the top
+    theta += np.pi/2
 
     def draw_poly_patch(self):
-        # rotate theta such that the first axis is at the top
-        verts = unit_poly_verts(theta + np.pi / 2)
+        verts = unit_poly_verts(theta)
         return plt.Polygon(verts, closed=True, edgecolor='k')
 
     def draw_circle_patch(self):
@@ -58,11 +59,6 @@ def radar_factory(num_vars, frame='circle'):
         RESOLUTION = 1
         # define draw_frame method
         draw_patch = patch_dict[frame]
-
-        def __init__(self, *args, **kwargs):
-            super(RadarAxes, self).__init__(*args, **kwargs)
-            # rotate plot such that the first axis is at the top
-            self.set_theta_zero_location('N')
 
         def fill(self, *args, **kwargs):
             """Override fill so that line is closed by default"""
@@ -97,7 +93,7 @@ def radar_factory(num_vars, frame='circle'):
 
             # spine_type must be 'left', 'right', 'top', 'bottom', or `circle`.
             spine_type = 'circle'
-            verts = unit_poly_verts(theta + np.pi / 2)
+            verts = unit_poly_verts(theta)
             # close off polygon by repeating first vertex
             verts.append(verts[0])
             path = Path(verts)

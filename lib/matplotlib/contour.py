@@ -75,15 +75,12 @@ class ContourLabeler(object):
 
         only labels contours listed in *v*.
 
-        Parameters
-        ----------
-        fontsize : string or float, optional
-            Size in points or relative size e.g., 'smaller', 'x-large'.
-            See `Text.set_size` for accepted string values.
+        Optional keyword arguments:
 
-        colors :
-            Color of each label
+          *fontsize*:
+            size in points or relative size e.g., 'smaller', 'x-large'
 
+          *colors*:
             - if *None*, the color of each label matches the color of
               the corresponding contour
 
@@ -94,50 +91,47 @@ class ContourLabeler(object):
               different labels will be plotted in different colors in the order
               specified
 
-        inline : bool, optional
-            If ``True`` the underlying contour is removed where the label is
-            placed. Default is ``True``.
+          *inline*:
+            controls whether the underlying contour is removed or
+            not. Default is *True*.
 
-        inline_spacing : float, optional
-            Space in pixels to leave on each side of label when
-            placing inline. Defaults to 5.
+          *inline_spacing*:
+            space in pixels to leave on each side of label when
+            placing inline.  Defaults to 5.  This spacing will be
+            exact for labels at locations where the contour is
+            straight, less so for labels on curved contours.
 
-            This spacing will be exact for labels at locations where the
-            contour is straight, less so for labels on curved contours.
-
-        fmt : string or dict, optional
-            A format string for the label. Default is '%1.3f'
-
+          *fmt*:
+            a format string for the label. Default is '%1.3f'
             Alternatively, this can be a dictionary matching contour
             levels with arbitrary strings to use for each contour level
             (i.e., fmt[level]=string), or it can be any callable, such
             as a :class:`~matplotlib.ticker.Formatter` instance, that
             returns a string when called with a numeric contour level.
 
-        manual : bool or iterable, optional
-            If ``True``, contour labels will be placed manually using
-            mouse clicks. Click the first button near a contour to
+          *manual*:
+            if *True*, contour labels will be placed manually using
+            mouse clicks.  Click the first button near a contour to
             add a label, click the second button (or potentially both
-            mouse buttons at once) to finish adding labels. The third
+            mouse buttons at once) to finish adding labels.  The third
             button can be used to remove the last label added, but
-            only if labels are not inline. Alternatively, the keyboard
+            only if labels are not inline.  Alternatively, the keyboard
             can be used to select label locations (enter to end label
             placement, delete or backspace act like the third mouse button,
             and any other key will select a label location).
 
-            *manual* can also be an iterable object of x,y tuples.
-            Contour labels will be created as if mouse is clicked at each
-            x,y positions.
+            *manual* can be an iterable object of x,y tuples. Contour labels
+            will be created as if mouse is clicked at each x,y positions.
 
-        rightside_up : bool, optional
-            If ``True``, label rotations will always be plus
-            or minus 90 degrees from level. Default is ``True``.
+          *rightside_up*:
+            if *True* (default), label rotations will always be plus
+            or minus 90 degrees from level.
 
-        use_clabeltext : bool, optional
-            If ``True``, `ClabelText` class (instead of `Text`) is used to
-            create labels. `ClabelText` recalculates rotation angles
-            of texts during the drawing time, therefore this can be used if
-            aspect of the axes changes. Default is ``False``.
+          *use_clabeltext*:
+            if *True* (default is False), ClabelText class (instead of
+            matplotlib.Text) is used to create labels. ClabelText
+            recalculates rotation angles of texts during the drawing time,
+            therefore this can be used if aspect of the axes changes.
         """
 
         """
@@ -150,7 +144,7 @@ class ContourLabeler(object):
 
         Once these attributes are set, clabel passes control to the
         labels method (case of automatic label placement) or
-        `BlockingContourLabeler` (case of manual label placement).
+        BlockingContourLabeler (case of manual label placement).
         """
 
         fontsize = kwargs.get('fontsize', None)
@@ -806,23 +800,23 @@ class ContourSet(cm.ScalarMappable, ContourLabeler):
         :attr:`matplotlib.contour.QuadContourSet.contour_doc`.
         """
         self.ax = ax
-        self.levels = kwargs.pop('levels', None)
-        self.filled = kwargs.pop('filled', False)
-        self.linewidths = kwargs.pop('linewidths', None)
-        self.linestyles = kwargs.pop('linestyles', None)
+        self.levels = kwargs.get('levels', None)
+        self.filled = kwargs.get('filled', False)
+        self.linewidths = kwargs.get('linewidths', None)
+        self.linestyles = kwargs.get('linestyles', None)
 
-        self.hatches = kwargs.pop('hatches', [None])
+        self.hatches = kwargs.get('hatches', [None])
 
-        self.alpha = kwargs.pop('alpha', None)
-        self.origin = kwargs.pop('origin', None)
-        self.extent = kwargs.pop('extent', None)
-        cmap = kwargs.pop('cmap', None)
-        self.colors = kwargs.pop('colors', None)
-        norm = kwargs.pop('norm', None)
-        vmin = kwargs.pop('vmin', None)
-        vmax = kwargs.pop('vmax', None)
-        self.extend = kwargs.pop('extend', 'neither')
-        self.antialiased = kwargs.pop('antialiased', None)
+        self.alpha = kwargs.get('alpha', None)
+        self.origin = kwargs.get('origin', None)
+        self.extent = kwargs.get('extent', None)
+        cmap = kwargs.get('cmap', None)
+        self.colors = kwargs.get('colors', None)
+        norm = kwargs.get('norm', None)
+        vmin = kwargs.get('vmin', None)
+        vmax = kwargs.get('vmax', None)
+        self.extend = kwargs.get('extend', 'neither')
+        self.antialiased = kwargs.get('antialiased', None)
         if self.antialiased is None and self.filled:
             self.antialiased = False  # eliminate artifacts; we are not
                                       # stroking the boundaries.
@@ -830,8 +824,8 @@ class ContourSet(cm.ScalarMappable, ContourLabeler):
             # the LineCollection default, which uses the
             # rcParams['lines.antialiased']
 
-        self.nchunk = kwargs.pop('nchunk', 0)
-        self.locator = kwargs.pop('locator', None)
+        self.nchunk = kwargs.get('nchunk', 0)
+        self.locator = kwargs.get('locator', None)
         if (isinstance(norm, colors.LogNorm)
                 or isinstance(self.locator, ticker.LogLocator)):
             self.logscale = True
@@ -854,9 +848,9 @@ class ContourSet(cm.ScalarMappable, ContourLabeler):
         if self.origin == 'image':
             self.origin = mpl.rcParams['image.origin']
 
-        self._transform = kwargs.pop('transform', None)
+        self._transform = kwargs.get('transform', None)
 
-        kwargs = self._process_args(*args, **kwargs)
+        self._process_args(*args, **kwargs)
         self._process_levels()
 
         if self.colors is not None:
@@ -921,12 +915,11 @@ class ContourSet(cm.ScalarMappable, ContourLabeler):
             if self.allkinds is None:
                 self.allkinds = [None] * len(self.allsegs)
 
-            # Default zorder taken from Collection
-            zorder = kwargs.pop('zorder', 1)
             for level, level_upper, segs, kinds in \
                     zip(lowers, uppers, self.allsegs, self.allkinds):
                 paths = self._make_paths(segs, kinds)
-
+                # Default zorder taken from Collection
+                zorder = kwargs.get('zorder', 1)
                 col = mcoll.PathCollection(
                     paths,
                     antialiaseds=(self.antialiased,),
@@ -943,10 +936,10 @@ class ContourSet(cm.ScalarMappable, ContourLabeler):
             aa = self.antialiased
             if aa is not None:
                 aa = (self.antialiased,)
-            # Default zorder taken from LineCollection
-            zorder = kwargs.pop('zorder', 2)
             for level, width, lstyle, segs in \
                     zip(self.levels, tlinewidths, tlinestyles, self.allsegs):
+                # Default zorder taken from LineCollection
+                zorder = kwargs.get('zorder', 2)
                 col = mcoll.LineCollection(
                     segs,
                     antialiaseds=aa,
@@ -966,11 +959,6 @@ class ContourSet(cm.ScalarMappable, ContourLabeler):
         self.ax.autoscale_view(tight=True)
 
         self.changed()  # set the colors
-
-        if kwargs:
-            s = ", ".join(map(repr, kwargs))
-            warnings.warn('The following kwargs were not used by contour: ' +
-                          s)
 
     def get_transform(self):
         """
@@ -1079,8 +1067,6 @@ class ContourSet(cm.ScalarMappable, ContourLabeler):
         points = np.concatenate(flatseglist, axis=0)
         self._mins = points.min(axis=0)
         self._maxs = points.max(axis=0)
-
-        return kwargs
 
     def _get_allsegs_and_allkinds(self):
         """
@@ -1445,7 +1431,7 @@ class QuadContourSet(ContourSet):
             self._mins = args[0]._mins
             self._maxs = args[0]._maxs
         else:
-            self._corner_mask = kwargs.pop('corner_mask', None)
+            self._corner_mask = kwargs.get('corner_mask', None)
             if self._corner_mask is None:
                 self._corner_mask = mpl.rcParams['contour.corner_mask']
 
@@ -1483,8 +1469,6 @@ class QuadContourSet(ContourSet):
             self.Cntr = contour_generator
         else:
             self._contour_generator = contour_generator
-
-        return kwargs
 
     def _get_allsegs_and_allkinds(self):
         """
@@ -1555,7 +1539,7 @@ class QuadContourSet(ContourSet):
         Exception class (here and elsewhere).
         """
         x, y = args[:2]
-        kwargs = self.ax._process_unit_info(xdata=x, ydata=y, kwargs=kwargs)
+        self.ax._process_unit_info(xdata=x, ydata=y, kwargs=kwargs)
         x = self.ax.convert_xunits(x)
         y = self.ax.convert_yunits(y)
 
@@ -1672,8 +1656,7 @@ class QuadContourSet(ContourSet):
           contour(Z,N)
           contour(X,Y,Z,N)
 
-        contour up to *N+1* automatically chosen contour levels
-        (*N* intervals).
+        contour up to *N* automatically-chosen levels.
 
         ::
 

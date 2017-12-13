@@ -191,9 +191,7 @@ np.random.seed(19680801)
 stack_data = np.random.randn(4, 12250)
 dict_data = OrderedDict(zip((c['label'] for c in label_cycle), stack_data))
 
-###############################################################################
-# Work with plain arrays
-
+# work with plain arrays
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4.5), tight_layout=True)
 arts = stack_hist(ax1, stack_data, color_cycle + label_cycle + hatch_cycle,
                   hist_func=hist_func)
@@ -206,8 +204,7 @@ ax1.set_xlabel('x')
 ax2.set_xlabel('counts')
 ax2.set_ylabel('x')
 
-###############################################################################
-# Work with labeled data
+# work with labeled data
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4.5),
                                tight_layout=True, sharey=True)

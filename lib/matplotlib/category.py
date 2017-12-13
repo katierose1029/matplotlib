@@ -88,9 +88,8 @@ class UnitData(object):
     def __init__(self, data):
         """Create mapping between unique categorical values
         and numerical identifier
-
-        Parameters
-        ----------
+        Paramters
+        ---------
         data: iterable
             sequence of values
         """

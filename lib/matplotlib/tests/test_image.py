@@ -2,25 +2,28 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import six
-
-from copy import copy
 import io
 import os
 import warnings
 
 import numpy as np
-from numpy import ma
 from numpy.testing import assert_array_equal
 
-from matplotlib import (
-    colors, image as mimage, mlab, patches, pyplot as plt,
-    rc_context, rcParams)
+from matplotlib.testing.decorators import image_comparison
 from matplotlib.image import (AxesImage, BboxImage, FigureImage,
                               NonUniformImage, PcolorImage)
-from matplotlib.testing.decorators import image_comparison
 from matplotlib.transforms import Bbox, Affine2D, TransformedBbox
+from matplotlib import rcParams, rc_context
+from matplotlib import patches
+import matplotlib.pyplot as plt
 
+from matplotlib import mlab
 import pytest
+
+from copy import copy
+from numpy import ma
+import matplotlib.image as mimage
+import matplotlib.colors as colors
 
 
 try:
@@ -31,7 +34,7 @@ except ImportError:
 needs_pillow = pytest.mark.xfail(not HAS_PIL, reason='Test requires Pillow')
 
 
-@image_comparison(baseline_images=['image_interps'], style='mpl20')
+@image_comparison(baseline_images=['image_interps'])
 def test_image_interps():
     'make the basic nearest, bilinear and bicubic interps'
     X = np.arange(100)
@@ -72,36 +75,22 @@ def test_interp_nearest_vs_none():
     ax2.set_title('interpolation nearest')
 
 
-def do_figimage(suppressComposite):
-    """ Helper for the next two tests """
-    fig = plt.figure(figsize=(2,2), dpi=100)
-    fig.suppressComposite = suppressComposite
-    x,y = np.ix_(np.arange(100.0)/100.0, np.arange(100.0)/100.0)
-    z = np.sin(x**2 + y**2 - x*y)
-    c = np.sin(20*x**2 + 50*y**2)
-    img = z + c/5
-
-    fig.figimage(img, xo=0, yo=0, origin='lower')
-    fig.figimage(img[::-1,:], xo=0, yo=100, origin='lower')
-    fig.figimage(img[:,::-1], xo=100, yo=0, origin='lower')
-    fig.figimage(img[::-1,::-1], xo=100, yo=100, origin='lower')
-
-@image_comparison(baseline_images=['figimage-0'],
-                  extensions=['png','pdf'])
-def test_figimage0():
+@image_comparison(baseline_images=['figimage-0', 'figimage-1'], extensions=['png'])
+def test_figimage():
     'test the figimage method'
 
-    suppressComposite = False
-    do_figimage(suppressComposite)
+    for suppressComposite in False, True:
+        fig = plt.figure(figsize=(2,2), dpi=100)
+        fig.suppressComposite = suppressComposite
+        x,y = np.ix_(np.arange(100.0)/100.0, np.arange(100.0)/100.0)
+        z = np.sin(x**2 + y**2 - x*y)
+        c = np.sin(20*x**2 + 50*y**2)
+        img = z + c/5
 
-
-@image_comparison(baseline_images=['figimage-1'],
-                  extensions=['png','pdf'])
-def test_figimage1():
-    'test the figimage method'
-    suppressComposite = True
-    do_figimage(suppressComposite)
-
+        fig.figimage(img, xo=0, yo=0, origin='lower')
+        fig.figimage(img[::-1,:], xo=0, yo=100, origin='lower')
+        fig.figimage(img[:,::-1], xo=100, yo=0, origin='lower')
+        fig.figimage(img[::-1,::-1], xo=100, yo=100, origin='lower')
 
 def test_image_python_io():
     fig = plt.figure()
@@ -259,7 +248,7 @@ def test_cursor_data():
     assert z is None, "Did not get None, got %d" % z
 
 
-@image_comparison(baseline_images=['image_clip'], style='mpl20')
+@image_comparison(baseline_images=['image_clip'])
 def test_image_clip():
     d = [[1, 2], [3, 4]]
 
@@ -269,7 +258,7 @@ def test_image_clip():
     im.set_clip_path(patch)
 
 
-@image_comparison(baseline_images=['image_cliprect'], style='mpl20')
+@image_comparison(baseline_images=['image_cliprect'])
 def test_image_cliprect():
     import matplotlib.patches as patches
 
@@ -282,8 +271,7 @@ def test_image_cliprect():
     rect = patches.Rectangle(xy=(1,1), width=2, height=2, transform=im.axes.transData)
     im.set_clip_path(rect)
 
-
-@image_comparison(baseline_images=['imshow'], remove_text=True, style='mpl20')
+@image_comparison(baseline_images=['imshow'], remove_text=True)
 def test_imshow():
     import numpy as np
     import matplotlib.pyplot as plt
@@ -325,8 +313,10 @@ def test_image_edges():
 
     data = np.tile(np.arange(12), 15).reshape(20, 9)
 
-    im = ax.imshow(data, origin='upper', extent=[-10, 10, -10, 10],
-                   interpolation='none', cmap='gray')
+    im = ax.imshow(data, origin='upper',
+                   extent=[-10, 10, -10, 10], interpolation='none',
+                   cmap='gray'
+                   )
 
     x = y = 2
     ax.set_xlim([-x, x])
@@ -346,10 +336,7 @@ def test_image_edges():
 
     assert g != 100, 'Expected a non-green edge - but sadly, it was.'
 
-
-@image_comparison(baseline_images=['image_composite_background'],
-                  remove_text=True,
-                  style='mpl20')
+@image_comparison(baseline_images=['image_composite_background'], remove_text=True)
 def test_image_composite_background():
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -359,9 +346,7 @@ def test_image_composite_background():
     ax.set_facecolor((1, 0, 0, 0.5))
     ax.set_xlim([0, 12])
 
-
-@image_comparison(baseline_images=['image_composite_alpha'],
-                  remove_text=True)
+@image_comparison(baseline_images=['image_composite_alpha'], remove_text=True)
 def test_image_composite_alpha():
     """
     Tests that the alpha value is recognized and correctly applied in the
@@ -387,9 +372,7 @@ def test_image_composite_alpha():
     ax.set_ylim([5, 0])
 
 
-@image_comparison(baseline_images=['rasterize_10dpi'],
-                  extensions=['pdf', 'svg'],
-                  remove_text=True, style='mpl20')
+@image_comparison(baseline_images=['rasterize_10dpi'], extensions=['pdf','svg'], remove_text=True)
 def test_rasterize_dpi():
     # This test should check rasterized rendering with high output resolution.
     # It plots a rasterized line and a normal image with implot. So it will catch
@@ -422,8 +405,7 @@ def test_rasterize_dpi():
     rcParams['savefig.dpi'] = 10
 
 
-@image_comparison(baseline_images=['bbox_image_inverted'], remove_text=True,
-                  style='mpl20')
+@image_comparison(baseline_images=['bbox_image_inverted'], remove_text=True)
 def test_bbox_image_inverted():
     # This is just used to produce an image to feed to BboxImage
     image = np.arange(100).reshape((10, 10))
@@ -469,8 +451,7 @@ def test_get_window_extent_for_AxisImage():
 
 @image_comparison(baseline_images=['zoom_and_clip_upper_origin'],
                   remove_text=True,
-                  extensions=['png'],
-                  style='mpl20')
+                  extensions=['png'])
 def test_zoom_and_clip_upper_origin():
     image = np.arange(100)
     image = image.reshape((10, 10))
@@ -559,12 +540,6 @@ def test_pcolorimage_setdata():
     im.set_data(x, y, z)
     x[0] = y[0] = z[0, 0] = 9.9
     assert im._A[0, 0] == im._Ax[0] == im._Ay[0] == 0, 'value changed'
-
-
-def test_pcolorimage_extent():
-    im = plt.hist2d([1, 2, 3], [3, 5, 6],
-                    bins=[[0, 3, 7], [1, 2, 3]])[-1]
-    assert im.get_extent() == (0, 7, 1, 3)
 
 
 def test_minimized_rasterized():
@@ -730,7 +705,7 @@ def test_mask_image():
 
     ax1.imshow(A, interpolation='nearest')
 
-    A = np.zeros((5, 5), dtype=bool)
+    A = np.zeros((5, 5), dtype=np.bool)
     A[1:2, 1:2] = True
     A = np.ma.masked_array(np.ones((5, 5), dtype=np.uint16), A)
 
@@ -754,7 +729,7 @@ def test_imshow_endianess():
 
 
 @image_comparison(baseline_images=['imshow_masked_interpolation'],
-                  remove_text=True, style='mpl20')
+                  remove_text=True, style='default')
 def test_imshow_masked_interpolation():
 
     cm = copy(plt.get_cmap('viridis'))
@@ -769,8 +744,7 @@ def test_imshow_masked_interpolation():
     data = np.arange(N*N, dtype='float').reshape(N, N)
 
     data[5, 5] = -1
-    # This will cause crazy ringing for the higher-order
-    # interpolations
+
     data[15, 5] = 1e5
 
     # data[3, 3] = np.nan
@@ -783,7 +757,6 @@ def test_imshow_masked_interpolation():
     data = np.ma.masked_array(data, mask)
 
     fig, ax_grid = plt.subplots(3, 6)
-
     for interp, ax in zip(sorted(mimage._interpd_), ax_grid.ravel()):
         ax.set_title(interp)
         ax.imshow(data, norm=n, cmap=cm, interpolation=interp)
@@ -797,27 +770,9 @@ def test_imshow_no_warn_invalid():
     assert len(warns) == 0
 
 
-@image_comparison(baseline_images=['imshow_flatfield'],
-                  remove_text=True, style='mpl20',
-                  extensions=['png'])
-def test_imshow_flatfield():
+def test_empty_imshow():
     fig, ax = plt.subplots()
-    im = ax.imshow(np.ones((5, 5)))
-    im.set_clim(.5, 1.5)
-
-
-@pytest.mark.parametrize(
-    "make_norm",
-    [colors.Normalize,
-     colors.LogNorm,
-     lambda: colors.SymLogNorm(1),
-     lambda: colors.PowerNorm(1)])
-def test_empty_imshow(make_norm):
-    fig, ax = plt.subplots()
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore", "Attempting to set identical left==right")
-        im = ax.imshow([[]], norm=make_norm())
+    im = ax.imshow([[]])
     im.set_extent([-5, 5, -5, 5])
     fig.canvas.draw()
 
@@ -828,26 +783,3 @@ def test_empty_imshow(make_norm):
 def test_imshow_float128():
     fig, ax = plt.subplots()
     ax.imshow(np.zeros((3, 3), dtype=np.longdouble))
-
-
-def test_imshow_bool():
-    fig, ax = plt.subplots()
-    ax.imshow(np.array([[True, False], [False, True]], dtype=bool))
-
-
-def test_imshow_deprecated_interd_warn():
-    im = plt.imshow([[1, 2], [3, np.nan]])
-    for k in ('_interpd', '_interpdr', 'iterpnames'):
-        with warnings.catch_warnings(record=True) as warns:
-            getattr(im, k)
-        assert len(warns) == 1
-
-
-def test_full_invalid():
-    x = np.ones((10, 10))
-    x[:] = np.nan
-
-    f, ax = plt.subplots()
-    ax.imshow(x)
-
-    f.canvas.draw()

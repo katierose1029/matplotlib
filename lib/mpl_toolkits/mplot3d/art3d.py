@@ -149,9 +149,13 @@ def line_2d_to_3d(line, zs=0, zdir='z'):
 def path_to_3d_segment(path, zs=0, zdir='z'):
     '''Convert a path to a 3D segment.'''
 
-    zs = _backports.broadcast_to(zs, len(path))
+    if not iterable(zs):
+        zs = np.ones(len(path)) * zs
+
+    seg = []
     pathsegs = path.iter_segments(simplify=False, curves=False)
-    seg = [(x, y, z) for (((x, y), code), z) in zip(pathsegs, zs)]
+    for (((x, y), code), z) in zip(pathsegs, zs):
+        seg.append((x, y, z))
     seg3d = [juggle_axes(x, y, z, zdir) for (x, y, z) in seg]
     return seg3d
 
@@ -161,16 +165,21 @@ def paths_to_3d_segments(paths, zs=0, zdir='z'):
     Convert paths from a collection object to 3D segments.
     '''
 
-    zs = _backports.broadcast_to(zs, len(paths))
-    segs = [path_to_3d_segment(path, pathz, zdir)
-            for path, pathz in zip(paths, zs)]
-    return segs
+    if not iterable(zs):
+        zs = np.ones(len(paths)) * zs
+
+    segments = []
+    for path, pathz in zip(paths, zs):
+        segments.append(path_to_3d_segment(path, pathz, zdir))
+    return segments
 
 
 def path_to_3d_segment_with_codes(path, zs=0, zdir='z'):
     '''Convert a path to a 3D segment with path codes.'''
 
-    zs = _backports.broadcast_to(zs, len(path))
+    if not iterable(zs):
+        zs = np.ones(len(path)) * zs
+
     seg = []
     codes = []
     pathsegs = path.iter_segments(simplify=False, curves=False)
@@ -186,7 +195,9 @@ def paths_to_3d_segments_with_codes(paths, zs=0, zdir='z'):
     Convert paths from a collection object to 3D segments with path codes.
     '''
 
-    zs = _backports.broadcast_to(zs, len(paths))
+    if not iterable(zs):
+        zs = np.ones(len(paths)) * zs
+
     segments = []
     codes_list = []
     for path, pathz in zip(paths, zs):
@@ -260,9 +271,11 @@ class Patch3D(Patch):
         self.set_3d_properties(zs, zdir)
 
     def set_3d_properties(self, verts, zs=0, zdir='z'):
-        zs = _backports.broadcast_to(zs, len(verts))
-        self._segment3d = [juggle_axes(x, y, z, zdir)
-                           for ((x, y), z) in zip(verts, zs)]
+        if not iterable(zs):
+            zs = np.ones(len(verts)) * zs
+
+        self._segment3d = [juggle_axes(x, y, z, zdir) \
+                for ((x, y), z) in zip(verts, zs)]
         self._facecolor3d = Patch.get_facecolor(self)
 
     def get_path(self):

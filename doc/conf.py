@@ -15,8 +15,6 @@ import os
 import sys
 import sphinx
 import six
-from glob import glob
-from sphinx_gallery.sorting import ExplicitOrder
 
 # If your extensions are in another directory, add it here. If the directory
 # is relative to the documentation root, use os.path.abspath to make it
@@ -41,25 +39,25 @@ exclude_patterns = ['api/api_changes/*', 'users/whats_new/*']
 
 
 def _check_deps():
-    names = {"colorspacious": 'colorspacious',
-             "IPython.sphinxext.ipython_console_highlighting": 'ipython',
-             "matplotlib": 'matplotlib',
-             "numpydoc": 'numpydoc',
-             "PIL.Image": 'pillow',
-             "sphinx_gallery": 'sphinx_gallery'}
+    names = ["colorspacious",
+             "IPython.sphinxext.ipython_console_highlighting",
+             "matplotlib",
+             "numpydoc",
+             "PIL.Image",
+             "scipy",
+             "sphinx_gallery"]
     if sys.version_info < (3, 3):
-        names["mock"] = 'mock'
+        names.append("mock")
     missing = []
     for name in names:
         try:
             __import__(name)
         except ImportError:
-            missing.append(names[name])
+            missing.append(name)
     if missing:
         raise ImportError(
             "The following dependencies are missing to build the "
             "documentation: {}".format(", ".join(missing)))
-
 
 _check_deps()
 
@@ -89,7 +87,6 @@ if not has_dot:
 autosummary_generate = True
 
 autodoc_docstring_signature = True
-autodoc_default_flags = ['members', 'undoc-members']
 
 intersphinx_mapping = {
   'python': ('https://docs.python.org/', None),
@@ -98,27 +95,6 @@ intersphinx_mapping = {
   'pandas': ('http://pandas.pydata.org/pandas-docs/stable', None)
   }
 
-explicit_order_folders = [
-                          '../examples/api',
-                          '../examples/pyplots',
-                          '../examples/subplots_axes_and_figures',
-                          '../examples/color',
-                          '../examples/statistics',
-                          '../examples/lines_bars_and_markers',
-                          '../examples/images_contours_and_fields',
-                          '../examples/shapes_and_collections',
-                          '../examples/text_labels_and_annotations',
-                          '../examples/pie_and_polar_charts',
-                          '../examples/style_sheets',
-                          '../examples/axes_grid',
-                          '../examples/showcase',
-                          '../tutorials/introductory',
-                          '../tutorials/intermediate',
-                          '../tutorials/advanced']
-for folder in sorted(glob('../examples/*') + glob('../tutorials/*')):
-    if not os.path.isdir(folder) or folder in explicit_order_folders:
-        continue
-    explicit_order_folders.append(folder)
 
 # Sphinx gallery configuration
 sphinx_gallery_conf = {
@@ -126,17 +102,13 @@ sphinx_gallery_conf = {
     'filename_pattern': '^((?!sgskip).)*$',
     'gallery_dirs': ['gallery', 'tutorials'],
     'doc_module': ('matplotlib', 'mpl_toolkits'),
-    'reference_url': {
-        'matplotlib': None,
-        'numpy': 'https://docs.scipy.org/doc/numpy',
-        'scipy': 'https://docs.scipy.org/doc/scipy/reference',
-    },
-    'backreferences_dir': 'api/_as_gen',
-    'subsection_order': ExplicitOrder(explicit_order_folders),
-    'min_reported_time': 1,
+    'reference_url': {'matplotlib': None,
+                      'numpy': 'http://docs.scipy.org/doc/numpy/reference',
+                      'scipy': 'http://docs.scipy.org/doc/scipy/reference'},
+    'backreferences_dir': 'api/_as_gen'
 }
 
-plot_gallery = 'True'
+plot_gallery = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

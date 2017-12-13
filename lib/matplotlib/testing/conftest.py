@@ -49,6 +49,7 @@ def mpl_test_settings(request):
         yield
     finally:
         if backend is not None:
+            import matplotlib.pyplot as plt
             plt.switch_backend(prev_backend)
         _do_cleanup(original_units_registry,
                     original_settings)

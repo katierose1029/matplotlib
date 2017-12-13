@@ -1489,8 +1489,4 @@ class Line2D(b_artist.Artist, HasTraits):
 # print('before b_Line2D.Line2D: ', b_Line2D.Line2D) #matplotlib.artist.Artist
 #monkey patching
 b_Line2D.Line2D = Line2D
-
 # print('after b_Line2D.Line2D: ', b_Line2D.Line2D) #matplotlib._traits.artist.Artist
-
-# print('after b_Line2D.Line2D: ', b_Line2D.Line2D) #matplotlib._traits.artist.Artist
-

@@ -599,14 +599,14 @@ def interpgrid(a, xi, yi):
 
     Ny, Nx = np.shape(a)
     if isinstance(xi, np.ndarray):
-        x = xi.astype(int)
-        y = yi.astype(int)
+        x = xi.astype(np.int)
+        y = yi.astype(np.int)
         # Check that xn, yn don't exceed max index
         xn = np.clip(x + 1, 0, Nx - 1)
         yn = np.clip(y + 1, 0, Ny - 1)
     else:
-        x = int(xi)
-        y = int(yi)
+        x = np.int(xi)
+        y = np.int(yi)
         # conditional is faster than clipping for integers
         if x == (Nx - 2):
             xn = x

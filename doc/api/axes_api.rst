@@ -4,8 +4,6 @@
 .. currentmodule:: matplotlib.axes
 
 .. autoclass:: Axes
-   :no-members:
-   :no-undoc-members:
 
 .. contents:: Table of Contents
    :depth: 2
@@ -581,7 +579,6 @@ General Artist Properties
    :template: autosummary.rst
    :nosignatures:
 
-   Axes.set_agg_filter
    Axes.set_alpha
    Axes.set_animated
    Axes.set_clip_box
@@ -589,16 +586,18 @@ General Artist Properties
    Axes.set_clip_path
    Axes.set_gid
    Axes.set_label
-   Axes.set_path_effects
-   Axes.set_rasterized
-   Axes.set_sketch_params
-   Axes.set_snap
-   Axes.set_transform
    Axes.set_url
    Axes.set_visible
    Axes.set_zorder
+   Axes.set_rasterized
+   Axes.set_sketch_params
+   Axes.set_agg_filter
+   Axes.set_snap
+   Axes.set_transform
+   Axes.set_path_effects
 
    Axes.get_agg_filter
+   Axes.get_sketch_params
    Axes.get_alpha
    Axes.get_animated
    Axes.get_clip_box
@@ -606,16 +605,18 @@ General Artist Properties
    Axes.get_clip_path
    Axes.get_gid
    Axes.get_label
-   Axes.get_path_effects
-   Axes.get_rasterized
-   Axes.get_sketch_params
-   Axes.get_snap
-   Axes.get_transform
    Axes.get_url
    Axes.get_visible
    Axes.get_zorder
+   Axes.get_rasterized
+   Axes.get_transform
+   Axes.get_snap
+   Axes.get_path_effects
+
 
    Axes.axes
+   Axes.get_axes
+   Axes.set_axes
    Axes.set_figure
    Axes.get_figure
 
